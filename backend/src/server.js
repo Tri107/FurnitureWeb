@@ -1,10 +1,22 @@
-import express from 'express'
-import dotenv from 'dotenv'
+import express from 'express';
+import dotenv from 'dotenv';
+import { connectMongoDB } from './config/mongodb.js';
+import { connectMySQL } from './config/mysql.js';
+
+dotenv.config();
 
 const app = express();
-dotenv.config();
-const PORT = process.env.PORT || 9999
+app.use(express.json());
 
-app.listen(PORT,()=>{
+const PORT = process.env.PORT || 9999;
+
+const startServer = async () => {
+  await connectMongoDB();
+  await connectMySQL();
+
+  app.listen(PORT, () => {
     console.log(`Server đang chạy tại cổng ${PORT}`);
-});
+  });
+};
+
+startServer();
