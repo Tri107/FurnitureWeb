@@ -1,4 +1,7 @@
-const Home = () => {
-  return <h1>HOME OK</h1>;
-};
-export default Home;
+export default function Home() {
+  return (
+    <div className="text-2xl font-bold">
+      Trang Home
+    </div>
+  );
+}
