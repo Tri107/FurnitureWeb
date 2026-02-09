@@ -1,25 +1,20 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
-
-// Auth
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Otp from "./pages/auth/Otp";
 
-// Admin
+import AdminLayout from "./components/layout/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Product from "./pages/admin/Product";
-import AdminLayout from "./components/layout/AdminLayout";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Trang ngoài */}
+        {/* Public */}
         <Route path="/" element={<Home />} />
-
-        {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<Otp />} />
