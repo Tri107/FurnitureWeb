@@ -1,4 +1,8 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../../lib/api";
+import toast from "react-hot-toast";
+
 import AuthCard from "../../components/ui/AuthCard";
 import AuthBenefits from "../../components/ui/AuthBenefits";
 import AuthForm from "../../components/ui/AuthForm";
@@ -6,51 +10,106 @@ import InputField from "../../components/ui/InputField";
 import SocialLogin from "../../components/ui/SocialLogin";
 
 const Login = () => {
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login submit");
+
+    if (!form.email || !form.password) {
+      return toast.error("Vui lòng nhập đầy đủ thông tin");
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await loginUser(form);
+
+      if (res?.token) {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.user));
+
+        toast.success("Đăng nhập thành công ");
+
+        setTimeout(() => {
+          if (res.user.role === "admin") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/");
+          }
+        }, 1000);
+      } else {
+        toast.error(res?.message || "Đăng nhập thất bại");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      toast.error("Không thể kết nối đến server");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen w-full bg-white relative">
-  {/* Amber Glow Background */}
-  <div
-    className="absolute inset-0 z-0"
-    style={{
-      backgroundImage: `
-        radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #f59e0b 100%)
-      `,
-      backgroundSize: "100% 100%",
-    }}
-  />
-  {/* Your Content/Components */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: `
+            radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #f59e0b 100%)
+          `,
+        }}
+      />
 
-   {/* Content wrapper – căn giữa toàn bộ */}
       <div className="relative z-10 w-screen min-h-screen flex items-center justify-center">
         <AuthCard>
           <AuthBenefits />
 
-          <AuthForm onSubmit={handleSubmit} submitText="Đăng nhập">
-          <InputField placeholder="Email" />
-          <InputField type="password" placeholder="Mật khẩu" />
+          <AuthForm
+            onSubmit={handleSubmit}
+            submitText={loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          >
+            <InputField
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+            />
 
-  {/* 👇 CHỈ THÊM ĐOẠN NÀY */}
-  <div className="flex justify-end">
-    <span className="text-sm text-gray-600">
-      Chưa có tài khoản?{" "}
-      <Link
-        to="/register"
-        className="text-red-500 font-medium hover:underline"
-      >
-        Đăng ký ngay
-      </Link>
-    </span>
-  </div>
-           </AuthForm>
+            <InputField
+              type="password"
+              name="password"
+              placeholder="Mật khẩu"
+              value={form.password}
+              onChange={handleChange}
+            />
+
+            <div className="flex justify-end">
+              <span className="text-sm text-gray-600">
+                Chưa có tài khoản?{" "}
+                <Link
+                  to="/register"
+                  className="text-red-500 font-medium hover:underline"
+                >
+                  Đăng ký ngay
+                </Link>
+              </span>
+            </div>
+          </AuthForm>
+
           <SocialLogin />
         </AuthCard>
       </div>
-    </div>    
+    </div>
   );
 };
 
