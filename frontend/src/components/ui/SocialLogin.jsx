@@ -15,12 +15,23 @@ const SocialLogin = () => {
 
     try {
       const res = await googleLogin({
-        token: credentialResponse.credential, // id_token
+        token: credentialResponse.credential, 
       });
 
-      if (res?.token) {
-        localStorage.setItem("token", res.token);
+    
+      if (res?.accessToken) {
+      
+        localStorage.setItem("accessToken", res.accessToken);
+        
+       
+        if (res.user) {
+          localStorage.setItem("user", JSON.stringify(res.user));
+        }
+        
+        
         navigate("/");
+      } else {
+         console.error("Đăng nhập Google thất bại: Không nhận được token từ server");
       }
     } catch (err) {
       console.error("Login error:", err);
