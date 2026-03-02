@@ -1,7 +1,7 @@
-// src/controllers/auth.controller.js
+
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken'; // [FIX] Bổ sung import này
-import AccountModel from '../models/accountModel.js'; // Đảm bảo tên file model đúng
+import jwt from 'jsonwebtoken'; 
+import AccountModel from '../models/accountModel.js'; 
 import ProfileModel from '../models/profileModel.js';
 import { sendOTP } from '../utils/sendEmail.js';
 import { OAuth2Client } from 'google-auth-library';
@@ -9,7 +9,18 @@ import { OAuth2Client } from 'google-auth-library';
 // Kho lưu trữ tạm thời
 const tempRegisterStore = new Map();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const generateTokens = (user) => {
+  const payload = {
+    id: user.account_id,
+    email: user.email,
+    role: user.is_admin ? 'admin' : 'user'
+  };
 
+  const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+  return { accessToken, refreshToken };
+};
 const AuthController = {
 
   register: async (req, res) => {
@@ -102,26 +113,30 @@ const AuthController = {
       if (!user) {
         return res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác' });
       }
+
       const isMatch = await bcrypt.compare(password, user.password_hash);
-      
       if (!isMatch) {
         return res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác' });
       }
 
-      
-      const token = jwt.sign(
-        { 
-          id: user.account_id, 
-          email: user.email, 
-          role: user.is_admin ? 'admin' : 'user' 
-        },
-        process.env.JWT_SECRET, 
-        { expiresIn: '30d' }     
-      );
+      // Tạo 2 loại Token
+      const { accessToken, refreshToken } = generateTokens(user);
 
+      // Lưu Refresh Token vào db
+      await AccountModel.updateRefreshToken(user.account_id, refreshToken);
+
+      //  Set Cookie chứa Refresh Token
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
+      });
+
+      // Chỉ trả về Access Token trong body
       return res.status(200).json({
         message: 'Đăng nhập thành công',
-        token,
+        accessToken, 
         user: {
           id: user.account_id,
           email: user.email,
@@ -137,23 +152,18 @@ const AuthController = {
 
   googleLogin: async (req, res) => {
     try {
-      const { token } = req.body; 
-
-      if (!token) {
-        return res.status(400).json({ message: 'Thiếu Google Token' });
-      }
+      const { token } = req.body;
+      if (!token) return res.status(400).json({ message: 'Thiếu Google Token' });
 
       const ticket = await client.verifyIdToken({
         idToken: token,
-        audience: process.env.GOOGLE_CLIENT_ID, 
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
-      
+
       const payload = ticket.getPayload();
       const { email, email_verified } = payload;
 
-      if (!email_verified) {
-        return res.status(400).json({ message: 'Email Google chưa được xác thực' });
-      }
+      if (!email_verified) return res.status(400).json({ message: 'Email Google chưa được xác thực' });
 
       let user = await AccountModel.findByEmail(email);
 
@@ -164,28 +174,28 @@ const AuthController = {
 
         const newAccountId = await AccountModel.createAccount(email, passwordHash, false);
         await ProfileModel.createDefaultProfile(newAccountId);
-        
-       
-        user = { 
-          account_id: newAccountId, 
-          email: email, 
-          is_admin: 0 
+
+        user = {
+          account_id: newAccountId,
+          email: email,
+          is_admin: 0
         };
       }
 
-      const jwtToken = jwt.sign(
-        { 
-          id: user.account_id, 
-          email: user.email, 
-          role: user.is_admin ? 'admin' : 'user' 
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '1d' }
-      );
+      // Áp dụng chung logic Token kép cho Google Login
+      const { accessToken, refreshToken } = generateTokens(user);
+      await AccountModel.updateRefreshToken(user.account_id, refreshToken);
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
 
       return res.status(200).json({
         message: 'Đăng nhập Google thành công',
-        token: jwtToken,
+        accessToken,
         user: {
           id: user.account_id,
           email: user.email,
@@ -196,6 +206,51 @@ const AuthController = {
     } catch (error) {
       console.error('Google Login Error:', error);
       return res.status(400).json({ message: 'Token Google không hợp lệ hoặc đã hết hạn' });
+    }
+  },
+  refreshToken: async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (!refreshToken) return res.status(401).json({ message: 'Bạn chưa đăng nhập' });
+
+      // Xác thực token
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+      // Kiểm tra xem token có trong DB không
+      const user = await AccountModel.findByRefreshToken(refreshToken);
+      if (!user || user.account_id !== decoded.id) {
+        return res.status(403).json({ message: 'Refresh Token không hợp lệ' });
+      }
+      // Ở đây tạm thời chỉ cấp Access Token mới cho đơn giản
+      const payload = {
+        id: user.account_id,
+        email: user.email,
+        role: user.is_admin ? 'admin' : 'user'
+      };
+      const newAccessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+
+      return res.status(200).json({ accessToken: newAccessToken });
+
+    } catch (error) {
+      console.error('Refresh Token Error:', error);
+      return res.status(403).json({ message: 'Refresh Token đã hết hạn, vui lòng đăng nhập lại' });
+    }
+  },
+  logout: async (req, res) => {
+    try {
+      const refreshToken = req.cookies.refreshToken;
+      if (refreshToken) {
+        // Xóa token trong DB
+        const user = await AccountModel.findByRefreshToken(refreshToken);
+        if (user) {
+          await AccountModel.updateRefreshToken(user.account_id, null);
+        }
+      }
+      // Xóa Cookie
+      res.clearCookie('refreshToken');
+      return res.status(200).json({ message: 'Đăng xuất thành công' });
+    } catch (error) {
+      return res.status(500).json({ message: 'Lỗi server khi đăng xuất' });
     }
   }
 };
