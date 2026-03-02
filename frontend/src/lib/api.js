@@ -1,86 +1,83 @@
 const API_URL = "http://localhost:9999/api";
 
-
-// 🔐 Helper tự động thêm token vào header (GIỐNG interceptor axios)
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
-
-  return {
+  const token = localStorage.getItem("accessToken"); 
+  const headers = {
     "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
   };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
 };
 
-
-// Helper xử lý response an toàn
-const handleResponse = async (res) => {
-  const text = await res.text();
-
+const apiFetch = async (endpoint, method = "GET", body = null, isRetry = false) => {
+  const options = {
+    method,
+    headers: getAuthHeaders(),
+    credentials: "include", 
+  };
+  
+  if (body) options.body = JSON.stringify(body);
+  
   try {
-    const data = JSON.parse(text);
+    let res = await fetch(`${API_URL}${endpoint}`, options);
+    // XỬ LÝ HẾT HẠN TOKEN
+    if (res.status === 401 && !isRetry) {
+      try {
+        // gọi API lấy token mới
+        const refreshRes = await fetch(`${API_URL}/auth/refresh-token`, {
+          method: "POST", // Hoặc GET tùy vào cấu hình Route ở Backend của bạn
+          credentials: "include", // Vẫn phải mang theo Cookie
+        });
 
-    // Nếu token hết hạn hoặc unauthorized → auto logout
-    if (res.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-      throw new Error("Phiên đăng nhập đã hết hạn");
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+         
+          localStorage.setItem("accessToken", refreshData.accessToken);
+          
+         
+          return await apiFetch(endpoint, method, body, true); 
+        } else {
+          // Nếu refresh token cũng hết hạn -> Chấp nhận đăng xuất
+          throw new Error("Refresh Token Expired");
+        }
+      } catch (refreshError) {
+        // Xóa sạch thông tin và đẩy về trang login
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
+        throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+      }
+    }
+
+   
+    // XỬ LÝ RESPONSE BÌNH THƯỜNG CÁC MÃ LỖI KHÁC
+   
+    const text = await res.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (err) {
+      throw new Error("Lỗi hệ thống: Phản hồi từ server không hợp lệ.");
     }
 
     if (!res.ok) {
-      throw new Error(data.message || "Request failed");
+      const errorMsg = data.message || `Lỗi ${res.status}: Thao tác thất bại`;
+      throw new Error(errorMsg);
     }
 
     return data;
-  } catch {
-    throw new Error("Server response is not valid JSON");
+    
+  } catch (error) {
+    // Ném lỗi ra ngoài để component (VD: trang Đăng nhập) có thể catch và dùng toast.error() hiển thị
+    throw error; 
   }
 };
 
-
 // ================= AUTH =================
-
-export const registerUser = async (data) => {
-  const res = await fetch(`${API_URL}/auth/register`, {
-    method: "POST",
-    headers: getAuthHeaders(), // 🔥 dùng header mới
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse(res);
-};
-
-
-export const loginUser = async (data) => {
-  const res = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse(res);
-};
-
-
-export const verifyOtp = async (data) => {
-  const res = await fetch(`${API_URL}/auth/register/verify`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse(res);
-};
-
-
-export const googleLogin = async (data) => {
-  const res = await fetch(`${API_URL}/auth/google-login`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-
-  return handleResponse(res);
-};
-
-
-
+export const registerUser = (data) => apiFetch("/auth/register", "POST", data);
+export const loginUser    = (data) => apiFetch("/auth/login", "POST", data);
+export const verifyOtp    = (data) => apiFetch("/auth/register/verify", "POST", data);
+export const googleLogin  = (data) => apiFetch("/auth/google-login", "POST", data);
+export const logoutUser   = () => apiFetch("/auth/logout", "POST"); 

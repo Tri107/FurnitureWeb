@@ -23,7 +23,7 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.email || !form.password) {
@@ -35,15 +35,17 @@ const Login = () => {
 
       const res = await loginUser(form);
 
-      if (res?.token) {
-        localStorage.setItem("token", res.token);
+      // SỬA LỖI 1: Đổi thành accessToken cho khớp với Backend mới
+      if (res?.accessToken) {
+        // Lưu đúng tên key là "accessToken" để hàm getAuthHeaders đọc được
+        localStorage.setItem("accessToken", res.accessToken); 
         localStorage.setItem("user", JSON.stringify(res.user));
 
-        toast.success("Đăng nhập thành công ");
+        toast.success("Đăng nhập thành công!");
 
         setTimeout(() => {
           if (res.user.role === "admin") {
-            navigate("/admin/dashboard");
+            navigate("/admin");
           } else {
             navigate("/");
           }
@@ -53,7 +55,8 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      toast.error("Không thể kết nối đến server");
+      // SỬA LỖI 2: Lấy thông báo lỗi thực tế từ server ném ra
+      toast.error(err.message || "Có lỗi xảy ra khi đăng nhập"); 
     } finally {
       setLoading(false);
     }
