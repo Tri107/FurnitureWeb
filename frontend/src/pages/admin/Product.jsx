@@ -14,6 +14,10 @@ const products = [
 export default function Product() {
     return (
         <div className="space-y-6">
+            {/* Title */}
+      <h1 className="text-3xl font-bold">
+        Trang sản phẩm
+      </h1>
             {/* Header */}
             <div className="flex items-center justify-between">
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center gap-2">

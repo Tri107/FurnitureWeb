@@ -1,11 +1,17 @@
-import StatCards from "./components/StatCards";
-import RevenueChart from "./components/RevenueChart";
-import OrderChart from "./components/OrderChart";
-import RecentOrders from "./components/RecentOrders";
+import StatCards from "../../components/ui/StatCards";
+import RevenueChart from "../../components/ui/RevenueChart";
+import OrderChart from "../../components/ui/OrderChart";
+import RecentOrders from "../../components/ui/RecentOrders";
 
 export default function Dashboard() {
   return (
     <div className="w-full space-y-6">
+
+      {/* Title */}
+      <h1 className="text-3xl font-bold">
+        Trang quản lý
+      </h1>
+
       {/* Stat cards */}
       <StatCards />
 
@@ -17,6 +23,7 @@ export default function Dashboard() {
 
       {/* Table */}
       <RecentOrders />
+
     </div>
   );
 }
