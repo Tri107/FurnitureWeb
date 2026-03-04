@@ -4,6 +4,7 @@ import authRoute from './authRoute.js'
 import profileRoute from './profileRoute.js'
 import categoryRoute from './categoryRoute.js'
 import brandRoute from './brandRoute.js'
+import collectionRoute from './collectionRoute.js'
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ router.use('/auth',authRoute)
 router.use('/profile',profileRoute)
 router.use('/categories',categoryRoute)
 router.use('/brands',brandRoute)
+router.use('/collections',collectionRoute)
 
 export default router;
