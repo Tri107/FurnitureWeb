@@ -5,6 +5,7 @@ import profileRoute from './profileRoute.js'
 import categoryRoute from './categoryRoute.js'
 import brandRoute from './brandRoute.js'
 import collectionRoute from './collectionRoute.js'
+import discountRoute from './discountRoute.js'
 
 const router = express.Router();
 
@@ -14,5 +15,6 @@ router.use('/profile',profileRoute)
 router.use('/categories',categoryRoute)
 router.use('/brands',brandRoute)
 router.use('/collections',collectionRoute)
+router.use('/discounts',discountRoute)
 
 export default router;
