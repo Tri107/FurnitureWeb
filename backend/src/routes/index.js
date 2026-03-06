@@ -7,6 +7,7 @@ import brandRoute from './brandRoute.js'
 import collectionRoute from './collectionRoute.js'
 import discountRoute from './discountRoute.js'
 import paymentRoute from './paymentRoute.js'
+import favoriteRoute from './favoriteRoute.js'
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.use('/brands',brandRoute)
 router.use('/collections',collectionRoute)
 router.use('/discounts',discountRoute)
 router.use('/payments',paymentRoute)
+router.use('/favorites',favoriteRoute)
 
 export default router;
