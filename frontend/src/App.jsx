@@ -5,6 +5,8 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Otp from "./pages/auth/Otp";
 
+import DetailProduct from "./pages/DetailProduct";
+
 import AdminLayout from "./components/layout/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Product from "./pages/admin/Product";
@@ -18,6 +20,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<Otp />} />
+
+        {/* New Product Configurator Page */}
+        <Route path="/detailproduct" element={<DetailProduct />} />
 
         {/* Admin */}
         <Route path="/admin" element={<AdminLayout />}>
