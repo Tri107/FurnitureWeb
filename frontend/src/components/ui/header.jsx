@@ -13,7 +13,6 @@ function formatVND(v) {
 export default function Header() {
   const location = useLocation();
 
-  // ====== MOCK DATA (sau này bạn nối context/redux) ======
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const cartItems = useMemo(
@@ -39,7 +38,6 @@ export default function Header() {
   const cartCount = cartItems.reduce((s, it) => s + it.qty, 0);
   const cartTotal = cartItems.reduce((s, it) => s + it.price * it.qty, 0);
 
-  // ===== Mega menu data =====
   const mega = useMemo(
     () => ({
       living: {
@@ -247,7 +245,6 @@ export default function Header() {
 
   const keys = ["living", "bedroom", "dining", "decor"];
 
-  // ===== Mega states =====
   const [activeKey, setActiveKey] = useState(null);
   const [openMega, setOpenMega] = useState(false);
   const megaCloseTimer = useRef(null);
@@ -256,8 +253,8 @@ export default function Header() {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
     setActiveKey(key);
     setOpenMega(true);
-    setOpenRight(null); // mở mega => đóng cart/account
-    setSearchOpen(false); // mở mega => đóng search pill
+    setOpenRight(null);
+    setSearchOpen(false);
   };
 
   const scheduleCloseMega = () => {
@@ -278,8 +275,7 @@ export default function Header() {
     setActiveKey(null);
   };
 
-  // ===== Right popover states (cart/account) =====
-  const [openRight, setOpenRight] = useState(null); // "cart" | "account" | null
+  const [openRight, setOpenRight] = useState(null);
   const toggleRight = (k) => {
     closeMega();
     setSearchOpen(false);
@@ -287,7 +283,6 @@ export default function Header() {
   };
   const closeRight = () => setOpenRight(null);
 
-  // ===== Search pill states =====
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchInputRef = useRef(null);
@@ -296,7 +291,6 @@ export default function Header() {
     closeMega();
     setOpenRight(null);
     setSearchOpen(true);
-    // focus hơi trễ để animation k bị giật
     setTimeout(() => searchInputRef.current?.focus(), 50);
   };
 
@@ -305,7 +299,6 @@ export default function Header() {
     setQuery("");
   };
 
-  // click outside search pill
   const rightWrapRef = useRef(null);
   useEffect(() => {
     const onDoc = (e) => {
@@ -319,7 +312,6 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [searchOpen]);
 
-  // search mock results
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
@@ -343,14 +335,12 @@ export default function Header() {
     return pool.filter((p) => (p.name || "").toLowerCase().includes(q)).slice(0, 6);
   }, [query, cartItems]);
 
-  // đóng khi đổi route
   useEffect(() => {
     closeMega();
     closeRight();
     if (searchOpen) closeSearch();
   }, [location.pathname]);
 
-  // ESC đóng mọi thứ
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
@@ -368,19 +358,15 @@ export default function Header() {
   const onSubmitSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
-    // bạn muốn điều hướng qua trang products/search thì sửa ở đây
-    // navigate(`/products?search=${encodeURIComponent(query)}`)
   };
 
   return (
     <header className="w-full bg-[#0B1E3A] text-white shadow-sm sticky top-0 z-[80]">
-      {/* Top bar */}
       <div className="mx-auto max-w-7xl px-3 lg:px-10 h-20 flex items-center">
         <Link to="/" className="font-bold text-2xl !text-orange-500 tracking-wide">
           B2VT
         </Link>
 
-        {/* Nav */}
         <nav className="hidden md:flex flex-1 justify-center gap-10 text-base font-medium">
           <Link to="/products" className="hover:text-orange-400 transition">
             Sản Phẩm
@@ -408,15 +394,13 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Right icons + pill/popovers */}
-        <div ref={rightWrapRef} className="ml-auto flex items-center gap-4 relative">
-          {/* ===== SEARCH PILL (như hình) ===== */}
+        <div ref={rightWrapRef} className="ml-auto flex items-center gap-3 relative">
           <form
             onSubmit={onSubmitSearch}
             className={[
               "flex items-center gap-2 rounded-full bg-white/10 border border-white/15",
               "transition-all duration-200 ease-out overflow-hidden",
-              searchOpen ? "w-[260px] px-3 py-2" : "w-10 px-2 py-2",
+              searchOpen ? "w-[240px] px-2.5 py-1.5" : "w-9 px-1.5 py-1.5"
             ].join(" ")}
           >
             <button
@@ -424,11 +408,11 @@ export default function Header() {
               onClick={() => {
                 if (!searchOpen) openSearch();
                 else searchInputRef.current?.focus();
-              }}
-              className="shrink-0 p-1 rounded-full hover:bg-white/10 transition"
+              }}className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition"
+              
               aria-label="Search"
             >
-              <Search size={18} className="text-white/90" />
+              <Search className="h-[18px] w-[18px] text-white/90" />
             </button>
 
             <input
@@ -447,15 +431,14 @@ export default function Header() {
               <button
                 type="button"
                 onClick={closeSearch}
-                className="shrink-0 p-1 rounded-full hover:bg-white/10 transition"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition"
                 aria-label="Close"
               >
-                <X size={16} className="text-white/80" />
+                <X className="h-4 w-4 text-white/80" />
               </button>
             )}
           </form>
 
-          {/* ===== mini results dropdown (đè lên) - optional, đẹp hơn khi search ===== */}
           {searchOpen && query.trim() && (
             <div className="absolute right-0 top-[56px] z-[90] w-[360px] rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
               <div className="p-2">
@@ -491,39 +474,35 @@ export default function Header() {
             </div>
           )}
 
-          {/* Cart */}
           <button
             type="button"
             onClick={() => toggleRight("cart")}
             className={[
-              "relative p-1 rounded hover:text-orange-400 transition",
-              openRight === "cart" ? "text-orange-400" : "",
+              "relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:text-orange-400 transition",
+              openRight === "cart" ? "text-orange-400 border-orange-400/30" : "text-white",
             ].join(" ")}
             aria-label="Cart"
           >
-            <ShoppingCart size={22} />
-            <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-[10px] w-5 h-5 flex items-center justify-center rounded-full text-white">
+            <ShoppingCart className="h-[19px] w-[19px]" />
+            <span className="absolute -top-1 -right-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-orange-500 text-[10px] font-semibold text-white">
               {cartCount}
             </span>
           </button>
 
-          {/* Account */}
           <button
             type="button"
             onClick={() => toggleRight("account")}
             className={[
-              "p-1 rounded hover:text-orange-400 transition",
-              openRight === "account" ? "text-orange-400" : "",
+              "flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 hover:bg-white/10 hover:text-orange-400 transition",
+              openRight === "account" ? "text-orange-400 border-orange-400/30" : "text-white",
             ].join(" ")}
             aria-label="Account"
           >
-            <User size={22} />
+            <User className="h-[19px] w-[19px]" />
           </button>
 
-          {/* ===== Popover (cart/account) ===== */}
           {openRight && (
             <div className="absolute right-0 top-[56px] z-[90]">
-              {/* Cart panel */}
               {openRight === "cart" && (
                 <div className="w-[380px] rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
                   <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -534,10 +513,10 @@ export default function Header() {
                     <button
                       type="button"
                       onClick={closeRight}
-                      className="p-1 rounded hover:bg-white/10 transition"
+                      className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition"
                       aria-label="Close"
                     >
-                      <X size={18} className="text-white/70" />
+                      <X className="h-[18px] w-[18px] text-white/70" />
                     </button>
                   </div>
 
@@ -585,7 +564,6 @@ export default function Header() {
                 </div>
               )}
 
-              {/* Account panel */}
               {openRight === "account" && (
                 <div className="w-[260px] rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
                   <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -593,10 +571,10 @@ export default function Header() {
                     <button
                       type="button"
                       onClick={closeRight}
-                      className="p-1 rounded hover:bg-white/10 transition"
+                      className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition"
                       aria-label="Close"
                     >
-                      <X size={18} className="text-white/70" />
+                      <X className="h-[18px] w-[18px] text-white/70" />
                     </button>
                   </div>
 
@@ -663,7 +641,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ===== Mega Backdrop (chỉ dưới header) ===== */}
       <div
         className={[
           "fixed inset-x-0 top-20 bottom-0 z-[50] transition-opacity duration-200",
@@ -676,12 +653,13 @@ export default function Header() {
         <div className="absolute inset-0 bg-black/25" />
       </div>
 
-      {/* ===== Mega Panel ===== */}
       <div
         className={[
           "fixed left-0 top-20 w-full z-[55]",
           "transition-all duration-200 ease-out",
-          openMega ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none",
+          openMega
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none",
         ].join(" ")}
         onMouseEnter={cancelCloseMega}
         onMouseLeave={scheduleCloseMega}
