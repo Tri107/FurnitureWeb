@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 
 export default function Cart() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([
     {
       id: "p1",
@@ -310,7 +312,7 @@ export default function Cart() {
                   <Button
                     className="h-12 w-full rounded-full bg-red-600 text-base hover:bg-red-700"
                     disabled={items.length === 0}
-                    onClick={() => alert("Đi tới thanh toán (demo)")}
+                    onClick={() => navigate('/checkout')}
                   >
                     Thanh toán
                   </Button>

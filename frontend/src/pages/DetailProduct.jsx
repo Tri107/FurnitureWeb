@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/ui/header';
+import Footer from '../components/ui/footer';
 import {
     ZoomIn, ZoomOut, Ruler, Box, LayoutGrid, List, Share,
     Minus, Plus, Info, ShoppingCart, Heart, ChevronRight,
@@ -6,6 +9,7 @@ import {
 } from 'lucide-react';
 
 export default function ProductPage() {
+    const navigate = useNavigate();
     const [width, setWidth] = useState(200); // Mặc định 200cm
     const [height, setHeight] = useState(100); // Mặc định 100cm
     const [userRating, setUserRating] = useState(0);
@@ -83,7 +87,8 @@ export default function ProductPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-white text-gray-900 font-sans pb-24">
+        <div className="min-h-screen bg-white text-gray-900 font-sans">
+            <Header />
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <header className="mb-6">
                     <h1 className="text-xl font-medium text-gray-500">Frame 1</h1>
@@ -284,7 +289,10 @@ export default function ProductPage() {
 
                         <div className="mt-auto pt-6">
                             <div className="flex gap-4 mb-4">
-                                <button className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-colors">
+                                <button 
+                                    onClick={() => navigate('/cart')}
+                                    className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-colors"
+                                >
                                     <ShoppingCart size={20} />
                                     Thêm vào giỏ hàng
                                 </button>
@@ -532,6 +540,7 @@ export default function ProductPage() {
 
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }
