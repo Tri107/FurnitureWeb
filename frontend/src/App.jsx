@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Otp from "./pages/auth/Otp";
+import Cart from "./pages/Cart";
 
 import DetailProduct from "./pages/DetailProduct";
 
@@ -16,6 +17,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public */}
+        <Route path="/cart" element={<Cart />} />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
