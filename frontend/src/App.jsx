@@ -12,7 +12,10 @@ import DetailProduct from "./pages/DetailProduct";
 import AdminLayout from "./components/layout/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Product from "./pages/admin/Product";
-
+import Discount from "./pages/admin/Discount";
+import AccountPage from "./pages/admin/Account";
+import Collection from "./pages/admin/Collection";
+import Payment from "./pages/admin/Payment";
 function App() {
   return (
     <BrowserRouter>
@@ -32,6 +35,10 @@ function App() {
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Product />} />
+          <Route path="discounts" element={<Discount />} />
+          <Route path="accounts" element={<AccountPage />} />
+          <Route path="collections" element={<Collection />} />
+          <Route path="payment" element={<Payment />} />
         </Route>
       </Routes>
     </BrowserRouter>
