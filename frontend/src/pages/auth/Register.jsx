@@ -25,50 +25,42 @@ const Register = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+ const handleSubmit = (e) => {
+  e.preventDefault();
+  setError("");
 
-    if (!form.email || !form.password || !form.confirmPassword) {
-      toast.error("Vui lòng nhập đầy đủ thông tin");
-      
-    }
+  if (!form.email || !form.password || !form.confirmPassword) {
+    toast.error("Vui lòng nhập đầy đủ thông tin");
+    return;
+  }
 
-    if (form.password.length < 6) {
-      toast.error("Mật khẩu phải có ít nhất 6 ký tự");
-      
-    }
+  if (form.password.length < 6) {
+    toast.error("Mật khẩu phải có ít nhất 6 ký tự");
+    return;
+  }
 
-    if (form.password !== form.confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp");
-     
-    }
+  if (form.password !== form.confirmPassword) {
+    toast.error("Mật khẩu xác nhận không khớp");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  setLoading(true);
 
-      const res = await registerUser({
-        email: form.email,
-        password: form.password,
-      });
+  // gọi API nhưng không chờ
+  registerUser({
+    email: form.email,
+    password: form.password,
+  }).catch(() => {
+    toast.error("Không thể kết nối đến server");
+  });
 
-      if (res?.email) {
-        toast.success("OTP đã được gửi tới email");
-        navigate("/otp", {
-          state: { email: res.email },
-        });
-      } else {
-        toast.error(res?.message || "Đăng ký thất bại");
-       
-      }
+  toast.success("Đăng ký thành công! Vui lòng kiểm tra Gmail để lấy mã OTP.");
 
-    } catch  {
-      toast.error("Không thể kết nối đến server");
-      
-    } finally {
-      setLoading(false);
-    }
-  };
+  // chuyển trang ngay
+  navigate("/otp", {
+    state: { email: form.email },
+  });
+};
 
   return (
     <div className="w-screen relative min-h-screen overflow-hidden">

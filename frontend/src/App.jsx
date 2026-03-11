@@ -6,6 +6,9 @@ import Register from "./pages/auth/Register";
 import Otp from "./pages/auth/Otp";
 import Cart from "./pages/Cart";
 import Products from "./pages/Products";
+import Checkout from "./pages/Checkout";
+
+import DetailProduct from "./pages/DetailProduct";
 
 import AdminLayout from "./components/layout/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
@@ -18,10 +21,14 @@ function App() {
         {/* Public */}
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<Otp />} />
+
+        {/* New Product Configurator Page */}
+        <Route path="/detailproduct" element={<DetailProduct />} />
 
         {/* Admin */}
         <Route path="/admin" element={<AdminLayout />}>
