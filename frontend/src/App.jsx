@@ -5,6 +5,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Otp from "./pages/auth/Otp";
 import Cart from "./pages/Cart";
+import Products from "./pages/Products";
 
 import AdminLayout from "./components/layout/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
@@ -15,6 +16,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public */}
+        <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
