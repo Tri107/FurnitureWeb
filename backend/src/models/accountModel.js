@@ -1,6 +1,11 @@
 import db from '../config/mysql.js';
 
 const AccountModel = {
+  findAll: async () => {
+    const query = 'SELECT * FROM accounts WHERE is_disabled = 0';
+    const [rows] = await db.execute(query);
+    return rows;
+  },
   findByEmail: async (email) => {
     const query = 'SELECT * FROM accounts WHERE email = ? AND is_disabled = 0';
     const [rows] = await db.execute(query, [email]);
