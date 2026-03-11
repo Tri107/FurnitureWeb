@@ -3,7 +3,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { getPayments, createPayment, updatePayment, deletePayment } from "@/api/payment";
+import {
+  getPayments,
+  createPayment,
+  updatePayment,
+  deletePayment,
+} from "@/lib/api";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +21,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -71,7 +86,11 @@ const paymentBadgeClass = (method) => {
     return "bg-blue-100 text-blue-700 hover:bg-blue-100";
   }
 
-  if (value.includes("momo") || value.includes("zalopay") || value.includes("vnpay")) {
+  if (
+    value.includes("momo") ||
+    value.includes("zalopay") ||
+    value.includes("vnpay")
+  ) {
     return "bg-violet-100 text-violet-700 hover:bg-violet-100";
   }
 
@@ -83,6 +102,10 @@ export default function PaymentPage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
+
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingPayment, setDeletingPayment] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(paymentSchema),
@@ -156,29 +179,39 @@ export default function PaymentPage() {
     }
   };
 
-  const handleDelete = async (item) => {
-    if (
-      !window.confirm(
-        `Bạn có chắc muốn xoá payment ID "${item.id}" không?`
-      )
-    ) {
-      return;
-    }
+  const openDeleteDialog = (item) => {
+    setDeletingPayment(item);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingPayment) return;
 
     try {
-      await deletePayment(item.id);
+      setIsDeleting(true);
+      await deletePayment(deletingPayment.id);
       await fetchPayments();
+      setDeleteDialogOpen(false);
+      setDeletingPayment(null);
     } catch (error) {
       alert(error.message || "Không thể xoá payment");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const stats = [
     { label: "Tổng payment", value: payments.length, icon: ReceiptText },
-    { label: "Order liên kết", value: payments.filter((item) => item.orderId).length, icon: Wallet },
+    {
+      label: "Order liên kết",
+      value: payments.filter((item) => item.orderId).length,
+      icon: Wallet,
+    },
     {
       label: "Phương thức khác nhau",
-      value: new Set(payments.map((item) => item.paymentMethod.toLowerCase())).size,
+      value: new Set(
+        payments.map((item) => item.paymentMethod.toLowerCase())
+      ).size,
       icon: CreditCard,
     },
   ];
@@ -207,7 +240,10 @@ export default function PaymentPage() {
             </DialogHeader>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
@@ -216,7 +252,10 @@ export default function PaymentPage() {
                       <FormItem>
                         <FormLabel>Phương thức thanh toán</FormLabel>
                         <FormControl>
-                          <Input placeholder="VD: COD, Banking, Momo..." {...field} />
+                          <Input
+                            placeholder="VD: COD, Banking, Momo..."
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -230,7 +269,11 @@ export default function PaymentPage() {
                       <FormItem>
                         <FormLabel>Order ID</FormLabel>
                         <FormControl>
-                          <Input type="number" placeholder="Nhập order id" {...field} />
+                          <Input
+                            type="number"
+                            placeholder="Nhập order id"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -239,10 +282,17 @@ export default function PaymentPage() {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2">
-                  <Button type="button" variant="outline" onClick={() => closeDialog(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => closeDialog(false)}
+                  >
                     Hủy
                   </Button>
-                  <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                  <Button
+                    type="submit"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
                     {editingPayment ? "Cập nhật" : "Tạo payment"}
                   </Button>
                 </div>
@@ -273,7 +323,9 @@ export default function PaymentPage() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <div className="text-sm text-muted-foreground">{item.label}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {item.label}
+                    </div>
                     <div className="mt-2 text-2xl font-bold">{item.value}</div>
                   </div>
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted">
@@ -295,7 +347,9 @@ export default function PaymentPage() {
                   <th className="px-6 py-4 font-medium">ID</th>
                   <th className="px-6 py-4 font-medium">Phương thức</th>
                   <th className="px-6 py-4 font-medium">Order ID</th>
-                  <th className="px-6 py-4 text-right font-medium">Hành động</th>
+                  <th className="px-6 py-4 text-right font-medium">
+                    Hành động
+                  </th>
                 </tr>
               </thead>
 
@@ -314,7 +368,9 @@ export default function PaymentPage() {
                         </div>
 
                         <div className="space-y-1">
-                          <div className="font-medium">{item.paymentMethod}</div>
+                          <div className="font-medium">
+                            {item.paymentMethod}
+                          </div>
                           <Badge
                             className={`rounded-full px-3 py-1 ${paymentBadgeClass(
                               item.paymentMethod
@@ -343,7 +399,7 @@ export default function PaymentPage() {
                           size="sm"
                           variant="destructive"
                           className="flex items-center gap-1"
-                          onClick={() => handleDelete(item)}
+                          onClick={() => openDeleteDialog(item)}
                         >
                           <Trash2 size={14} />
                           Xóa
@@ -363,6 +419,52 @@ export default function PaymentPage() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(value) => {
+          setDeleteDialogOpen(value);
+          if (!value) {
+            setDeletingPayment(null);
+          }
+        }}
+      >
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xoá payment</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deletingPayment ? (
+                <>
+                  Bạn có chắc muốn xoá payment có ID{" "}
+                  <span className="font-semibold text-foreground">
+                    #{deletingPayment.id}
+                  </span>{" "}
+                  với phương thức{" "}
+                  <span className="font-semibold text-foreground">
+                    {deletingPayment.paymentMethod}
+                  </span>{" "}
+                  không?
+                  <br />
+                  Hành động này không thể hoàn tác.
+                </>
+              ) : (
+                "Bạn có chắc muốn xoá payment này không?"
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {isDeleting ? "Đang xoá..." : "Xóa payment"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

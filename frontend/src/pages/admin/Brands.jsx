@@ -5,10 +5,10 @@ import * as z from "zod";
 import toast from "react-hot-toast";
 
 import {
-  getCollections,
-  createCollection,
-  updateCollection,
-  deleteCollection,
+  getBrands,
+  createBrand,
+  updateBrand,
+  deleteBrand,
 } from "../../lib/api";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,16 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -53,24 +43,25 @@ import {
   Trash2,
   Plus,
   Search,
-  FolderKanban,
+  Tags,
   Eye,
   EyeOff,
+  AlertTriangle,
 } from "lucide-react";
 
-const collectionSchema = z.object({
-  collectionName: z.string().min(1, "Vui lòng nhập tên bộ sưu tập"),
+const brandSchema = z.object({
+  brandName: z.string().min(1, "Vui lòng nhập tên thương hiệu"),
   isDisabled: z.string().min(1, "Vui lòng chọn trạng thái"),
 });
 
 const defaultValues = {
-  collectionName: "",
+  brandName: "",
   isDisabled: "0",
 };
 
-const mapApiCollectionToUI = (item) => ({
-  id: item.collection_id,
-  name: item.collection_name || "",
+const mapApiBrandToUI = (item) => ({
+  id: item.brand_id,
+  name: item.brand_name || "",
   isDisabled: Number(item.is_disabled ?? 0),
   status: Number(item.is_disabled ?? 0) === 1 ? "Đang ẩn" : "Đang hoạt động",
 });
@@ -80,53 +71,50 @@ const getStatusClass = (status) =>
     ? "bg-green-100 text-green-700 hover:bg-green-100"
     : "bg-gray-200 text-gray-700 hover:bg-gray-200";
 
-export default function CollectionPage() {
-  const [collections, setCollections] = useState([]);
+export default function BrandPage() {
+  const [brands, setBrands] = useState([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
-  const [editingCollection, setEditingCollection] = useState(null);
+  const [editingBrand, setEditingBrand] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
-  const [deletingCollection, setDeletingCollection] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
   const form = useForm({
-    resolver: zodResolver(collectionSchema),
+    resolver: zodResolver(brandSchema),
     defaultValues,
   });
 
-  const fetchCollectionList = async () => {
+  const fetchBrandList = async () => {
     try {
-      const res = await getCollections();
-      setCollections((res?.data || []).map(mapApiCollectionToUI));
+      const res = await getBrands();
+      setBrands((res?.data || []).map(mapApiBrandToUI));
     } catch (error) {
-      console.error("GET COLLECTIONS ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể tải danh sách bộ sưu tập"
-      );
+      console.error("GET BRANDS ERROR:", error);
+      toast.error(error.message || "Không thể tải danh sách thương hiệu");
     }
   };
 
   useEffect(() => {
-    fetchCollectionList();
+    fetchBrandList();
   }, []);
 
-  const filteredCollections = useMemo(() => {
+  const filteredBrands = useMemo(() => {
     const keyword = search.toLowerCase().trim();
-    return collections.filter(
+
+    return brands.filter(
       (item) =>
         item.name.toLowerCase().includes(keyword) ||
         item.status.toLowerCase().includes(keyword) ||
         String(item.id).includes(keyword)
     );
-  }, [collections, search]);
+  }, [brands, search]);
 
   const resetFormAndClose = () => {
     form.reset(defaultValues);
-    setEditingCollection(null);
+    setEditingBrand(null);
     setOpen(false);
   };
 
@@ -135,71 +123,57 @@ export default function CollectionPage() {
       setSubmitting(true);
 
       const payload = {
-        collectionName: values.collectionName.trim(),
+        brandName: values.brandName.trim(),
         isDisabled: Number(values.isDisabled),
       };
 
-      if (editingCollection) {
-        await updateCollection(editingCollection.id, payload);
-        toast.success("Cập nhật bộ sưu tập thành công!");
+      if (editingBrand) {
+        await updateBrand(editingBrand.id, payload);
+        toast.success("Cập nhật thương hiệu thành công!");
       } else {
-        await createCollection({
-          collectionName: values.collectionName.trim(),
+        await createBrand({
+          brandName: values.brandName.trim(),
         });
-        toast.success("Thêm bộ sưu tập thành công!");
+        toast.success("Thêm thương hiệu thành công!");
       }
 
-      await fetchCollectionList();
+      await fetchBrandList();
       resetFormAndClose();
     } catch (error) {
-      console.error("SAVE COLLECTION ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể lưu bộ sưu tập"
-      );
+      console.error("SAVE BRAND ERROR:", error);
+      toast.error(error.message || "Không thể lưu thương hiệu");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const openDeletePopup = (item) => {
-    setDeletingCollection(item);
-    setDeletePopupOpen(true);
-  };
-
-  const closeDeletePopup = () => {
-    if (deleting) return;
-    setDeletePopupOpen(false);
-    setDeletingCollection(null);
+  const handleDelete = (id, name) => {
+    setDeleteTarget({ id, name });
+    setConfirmOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (!deletingCollection) return;
+    if (!deleteTarget) return;
 
     try {
       setDeleting(true);
-      await deleteCollection(deletingCollection.id);
-      toast.success(`Đã xóa bộ sưu tập "${deletingCollection.name}"`);
-      await fetchCollectionList();
-      setDeletePopupOpen(false);
-      setDeletingCollection(null);
+      await deleteBrand(deleteTarget.id);
+      toast.success(`Đã xóa thương hiệu "${deleteTarget.name}"`);
+      await fetchBrandList();
+      setConfirmOpen(false);
+      setDeleteTarget(null);
     } catch (error) {
-      console.error("DELETE COLLECTION ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể xóa bộ sưu tập"
-      );
+      console.error("DELETE BRAND ERROR:", error);
+      toast.error(error.message || "Không thể xóa thương hiệu");
     } finally {
       setDeleting(false);
     }
   };
 
   const handleEdit = (item) => {
-    setEditingCollection(item);
+    setEditingBrand(item);
     form.reset({
-      collectionName: item.name || "",
+      brandName: item.name || "",
       isDisabled: String(item.isDisabled),
     });
     setOpen(true);
@@ -209,44 +183,39 @@ export default function CollectionPage() {
     const nextDisabled = item.isDisabled === 1 ? 0 : 1;
 
     try {
-      await updateCollection(item.id, {
-        collectionName: item.name,
+      await updateBrand(item.id, {
+        brandName: item.name,
         isDisabled: nextDisabled,
       });
 
       toast.success(
         nextDisabled === 1
-          ? `Đã ẩn bộ sưu tập "${item.name}"`
-          : `Đã hiện bộ sưu tập "${item.name}"`
+          ? `Đã ẩn thương hiệu "${item.name}"`
+          : `Đã hiện thương hiệu "${item.name}"`
       );
 
-      await fetchCollectionList();
+      await fetchBrandList();
     } catch (error) {
-      console.error("TOGGLE COLLECTION ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể cập nhật trạng thái bộ sưu tập"
-      );
+      console.error("TOGGLE BRAND ERROR:", error);
+      toast.error(error.message || "Không thể cập nhật trạng thái thương hiệu");
     }
   };
 
   const stats = [
-    { label: "Tổng bộ sưu tập", value: collections.length },
+    { label: "Tổng thương hiệu", value: brands.length },
     {
       label: "Đang hoạt động",
-      value: collections.filter((item) => item.status === "Đang hoạt động")
-        .length,
+      value: brands.filter((item) => item.status === "Đang hoạt động").length,
     },
     {
       label: "Đang ẩn",
-      value: collections.filter((item) => item.status === "Đang ẩn").length,
+      value: brands.filter((item) => item.status === "Đang ẩn").length,
     },
   ];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Trang bộ sưu tập</h1>
+      <h1 className="text-3xl font-bold">Trang thương hiệu</h1>
 
       <div className="flex items-center justify-between">
         <Dialog
@@ -260,28 +229,28 @@ export default function CollectionPage() {
             <Button
               className="flex items-center gap-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => {
-                setEditingCollection(null);
+                setEditingBrand(null);
                 form.reset(defaultValues);
                 setOpen(true);
               }}
             >
               <Plus size={16} />
-              Thêm bộ sưu tập
+              Thêm thương hiệu
             </Button>
           </DialogTrigger>
 
           <DialogContent
             className="sm:max-w-[600px] rounded-2xl"
-            aria-describedby="collection-dialog-description"
+            aria-describedby="brand-dialog-description"
           >
             <DialogHeader>
               <DialogTitle>
-                {editingCollection ? "Cập nhật bộ sưu tập" : "Thêm bộ sưu tập"}
+                {editingBrand ? "Cập nhật thương hiệu" : "Thêm thương hiệu"}
               </DialogTitle>
             </DialogHeader>
 
-            <p id="collection-dialog-description" className="sr-only">
-              Form thêm hoặc cập nhật bộ sưu tập
+            <p id="brand-dialog-description" className="sr-only">
+              Form thêm hoặc cập nhật thương hiệu
             </p>
 
             <Form {...form}>
@@ -289,19 +258,19 @@ export default function CollectionPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="collectionName"
+                    name="brandName"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel>Tên bộ sưu tập</FormLabel>
+                        <FormLabel>Tên thương hiệu</FormLabel>
                         <FormControl>
-                          <Input placeholder="VD: Bộ sưu tập mùa hè" {...field} />
+                          <Input placeholder="VD: IKEA, Hòa Phát..." {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  {editingCollection && (
+                  {editingBrand && (
                     <FormField
                       control={form.control}
                       name="isDisabled"
@@ -341,12 +310,12 @@ export default function CollectionPage() {
                     disabled={submitting}
                   >
                     {submitting
-                      ? editingCollection
+                      ? editingBrand
                         ? "Đang cập nhật..."
                         : "Đang lưu..."
-                      : editingCollection
+                      : editingBrand
                       ? "Cập nhật"
-                      : "Lưu bộ sưu tập"}
+                      : "Lưu thương hiệu"}
                   </Button>
                 </div>
               </form>
@@ -385,21 +354,21 @@ export default function CollectionPage() {
             <thead className="border-b bg-muted/30">
               <tr className="text-left">
                 <th className="px-6 py-4 font-medium">ID</th>
-                <th className="px-6 py-4 font-medium">Tên bộ sưu tập</th>
+                <th className="px-6 py-4 font-medium">Tên thương hiệu</th>
                 <th className="px-6 py-4 font-medium">Trạng thái</th>
                 <th className="px-6 py-4 text-right font-medium">Hành động</th>
               </tr>
             </thead>
 
             <tbody>
-              {filteredCollections.map((item) => (
+              {filteredBrands.map((item) => (
                 <tr key={item.id} className="border-b last:border-b-0 hover:bg-muted/20">
                   <td className="px-6 py-4">{item.id}</td>
 
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        <FolderKanban size={18} className="text-muted-foreground" />
+                        <Tags size={18} className="text-muted-foreground" />
                       </div>
                       <span className="font-medium">{item.name}</span>
                     </div>
@@ -443,7 +412,7 @@ export default function CollectionPage() {
                       <Button
                         size="sm"
                         className="flex items-center gap-1 bg-red-600 text-white hover:bg-red-700"
-                        onClick={() => openDeletePopup(item)}
+                        onClick={() => handleDelete(item.id, item.name)}
                       >
                         <Trash2 size={14} />
                         Xóa
@@ -455,41 +424,63 @@ export default function CollectionPage() {
             </tbody>
           </table>
 
-          {filteredCollections.length === 0 && (
+          {filteredBrands.length === 0 && (
             <div className="py-10 text-center text-sm text-muted-foreground">
-              Không có bộ sưu tập nào
+              Không có thương hiệu nào
             </div>
           )}
         </CardContent>
       </Card>
 
-      <AlertDialog open={deletePopupOpen} onOpenChange={setDeletePopupOpen}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa bộ sưu tập</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa bộ sưu tập{" "}
-              <span className="font-semibold text-foreground">
-                "{deletingCollection?.name}"
-              </span>{" "}
-              không? Hành động này không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+      <Dialog
+        open={confirmOpen}
+        onOpenChange={(value) => {
+          setConfirmOpen(value);
+          if (!value && !deleting) {
+            setDeleteTarget(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[420px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle size={20} className="text-red-500" />
+              Xác nhận xóa
+            </DialogTitle>
+          </DialogHeader>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDeletePopup} disabled={deleting}>
-              Hủy
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
+          <div className="py-2 text-sm text-muted-foreground">
+            Bạn có chắc muốn xóa thương hiệu{" "}
+            <span className="font-semibold text-foreground">
+              "{deleteTarget?.name}"
+            </span>{" "}
+            không?
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
               disabled={deleting}
-              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => {
+                setConfirmOpen(false);
+                setDeleteTarget(null);
+              }}
             >
-              {deleting ? "Đang xóa..." : "Xác nhận xóa"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              Hủy
+            </Button>
+
+            <Button
+              type="button"
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={deleting}
+              onClick={confirmDelete}
+            >
+              {deleting ? "Đang xóa..." : "Xóa"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

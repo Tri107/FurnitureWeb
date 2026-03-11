@@ -16,6 +16,8 @@ import Discount from "./pages/admin/Discount";
 import AccountPage from "./pages/admin/Account";
 import Collection from "./pages/admin/Collection";
 import Payment from "./pages/admin/Payment";
+import CategoryPage from "./pages/admin/Category";   
+import BrandPage from "./pages/admin/Brands";
 function App() {
   return (
     <BrowserRouter>
@@ -39,6 +41,8 @@ function App() {
           <Route path="accounts" element={<AccountPage />} />
           <Route path="collections" element={<Collection />} />
           <Route path="payment" element={<Payment />} />
+           <Route path="categories" element={<CategoryPage />} />
+            <Route path="brands" element={<BrandPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

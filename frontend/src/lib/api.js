@@ -104,3 +104,13 @@ export const getPayments = () => apiFetch("/payments");
 export const createPayment = (data) => apiFetch("/payments", "POST", data);
 export const updatePayment = (paymentId, data) => apiFetch(`/payments/${paymentId}`, "PUT", data);
 export const deletePayment = (paymentId) => apiFetch(`/payments/${paymentId}`, "DELETE");
+// ================= CATEGORY =================
+export const getCategories = () => apiFetch("/categories");
+export const createCategory = (data) => apiFetch("/categories", "POST", data);
+export const updateCategory = (categoryId, data) => apiFetch(`/categories/${categoryId}`, "PUT", data);
+export const deleteCategory = (categoryId) => apiFetch(`/categories/${categoryId}`, "DELETE");
+// ================= BRAND =================
+export const getBrands = () => apiFetch("/brands");
+export const createBrand = (data) => apiFetch("/brands", "POST", data);
+export const updateBrand = (brandId, data) => apiFetch(`/brands/${brandId}`, "PUT", data);
+export const deleteBrand = (brandId) => apiFetch(`/brands/${brandId}`, "DELETE");

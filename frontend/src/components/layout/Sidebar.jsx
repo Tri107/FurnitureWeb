@@ -41,12 +41,13 @@ export default function Sidebar() {
 
         <Item to="/admin" icon={<Home size={18} />} label="Trang chủ" end />
         <Item to="/admin/products" icon={<Package size={18} />} label="Trang sản phẩm" />
+        <Item to="/admin/categories" icon={<Package size={18} />} label="Danh mục" />
         <Item to="/admin/payment" icon={<CreditCard size={18} />} label="Thanh toán" />
         <Item to="/admin/orders" icon={<Package size={18} />} label="Đơn hàng" />
         <Item to="/admin/collections" icon={<Package size={18} />} label="Collections" />
         <Item to="/admin/discounts" icon={<CreditCard size={18} />} label="Khuyến mãi" />
         <Item to="/admin/accounts" icon={<Users size={18} />} label="Người dùng" />
-
+          <Item to="/admin/brands" icon={<Package size={18} />} label="Thương hiệu" />
       </nav>
 
       {/* Logout */}

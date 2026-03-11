@@ -5,10 +5,10 @@ import * as z from "zod";
 import toast from "react-hot-toast";
 
 import {
-  getCollections,
-  createCollection,
-  updateCollection,
-  deleteCollection,
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
 } from "../../lib/api";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,16 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import {
   Form,
   FormControl,
@@ -53,24 +43,24 @@ import {
   Trash2,
   Plus,
   Search,
-  FolderKanban,
+  FolderTree,
   Eye,
   EyeOff,
 } from "lucide-react";
 
-const collectionSchema = z.object({
-  collectionName: z.string().min(1, "Vui lòng nhập tên bộ sưu tập"),
+const categorySchema = z.object({
+  categoryName: z.string().min(1, "Vui lòng nhập tên danh mục"),
   isDisabled: z.string().min(1, "Vui lòng chọn trạng thái"),
 });
 
 const defaultValues = {
-  collectionName: "",
+  categoryName: "",
   isDisabled: "0",
 };
 
-const mapApiCollectionToUI = (item) => ({
-  id: item.collection_id,
-  name: item.collection_name || "",
+const mapApiCategoryToUI = (item) => ({
+  id: item.category_id,
+  name: item.category_name || "",
   isDisabled: Number(item.is_disabled ?? 0),
   status: Number(item.is_disabled ?? 0) === 1 ? "Đang ẩn" : "Đang hoạt động",
 });
@@ -80,53 +70,49 @@ const getStatusClass = (status) =>
     ? "bg-green-100 text-green-700 hover:bg-green-100"
     : "bg-gray-200 text-gray-700 hover:bg-gray-200";
 
-export default function CollectionPage() {
-  const [collections, setCollections] = useState([]);
+export default function CategoryPage() {
+  const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
-  const [editingCollection, setEditingCollection] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
-  const [deletingCollection, setDeletingCollection] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
   const form = useForm({
-    resolver: zodResolver(collectionSchema),
+    resolver: zodResolver(categorySchema),
     defaultValues,
   });
 
-  const fetchCollectionList = async () => {
+  const fetchCategoryList = async () => {
     try {
-      const res = await getCollections();
-      setCollections((res?.data || []).map(mapApiCollectionToUI));
+      const res = await getCategories();
+      setCategories((res?.data || []).map(mapApiCategoryToUI));
     } catch (error) {
-      console.error("GET COLLECTIONS ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể tải danh sách bộ sưu tập"
-      );
+      console.error("GET CATEGORIES ERROR:", error);
+      toast.error(error.message || "Không thể tải danh sách danh mục");
     }
   };
 
   useEffect(() => {
-    fetchCollectionList();
+    fetchCategoryList();
   }, []);
 
-  const filteredCollections = useMemo(() => {
+  const filteredCategories = useMemo(() => {
     const keyword = search.toLowerCase().trim();
-    return collections.filter(
+    return categories.filter(
       (item) =>
         item.name.toLowerCase().includes(keyword) ||
         item.status.toLowerCase().includes(keyword) ||
         String(item.id).includes(keyword)
     );
-  }, [collections, search]);
+  }, [categories, search]);
 
   const resetFormAndClose = () => {
     form.reset(defaultValues);
-    setEditingCollection(null);
+    setEditingCategory(null);
     setOpen(false);
   };
 
@@ -135,71 +121,57 @@ export default function CollectionPage() {
       setSubmitting(true);
 
       const payload = {
-        collectionName: values.collectionName.trim(),
+        categoryName: values.categoryName.trim(),
         isDisabled: Number(values.isDisabled),
       };
 
-      if (editingCollection) {
-        await updateCollection(editingCollection.id, payload);
-        toast.success("Cập nhật bộ sưu tập thành công!");
+      if (editingCategory) {
+        await updateCategory(editingCategory.id, payload);
+        toast.success("Cập nhật danh mục thành công!");
       } else {
-        await createCollection({
-          collectionName: values.collectionName.trim(),
+        await createCategory({
+          categoryName: values.categoryName.trim(),
         });
-        toast.success("Thêm bộ sưu tập thành công!");
+        toast.success("Thêm danh mục thành công!");
       }
 
-      await fetchCollectionList();
+      await fetchCategoryList();
       resetFormAndClose();
     } catch (error) {
-      console.error("SAVE COLLECTION ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể lưu bộ sưu tập"
-      );
+      console.error("SAVE CATEGORY ERROR:", error);
+      toast.error(error.message || "Không thể lưu danh mục");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const openDeletePopup = (item) => {
-    setDeletingCollection(item);
-    setDeletePopupOpen(true);
+  const openDeleteDialog = (item) => {
+    setDeletingCategory(item);
+    setDeleteDialogOpen(true);
   };
 
-  const closeDeletePopup = () => {
-    if (deleting) return;
-    setDeletePopupOpen(false);
-    setDeletingCollection(null);
-  };
-
-  const confirmDelete = async () => {
-    if (!deletingCollection) return;
+  const handleDelete = async () => {
+    if (!deletingCategory) return;
 
     try {
       setDeleting(true);
-      await deleteCollection(deletingCollection.id);
-      toast.success(`Đã xóa bộ sưu tập "${deletingCollection.name}"`);
-      await fetchCollectionList();
-      setDeletePopupOpen(false);
-      setDeletingCollection(null);
+      await deleteCategory(deletingCategory.id);
+      toast.success(`Đã xóa danh mục "${deletingCategory.name}"`);
+      setDeleteDialogOpen(false);
+      setDeletingCategory(null);
+      await fetchCategoryList();
     } catch (error) {
-      console.error("DELETE COLLECTION ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể xóa bộ sưu tập"
-      );
+      console.error("DELETE CATEGORY ERROR:", error);
+      toast.error(error.message || "Không thể xóa danh mục");
     } finally {
       setDeleting(false);
     }
   };
 
   const handleEdit = (item) => {
-    setEditingCollection(item);
+    setEditingCategory(item);
     form.reset({
-      collectionName: item.name || "",
+      categoryName: item.name || "",
       isDisabled: String(item.isDisabled),
     });
     setOpen(true);
@@ -209,44 +181,39 @@ export default function CollectionPage() {
     const nextDisabled = item.isDisabled === 1 ? 0 : 1;
 
     try {
-      await updateCollection(item.id, {
-        collectionName: item.name,
+      await updateCategory(item.id, {
+        categoryName: item.name,
         isDisabled: nextDisabled,
       });
 
       toast.success(
         nextDisabled === 1
-          ? `Đã ẩn bộ sưu tập "${item.name}"`
-          : `Đã hiện bộ sưu tập "${item.name}"`
+          ? `Đã ẩn danh mục "${item.name}"`
+          : `Đã hiện danh mục "${item.name}"`
       );
 
-      await fetchCollectionList();
+      await fetchCategoryList();
     } catch (error) {
-      console.error("TOGGLE COLLECTION ERROR:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Không thể cập nhật trạng thái bộ sưu tập"
-      );
+      console.error("TOGGLE CATEGORY ERROR:", error);
+      toast.error(error.message || "Không thể cập nhật trạng thái danh mục");
     }
   };
 
   const stats = [
-    { label: "Tổng bộ sưu tập", value: collections.length },
+    { label: "Tổng danh mục", value: categories.length },
     {
       label: "Đang hoạt động",
-      value: collections.filter((item) => item.status === "Đang hoạt động")
-        .length,
+      value: categories.filter((item) => item.status === "Đang hoạt động").length,
     },
     {
       label: "Đang ẩn",
-      value: collections.filter((item) => item.status === "Đang ẩn").length,
+      value: categories.filter((item) => item.status === "Đang ẩn").length,
     },
   ];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Trang bộ sưu tập</h1>
+      <h1 className="text-3xl font-bold">Trang danh mục</h1>
 
       <div className="flex items-center justify-between">
         <Dialog
@@ -260,28 +227,28 @@ export default function CollectionPage() {
             <Button
               className="flex items-center gap-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => {
-                setEditingCollection(null);
+                setEditingCategory(null);
                 form.reset(defaultValues);
                 setOpen(true);
               }}
             >
               <Plus size={16} />
-              Thêm bộ sưu tập
+              Thêm danh mục
             </Button>
           </DialogTrigger>
 
           <DialogContent
             className="sm:max-w-[600px] rounded-2xl"
-            aria-describedby="collection-dialog-description"
+            aria-describedby="category-dialog-description"
           >
             <DialogHeader>
               <DialogTitle>
-                {editingCollection ? "Cập nhật bộ sưu tập" : "Thêm bộ sưu tập"}
+                {editingCategory ? "Cập nhật danh mục" : "Thêm danh mục"}
               </DialogTitle>
             </DialogHeader>
 
-            <p id="collection-dialog-description" className="sr-only">
-              Form thêm hoặc cập nhật bộ sưu tập
+            <p id="category-dialog-description" className="sr-only">
+              Form thêm hoặc cập nhật danh mục
             </p>
 
             <Form {...form}>
@@ -289,19 +256,19 @@ export default function CollectionPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="collectionName"
+                    name="categoryName"
                     render={({ field }) => (
                       <FormItem className="md:col-span-2">
-                        <FormLabel>Tên bộ sưu tập</FormLabel>
+                        <FormLabel>Tên danh mục</FormLabel>
                         <FormControl>
-                          <Input placeholder="VD: Bộ sưu tập mùa hè" {...field} />
+                          <Input placeholder="VD: Phòng khách" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  {editingCollection && (
+                  {editingCategory && (
                     <FormField
                       control={form.control}
                       name="isDisabled"
@@ -341,12 +308,12 @@ export default function CollectionPage() {
                     disabled={submitting}
                   >
                     {submitting
-                      ? editingCollection
+                      ? editingCategory
                         ? "Đang cập nhật..."
                         : "Đang lưu..."
-                      : editingCollection
+                      : editingCategory
                       ? "Cập nhật"
-                      : "Lưu bộ sưu tập"}
+                      : "Lưu danh mục"}
                   </Button>
                 </div>
               </form>
@@ -385,21 +352,21 @@ export default function CollectionPage() {
             <thead className="border-b bg-muted/30">
               <tr className="text-left">
                 <th className="px-6 py-4 font-medium">ID</th>
-                <th className="px-6 py-4 font-medium">Tên bộ sưu tập</th>
+                <th className="px-6 py-4 font-medium">Tên danh mục</th>
                 <th className="px-6 py-4 font-medium">Trạng thái</th>
                 <th className="px-6 py-4 text-right font-medium">Hành động</th>
               </tr>
             </thead>
 
             <tbody>
-              {filteredCollections.map((item) => (
+              {filteredCategories.map((item) => (
                 <tr key={item.id} className="border-b last:border-b-0 hover:bg-muted/20">
                   <td className="px-6 py-4">{item.id}</td>
 
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        <FolderKanban size={18} className="text-muted-foreground" />
+                        <FolderTree size={18} className="text-muted-foreground" />
                       </div>
                       <span className="font-medium">{item.name}</span>
                     </div>
@@ -443,7 +410,7 @@ export default function CollectionPage() {
                       <Button
                         size="sm"
                         className="flex items-center gap-1 bg-red-600 text-white hover:bg-red-700"
-                        onClick={() => openDeletePopup(item)}
+                        onClick={() => openDeleteDialog(item)}
                       >
                         <Trash2 size={14} />
                         Xóa
@@ -455,41 +422,62 @@ export default function CollectionPage() {
             </tbody>
           </table>
 
-          {filteredCollections.length === 0 && (
+          {filteredCategories.length === 0 && (
             <div className="py-10 text-center text-sm text-muted-foreground">
-              Không có bộ sưu tập nào
+              Không có danh mục nào
             </div>
           )}
         </CardContent>
       </Card>
 
-      <AlertDialog open={deletePopupOpen} onOpenChange={setDeletePopupOpen}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa bộ sưu tập</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa bộ sưu tập{" "}
-              <span className="font-semibold text-foreground">
-                "{deletingCollection?.name}"
-              </span>{" "}
-              không? Hành động này không thể hoàn tác.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(value) => {
+          setDeleteDialogOpen(value);
+          if (!value) {
+            setDeletingCategory(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[480px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa danh mục</DialogTitle>
+          </DialogHeader>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={closeDeletePopup} disabled={deleting}>
-              Hủy
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={deleting}
-              className="bg-red-600 text-white hover:bg-red-700"
-            >
-              {deleting ? "Đang xóa..." : "Xác nhận xóa"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Bạn có chắc muốn xóa danh mục{" "}
+              <span className="font-semibold text-foreground">
+                "{deletingCategory?.name}"
+              </span>{" "}
+              không?
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setDeletingCategory(null);
+                }}
+                disabled={deleting}
+              >
+                Hủy
+              </Button>
+
+              <Button
+                type="button"
+                className="bg-red-600 text-white hover:bg-red-700"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? "Đang xóa..." : "Xác nhận xóa"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -6,20 +6,63 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import toast from "react-hot-toast";
 
-import { getDiscounts, createDiscount, updateDiscount, deleteDiscount} from "../../lib/api";
+import {
+  getDiscounts,
+  createDiscount,
+  updateDiscount,
+  deleteDiscount,
+} from "../../lib/api";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
-import { Pencil, Trash2, Plus, Search, TicketPercent, Wand2, Eye, EyeOff, CalendarDays} from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Plus,
+  Search,
+  TicketPercent,
+  Wand2,
+  Eye,
+  EyeOff,
+  CalendarDays,
+} from "lucide-react";
 
 const discountSchema = z.object({
   code: z.string().min(3, "Mã phải có ít nhất 3 ký tự"),
@@ -102,6 +145,10 @@ export default function DiscountPage() {
   const [editingDiscount, setEditingDiscount] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
+  const [deletingDiscount, setDeletingDiscount] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(discountSchema),
     defaultValues,
@@ -113,7 +160,11 @@ export default function DiscountPage() {
       setDiscounts((res?.data || []).map(mapApiDiscountToUI));
     } catch (error) {
       console.error("GET DISCOUNTS ERROR:", error);
-      toast.error(error.message || "Không thể tải danh sách mã giảm giá");
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Không thể tải danh sách mã giảm giá"
+      );
     }
   };
 
@@ -174,20 +225,46 @@ export default function DiscountPage() {
       resetFormAndClose();
     } catch (error) {
       console.error("SAVE ERROR:", error);
-      toast.error(error.message || "Không thể lưu mã giảm giá");
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Không thể lưu mã giảm giá"
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id, code) => {
+  const openDeletePopup = (item) => {
+    setDeletingDiscount(item);
+    setDeletePopupOpen(true);
+  };
+
+  const closeDeletePopup = () => {
+    if (deleting) return;
+    setDeletePopupOpen(false);
+    setDeletingDiscount(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingDiscount) return;
+
     try {
-      await deleteDiscount(id);
-      toast.success(`Đã xóa mã giảm giá "${code}"`);
+      setDeleting(true);
+      await deleteDiscount(deletingDiscount.id);
+      toast.success(`Đã xóa mã giảm giá "${deletingDiscount.code}"`);
       await fetchDiscountList();
+      setDeletePopupOpen(false);
+      setDeletingDiscount(null);
     } catch (error) {
       console.error("DELETE ERROR:", error);
-      toast.error(error.message || "Không thể xóa mã giảm giá");
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Không thể xóa mã giảm giá"
+      );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -219,7 +296,11 @@ export default function DiscountPage() {
       await fetchDiscountList();
     } catch (error) {
       console.error("TOGGLE ERROR:", error);
-      toast.error(error.message || "Không thể cập nhật trạng thái mã giảm giá");
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Không thể cập nhật trạng thái mã giảm giá"
+      );
     }
   };
 
@@ -531,7 +612,7 @@ export default function DiscountPage() {
                       <Button
                         size="sm"
                         className="flex items-center gap-1 bg-red-600 text-white hover:bg-red-700"
-                        onClick={() => handleDelete(item.id, item.code)}
+                        onClick={() => openDeletePopup(item)}
                       >
                         <Trash2 size={14} />
                         Xóa
@@ -550,6 +631,34 @@ export default function DiscountPage() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={deletePopupOpen} onOpenChange={setDeletePopupOpen}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa mã giảm giá</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa mã giảm giá{" "}
+              <span className="font-semibold text-foreground">
+                "{deletingDiscount?.code}"
+              </span>{" "}
+              không? Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={closeDeletePopup} disabled={deleting}>
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {deleting ? "Đang xóa..." : "Xác nhận xóa"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
