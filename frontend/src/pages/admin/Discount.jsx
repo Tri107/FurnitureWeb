@@ -641,7 +641,7 @@ export default function DiscountPage() {
               <span className="font-semibold text-foreground">
                 "{deletingDiscount?.code}"
               </span>{" "}
-              không? Hành động này không thể hoàn tác.
+              không?
             </AlertDialogDescription>
           </AlertDialogHeader>
 

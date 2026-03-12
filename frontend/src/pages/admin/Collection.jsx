@@ -4,59 +4,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
 
-import {
-  getCollections,
-  createCollection,
-  updateCollection,
-  deleteCollection,
-} from "../../lib/api";
+import { getCollections, createCollection, updateCollection, deleteCollection } from "../../lib/api";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import {
-  Pencil,
-  Trash2,
-  Plus,
-  Search,
-  FolderKanban,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Pencil, Trash2, Plus, Search, FolderKanban, Eye, EyeOff } from "lucide-react";
 
 const collectionSchema = z.object({
   collectionName: z.string().min(1, "Vui lòng nhập tên bộ sưu tập"),
@@ -104,7 +63,7 @@ export default function CollectionPage() {
       console.error("GET COLLECTIONS ERROR:", error);
       toast.error(
         error?.response?.data?.message ||
-          error.message ||
+          error?.message ||
           "Không thể tải danh sách bộ sưu tập"
       );
     }
@@ -155,7 +114,7 @@ export default function CollectionPage() {
       console.error("SAVE COLLECTION ERROR:", error);
       toast.error(
         error?.response?.data?.message ||
-          error.message ||
+          error?.message ||
           "Không thể lưu bộ sưu tập"
       );
     } finally {
@@ -186,11 +145,29 @@ export default function CollectionPage() {
       setDeletingCollection(null);
     } catch (error) {
       console.error("DELETE COLLECTION ERROR:", error);
-      toast.error(
+
+      const serverMessage =
         error?.response?.data?.message ||
-          error.message ||
-          "Không thể xóa bộ sưu tập"
-      );
+        error?.response?.data?.error ||
+        error?.message ||
+        "";
+
+      const normalizedMessage = String(serverMessage).toLowerCase();
+
+      const isCollectionHasProductsError =
+        normalizedMessage.includes("foreign key") ||
+        normalizedMessage.includes("constraint") ||
+        normalizedMessage.includes("cannot delete") ||
+        normalizedMessage.includes("a foreign key constraint fails") ||
+        normalizedMessage.includes("internal server error") ||
+        normalizedMessage.includes("bộ sưu tập đang có sản phẩm") ||
+        normalizedMessage.includes("vẫn còn sản phẩm");
+
+      if (isCollectionHasProductsError) {
+        toast.error("Còn sản phẩm thuộc bộ sưu tập này");
+      } else {
+        toast.error(serverMessage || "Không thể xóa bộ sưu tập");
+      }
     } finally {
       setDeleting(false);
     }
@@ -225,7 +202,7 @@ export default function CollectionPage() {
       console.error("TOGGLE COLLECTION ERROR:", error);
       toast.error(
         error?.response?.data?.message ||
-          error.message ||
+          error?.message ||
           "Không thể cập nhật trạng thái bộ sưu tập"
       );
     }
@@ -235,8 +212,7 @@ export default function CollectionPage() {
     { label: "Tổng bộ sưu tập", value: collections.length },
     {
       label: "Đang hoạt động",
-      value: collections.filter((item) => item.status === "Đang hoạt động")
-        .length,
+      value: collections.filter((item) => item.status === "Đang hoạt động").length,
     },
     {
       label: "Đang ẩn",
@@ -345,8 +321,8 @@ export default function CollectionPage() {
                         ? "Đang cập nhật..."
                         : "Đang lưu..."
                       : editingCollection
-                      ? "Cập nhật"
-                      : "Lưu bộ sưu tập"}
+                        ? "Cập nhật"
+                        : "Lưu bộ sưu tập"}
                   </Button>
                 </div>
               </form>
@@ -472,7 +448,7 @@ export default function CollectionPage() {
               <span className="font-semibold text-foreground">
                 "{deletingCollection?.name}"
               </span>{" "}
-              không? Hành động này không thể hoàn tác.
+              không?
             </AlertDialogDescription>
           </AlertDialogHeader>
 

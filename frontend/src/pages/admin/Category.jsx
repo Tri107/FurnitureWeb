@@ -92,7 +92,11 @@ export default function CategoryPage() {
       setCategories((res?.data || []).map(mapApiCategoryToUI));
     } catch (error) {
       console.error("GET CATEGORIES ERROR:", error);
-      toast.error(error.message || "Không thể tải danh sách danh mục");
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Không thể tải danh sách danh mục"
+      );
     }
   };
 
@@ -139,7 +143,11 @@ export default function CategoryPage() {
       resetFormAndClose();
     } catch (error) {
       console.error("SAVE CATEGORY ERROR:", error);
-      toast.error(error.message || "Không thể lưu danh mục");
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Không thể lưu danh mục"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -162,7 +170,29 @@ export default function CategoryPage() {
       await fetchCategoryList();
     } catch (error) {
       console.error("DELETE CATEGORY ERROR:", error);
-      toast.error(error.message || "Không thể xóa danh mục");
+
+      const serverMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "";
+
+      const normalizedMessage = String(serverMessage).toLowerCase();
+
+      const isCategoryHasProductsError =
+        normalizedMessage.includes("foreign key") ||
+        normalizedMessage.includes("constraint") ||
+        normalizedMessage.includes("cannot delete") ||
+        normalizedMessage.includes("a foreign key constraint fails") ||
+        normalizedMessage.includes("internal server error") ||
+        normalizedMessage.includes("danh mục đang có sản phẩm") ||
+        normalizedMessage.includes("vẫn còn sản phẩm");
+
+      if (isCategoryHasProductsError) {
+        toast.error("Không thể xóa danh mục vì vẫn còn sản phẩm trong danh mục này");
+      } else {
+        toast.error(serverMessage || "Không thể xóa danh mục");
+      }
     } finally {
       setDeleting(false);
     }
@@ -195,7 +225,11 @@ export default function CategoryPage() {
       await fetchCategoryList();
     } catch (error) {
       console.error("TOGGLE CATEGORY ERROR:", error);
-      toast.error(error.message || "Không thể cập nhật trạng thái danh mục");
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Không thể cập nhật trạng thái danh mục"
+      );
     }
   };
 

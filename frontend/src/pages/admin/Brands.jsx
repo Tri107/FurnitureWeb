@@ -4,50 +4,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
 
-import {
-  getBrands,
-  createBrand,
-  updateBrand,
-  deleteBrand,
-} from "../../lib/api";
+import { getBrands, createBrand, updateBrand, deleteBrand } from "../../lib/api";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import {
-  Pencil,
-  Trash2,
-  Plus,
-  Search,
-  Tags,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-} from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Tags, Eye, EyeOff, AlertTriangle } from "lucide-react";
 
 const brandSchema = z.object({
   brandName: z.string().min(1, "Vui lòng nhập tên thương hiệu"),
@@ -93,7 +60,7 @@ export default function BrandPage() {
       setBrands((res?.data || []).map(mapApiBrandToUI));
     } catch (error) {
       console.error("GET BRANDS ERROR:", error);
-      toast.error(error.message || "Không thể tải danh sách thương hiệu");
+      toast.error(error?.response?.data?.message || error?.message || "Không thể tải danh sách thương hiệu");
     }
   };
 
@@ -141,7 +108,7 @@ export default function BrandPage() {
       resetFormAndClose();
     } catch (error) {
       console.error("SAVE BRAND ERROR:", error);
-      toast.error(error.message || "Không thể lưu thương hiệu");
+      toast.error(error?.response?.data?.message || error?.message || "Không thể lưu thương hiệu");
     } finally {
       setSubmitting(false);
     }
@@ -164,7 +131,29 @@ export default function BrandPage() {
       setDeleteTarget(null);
     } catch (error) {
       console.error("DELETE BRAND ERROR:", error);
-      toast.error(error.message || "Không thể xóa thương hiệu");
+
+      const serverMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "";
+
+      const normalizedMessage = String(serverMessage).toLowerCase();
+
+      const isBrandHasProductsError =
+        normalizedMessage.includes("foreign key") ||
+        normalizedMessage.includes("constraint") ||
+        normalizedMessage.includes("cannot delete") ||
+        normalizedMessage.includes("a foreign key constraint fails") ||
+        normalizedMessage.includes("internal server error") ||
+        normalizedMessage.includes("thương hiệu đang có sản phẩm") ||
+        normalizedMessage.includes("vẫn còn sản phẩm");
+
+      if (isBrandHasProductsError) {
+        toast.error("Còn sản phẩm thuộc thương hiệu này");
+      } else {
+        toast.error(serverMessage || "Không thể xóa thương hiệu");
+      }
     } finally {
       setDeleting(false);
     }
@@ -197,7 +186,7 @@ export default function BrandPage() {
       await fetchBrandList();
     } catch (error) {
       console.error("TOGGLE BRAND ERROR:", error);
-      toast.error(error.message || "Không thể cập nhật trạng thái thương hiệu");
+      toast.error(error?.response?.data?.message || error?.message || "Không thể cập nhật trạng thái thương hiệu");
     }
   };
 
@@ -314,8 +303,8 @@ export default function BrandPage() {
                         ? "Đang cập nhật..."
                         : "Đang lưu..."
                       : editingBrand
-                      ? "Cập nhật"
-                      : "Lưu thương hiệu"}
+                        ? "Cập nhật"
+                        : "Lưu thương hiệu"}
                   </Button>
                 </div>
               </form>
@@ -324,10 +313,7 @@ export default function BrandPage() {
         </Dialog>
 
         <div className="relative w-64">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-          />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Tìm kiếm..."
             className="bg-white pl-9"
