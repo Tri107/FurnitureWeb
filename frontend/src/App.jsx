@@ -6,7 +6,7 @@ import Register from "./pages/auth/Register";
 import Otp from "./pages/auth/Otp";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-
+import UserProfile from "./pages/UserProfile";
 import DetailProduct from "./pages/DetailProduct";
 
 import AdminLayout from "./components/layout/AdminLayout";
@@ -21,6 +21,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/" element={<Home />} />
+        <Route path="/userprofile" element={<UserProfile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<Otp />} />
