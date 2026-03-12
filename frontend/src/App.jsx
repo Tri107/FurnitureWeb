@@ -13,6 +13,7 @@ import DetailProduct from "./pages/DetailProduct";
 import AdminLayout from "./components/layout/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import Product from "./pages/admin/Product";
+import Favorites from "./pages/Favorites";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<Otp />} />
+        <Route path="/favorites" element={<Favorites />} />
 
         {/* New Product Configurator Page */}
         <Route path="/detailproduct" element={<DetailProduct />} />
