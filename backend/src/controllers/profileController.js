@@ -2,21 +2,30 @@ import ProfileModel from '../models/profileModel.js';
 
 const ProfileController = {
   getMyProfile: async (req, res) => {
-    try {
-      const accountId = req.user.id; 
-      const profile = await ProfileModel.getProfileByAccountId(accountId);
-      if (!profile) {
-        return res.status(404).json({ message: 'Profile not found' });
-      }
-      return res.status(200).json({
-        message: 'Lấy thông tin thành công',
-        data: profile
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal Server Error' });
+  try {
+    // 1. Kiểm tra xem user đã đăng nhập chưa (req.user có tồn tại không)
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Bạn chưa đăng nhập hoặc token không hợp lệ' });
     }
-  },
+
+    const accountId = req.user.id; 
+    
+    // 2. Gọi Model và bắt lỗi từ Model
+    const profile = await ProfileModel.getProfileByAccountId(accountId);
+    
+    if (!profile) {
+      return res.status(404).json({ message: 'Không tìm thấy thông tin cá nhân' });
+    }
+
+    return res.status(200).json({
+      message: 'Lấy thông tin thành công',
+      data: profile
+    });
+  } catch (error) {
+    console.error("Lỗi tại ProfileController:", error);
+    return res.status(500).json({ message: 'Lỗi hệ thống nội bộ' });
+  }
+},
 
   updateMyProfile: async (req, res) => {
     try {
