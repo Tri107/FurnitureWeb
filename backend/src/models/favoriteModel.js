@@ -25,6 +25,21 @@ const FavoriteModel = {
         );
         return result.affectedRows;
     },
+
+    getFavoritesByAccountId: async (accountId) => {
+        const query = `
+        SELECT p.*
+        FROM favorites f
+        JOIN products p ON f.product_id = p.product_id
+        WHERE f.account_id = ?
+      `;
+        try {
+            const [rows] = await db.execute(query, [accountId]);
+            return rows; 
+        } catch (error) {
+            throw new Error('Database query failed');
+        }
+    }
 };
 
 export default FavoriteModel;
