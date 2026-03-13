@@ -81,6 +81,8 @@ export const loginUser    = (data) => apiFetch("/auth/login", "POST", data);
 export const verifyOtp    = (data) => apiFetch("/auth/register/verify", "POST", data);
 export const googleLogin  = (data) => apiFetch("/auth/google-login", "POST", data);
 export const logoutUser   = () => apiFetch("/auth/logout", "POST"); 
+export const getMyProfile = () => apiFetch("/profile/me", "GET");
+export const updateProfile = (data) => apiFetch("/profile/update", "PUT", data);
 // ================= DISCOUNT =================
 export const getDiscounts = () => apiFetch("/discounts");
 export const createDiscount = (data) => apiFetch("/discounts", "POST", data);
