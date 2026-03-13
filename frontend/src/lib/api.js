@@ -81,3 +81,36 @@ export const loginUser    = (data) => apiFetch("/auth/login", "POST", data);
 export const verifyOtp    = (data) => apiFetch("/auth/register/verify", "POST", data);
 export const googleLogin  = (data) => apiFetch("/auth/google-login", "POST", data);
 export const logoutUser   = () => apiFetch("/auth/logout", "POST"); 
+// ================= DISCOUNT =================
+export const getDiscounts = () => apiFetch("/discounts");
+export const createDiscount = (data) => apiFetch("/discounts", "POST", data);
+export const updateDiscount = (id, data) => apiFetch(`/discounts/${id}`, "PUT", data);
+export const deleteDiscount = (id) => apiFetch(`/discounts/${id}`, "DELETE");
+// ================= ACCOUNT (Admin) =================
+export const getAccounts = () => apiFetch("/account");
+export const getAccountById = (id) => apiFetch(`/account/${id}`);
+export const createAccount = (data) => apiFetch("/account", "POST", data);
+export const updateAccount = (id, data) => apiFetch(`/account/${id}`, "PUT", data);
+export const changeAccountPassword = (id, data) => apiFetch(`/account/${id}/password`, "PUT", data);
+export const deleteAccount = (id) => apiFetch(`/account/${id}`, "DELETE");
+export const restoreAccount = (id) => apiFetch(`/account/${id}/restore`, "PATCH");
+// ================= COLLECTION =================
+export const getCollections = () => apiFetch("/collections");
+export const createCollection = (data) => apiFetch("/collections", "POST", data);
+export const updateCollection = (collectionId, data) => apiFetch(`/collections/${collectionId}`, "PUT", data);
+export const deleteCollection = (collectionId) => apiFetch(`/collections/${collectionId}`, "DELETE");
+// ================= PAYMENT =================
+export const getPayments = () => apiFetch("/payments");
+export const createPayment = (data) => apiFetch("/payments", "POST", data);
+export const updatePayment = (paymentId, data) => apiFetch(`/payments/${paymentId}`, "PUT", data);
+export const deletePayment = (paymentId) => apiFetch(`/payments/${paymentId}`, "DELETE");
+// ================= CATEGORY =================
+export const getCategories = () => apiFetch("/categories");
+export const createCategory = (data) => apiFetch("/categories", "POST", data);
+export const updateCategory = (categoryId, data) => apiFetch(`/categories/${categoryId}`, "PUT", data);
+export const deleteCategory = (categoryId) => apiFetch(`/categories/${categoryId}`, "DELETE");
+// ================= BRAND =================
+export const getBrands = () => apiFetch("/brands");
+export const createBrand = (data) => apiFetch("/brands", "POST", data);
+export const updateBrand = (brandId, data) => apiFetch(`/brands/${brandId}`, "PUT", data);
+export const deleteBrand = (brandId) => apiFetch(`/brands/${brandId}`, "DELETE");

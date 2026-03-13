@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home,
   ShoppingCart,
@@ -8,9 +8,18 @@ import {
   Settings,
   Wrench,
   Truck,
+  LogOut
 } from "lucide-react";
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
     <aside className="w-64 border-r flex flex-col">
 
@@ -26,19 +35,31 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
+
       {/* Menu */}
-      <nav className="p-4 space-y-1 text-sm bg-slate-100 flex-1">
+      <nav className="p-4 space-y-2 text-sm bg-slate-100 flex-1">
+
         <Item to="/admin" icon={<Home size={18} />} label="Trang chủ" end />
-        <Item to="/admin/cart" icon={<ShoppingCart size={18} />} label="Giỏ hàng" />
         <Item to="/admin/products" icon={<Package size={18} />} label="Trang sản phẩm" />
+        <Item to="/admin/categories" icon={<Package size={18} />} label="Danh mục" />
         <Item to="/admin/payment" icon={<CreditCard size={18} />} label="Thanh toán" />
         <Item to="/admin/orders" icon={<Package size={18} />} label="Đơn hàng" />
-        <Item to="/admin/users" icon={<Users size={18} />} label="Người dùng" />
-        <Item to="/admin/settings" icon={<Settings size={18} />} label="Trang quản trị" />
-        <Item to="/admin/crud" icon={<Wrench size={18} />} label="CRUD" />
-        <Item to="/admin/shipping" icon={<Truck size={18} />} label="Shipping" />
-
+        <Item to="/admin/collections" icon={<Package size={18} />} label="Collections" />
+        <Item to="/admin/discounts" icon={<CreditCard size={18} />} label="Khuyến mãi" />
+        <Item to="/admin/accounts" icon={<Users size={18} />} label="Người dùng" />
+          <Item to="/admin/brands" icon={<Package size={18} />} label="Thương hiệu" />
       </nav>
+
+      {/* Logout */}
+      <div className="p-4 border-t bg-slate-100">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2 rounded-md text-red-600 hover:bg-red-100 w-full transition"
+        >
+          <LogOut size={18} />
+          <span>Đăng xuất</span>
+        </button>
+      </div>
 
     </aside>
   );
