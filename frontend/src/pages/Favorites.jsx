@@ -10,8 +10,14 @@ import useFavorites from "@/hooks/useFavorites";
 
 export default function Favorites() {
   // Lấy dữ liệu và các function xử lý từ custom hook
-  const { favorites, removeFavorite, clearFavorites, addToCart } =
-    useFavorites();
+  const {
+    favorites,
+    loading,
+    error,
+    removeFavorite,
+    clearFavorites,
+    addToCart,
+  } = useFavorites();
 
   // state lưu trạng thái sắp xếp sản phẩm
   const [sort, setSort] = useState("default");
@@ -24,6 +30,14 @@ export default function Favorites() {
 
     return favorites;
   }, [favorites, sort]);
+
+  if (loading) {
+    return <div className="p-10 text-center">Đang tải...</div>;
+  }
+
+  if (error) {
+    return <div className="p-10 text-center text-red-500">{error}</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
