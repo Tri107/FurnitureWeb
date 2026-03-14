@@ -41,6 +41,17 @@ const favoriteController = {
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     },
+
+    getFavoritesByAccountId: async (req, res) => {
+        try {
+            const { accountId } = req.params;
+            const favorites = await favoriteModel.getFavoritesByAccountId(accountId);
+            res.status(200).json(favorites);
+        } catch (error) {
+            console.error('Error fetching favorites:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+    }
 };
 
 export default favoriteController;
