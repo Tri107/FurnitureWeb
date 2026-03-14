@@ -6,11 +6,6 @@ export default function PromoCode({ couponInput, setCouponInput, applyCoupon, co
     <div className="border border-slate-200 rounded-2xl p-6 bg-white mb-6">
       <h2 className="text-lg font-bold text-slate-900 mb-5">Mã khuyến mãi</h2>
       <div className="space-y-3">
-        {/* Chọn mã button/box */}
-        <button className="w-full flex items-center px-4 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-left text-slate-700 font-medium">
-          <Ticket className="w-5 h-5 mr-2 text-slate-500" />
-          Chọn mã
-        </button>
 
         {/* Nhập mã và Áp dụng */}
         <div className="flex gap-2">

@@ -14,6 +14,23 @@ export default function Header() {
   const location = useLocation();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("accessToken");
+    const storedUser = localStorage.getItem("user");
+    if (storedToken && storedUser) {
+      setIsLoggedIn(true);
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error("Error parsing user data", err);
+      }
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
+    }
+  }, [location.pathname]);
 
   const cartItems = useMemo(
     () => [
@@ -565,18 +582,15 @@ export default function Header() {
               )}
 
               {openRight === "account" && (
-                <div className="w-[260px] rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
-                  <div className="flex items-center justify-between p-4 border-b border-white/10">
-                    <p className="text-sm font-semibold">Tài khoản</p>
-                    <button
-                      type="button"
-                      onClick={closeRight}
-                      className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition"
-                      aria-label="Close"
-                    >
-                      <X className="h-[18px] w-[18px] text-white/70" />
-                    </button>
-                  </div>
+                <div className="w-[300px] relative rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={closeRight}
+                    className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition"
+                    aria-label="Close"
+                  >
+                    <X className="h-[18px] w-[18px] text-white/70" />
+                  </button>
 
                   {!isLoggedIn ? (
                     <div className="p-3 space-y-2">
@@ -594,26 +608,28 @@ export default function Header() {
                       >
                         Đăng ký
                       </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsLoggedIn(true);
-                          closeRight();
-                        }}
-                        className="mt-2 w-full text-xs text-white/60 hover:text-white/80 transition"
-                      >
-                        (test) set logged in
-                      </button>
                     </div>
                   ) : (
                     <div className="p-3 space-y-1">
+                      <div className="px-3 py-2 mb-2 border-b border-white/5 pr-10">
+                        <p className="text-xs text-white/50 uppercase tracking-wider">Tài khoản</p>
+                        <p className="text-sm font-medium text-white truncate" title={user?.email}>
+                          {user?.email || "Người dùng"}
+                        </p>
+                      </div>
                       <Link
                         to="/account"
                         onClick={closeRight}
                         className="block rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
                       >
                         Thông tin cá nhân
+                      </Link>
+                      <Link
+                        to="/orders"
+                        onClick={closeRight}
+                        className="block rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
+                      >
+                        Lịch sử đơn hàng
                       </Link>
                       <Link
                         to="/favorites"
@@ -625,7 +641,10 @@ export default function Header() {
                       <button
                         type="button"
                         onClick={() => {
+                          localStorage.removeItem("accessToken");
+                          localStorage.removeItem("user");
                           setIsLoggedIn(false);
+                          setUser(null);
                           closeRight();
                         }}
                         className="w-full text-left rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
