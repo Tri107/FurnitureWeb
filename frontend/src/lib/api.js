@@ -1,7 +1,8 @@
 const API_URL = "http://localhost:9999/api";
+const FAV_API_URL = "http://localhost:9999/api/favorites";
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("accessToken"); 
+  const token = localStorage.getItem("accessToken");
   const headers = {
     "Content-Type": "application/json",
   };
@@ -9,15 +10,20 @@ const getAuthHeaders = () => {
   return headers;
 };
 
-const apiFetch = async (endpoint, method = "GET", body = null, isRetry = false) => {
+const apiFetch = async (
+  endpoint,
+  method = "GET",
+  body = null,
+  isRetry = false,
+) => {
   const options = {
     method,
     headers: getAuthHeaders(),
-    credentials: "include", 
+    credentials: "include",
   };
-  
+
   if (body) options.body = JSON.stringify(body);
-  
+
   try {
     let res = await fetch(`${API_URL}${endpoint}`, options);
     // XỬ LÝ HẾT HẠN TOKEN
@@ -31,11 +37,10 @@ const apiFetch = async (endpoint, method = "GET", body = null, isRetry = false) 
 
         if (refreshRes.ok) {
           const refreshData = await refreshRes.json();
-         
+
           localStorage.setItem("accessToken", refreshData.accessToken);
-          
-         
-          return await apiFetch(endpoint, method, body, true); 
+
+          return await apiFetch(endpoint, method, body, true);
         } else {
           // Nếu refresh token cũng hết hạn -> Chấp nhận đăng xuất
           throw new Error("Refresh Token Expired");
@@ -51,9 +56,8 @@ const apiFetch = async (endpoint, method = "GET", body = null, isRetry = false) 
       }
     }
 
-   
     // XỬ LÝ RESPONSE BÌNH THƯỜNG CÁC MÃ LỖI KHÁC
-   
+
     const text = await res.text();
     let data;
     try {
@@ -68,12 +72,27 @@ const apiFetch = async (endpoint, method = "GET", body = null, isRetry = false) 
     }
 
     return data;
-    
   } catch (error) {
     // Ném lỗi ra ngoài để component (VD: trang Đăng nhập) có thể catch và dùng toast.error() hiển thị
-    throw error; 
+    throw error;
   }
 };
+
+export async function getFavorites(accountId) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(`${FAV_API_URL}/${accountId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error("Không thể lấy danh sách favorites");
+  }
+
+  return res.json();
+}
 
 // ================= AUTH =================
 export const registerUser = (data) => apiFetch("/auth/register", "POST", data);
