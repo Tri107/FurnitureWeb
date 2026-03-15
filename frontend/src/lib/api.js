@@ -135,3 +135,6 @@ export const getBrands = () => apiFetch("/brands");
 export const createBrand = (data) => apiFetch("/brands", "POST", data);
 export const updateBrand = (brandId, data) => apiFetch(`/brands/${brandId}`, "PUT", data);
 export const deleteBrand = (brandId) => apiFetch(`/brands/${brandId}`, "DELETE");
+// ================= PRODUCT =================
+export const getProducts = () => apiFetch("/products");
+export const getProductById = (id) => apiFetch(`/products/${id}`);

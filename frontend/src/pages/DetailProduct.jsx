@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/ui/header';
 import Footer from '../components/ui/footer';
+import { getProductById } from '../lib/api';
 import {
     ZoomIn, ZoomOut, Ruler, Box, LayoutGrid, List, Share,
     Minus, Plus, Info, ShoppingCart, Heart, ChevronRight,
@@ -10,9 +11,15 @@ import {
 
 export default function ProductPage() {
     const navigate = useNavigate();
-    const [width, setWidth] = useState(200); // Mặc định 200cm
-    const [height, setHeight] = useState(100); // Mặc định 100cm
+    const { id } = useParams();
+
+    const [width, setWidth] = useState(200);
+    const [height, setHeight] = useState(100);
     const [userRating, setUserRating] = useState(0);
+
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const finishingTabs = ['Màu sắc', 'Ván ép', 'Hiệu ứng vân gỗ'];
     const [activeFinishing, setActiveFinishing] = useState(finishingTabs[0]);
@@ -28,22 +35,56 @@ export default function ProductPage() {
         'bg-[#DEDEDE]',
         'bg-[#38506D]',
     ];
-    const [activeColor, setActiveColor] = useState(8); // Default to the blue one
-
+    const [activeColor, setActiveColor] = useState(8);
     const [openIndex, setOpenIndex] = useState(0);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                setLoading(true);
+                setError('');
+                const res = await getProductById(id);
+                setProduct(res.data);
+
+                const apiWidth = res?.data?.variants?.specs?.dimensions?.width;
+                const apiHeight = res?.data?.variants?.specs?.dimensions?.height;
+
+                if (apiWidth) setWidth(apiWidth);
+                if (apiHeight) setHeight(apiHeight);
+            } catch (err) {
+                setError(err.message || 'Không thể tải dữ liệu sản phẩm');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) fetchProduct();
+    }, [id]);
+
+    const productImages = useMemo(() => {
+        const urls = product?.variants?.url;
+        if (!Array.isArray(urls)) return [];
+        return urls.filter((url) => typeof url === 'string' && url.trim() !== '' && !url.includes('example.com'));
+    }, [product]);
+
+    const averageRating = product?.average_rating || 4.9;
+    const reviewCount = product?.review_count || 0;
+    const reviews = product?.reviews || [];
 
     const features = [
         {
             title: "Xếp hạng đánh giá được thu thập tại",
             subtitle: (
                 <div className="flex items-center gap-1 font-bold mt-1 text-sm">
-                    4,9/5
+                    {averageRating}/5
                     <div className="flex text-black">
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
-                        <Star size={12} fill="currentColor" />
+                        {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                                key={star}
+                                size={12}
+                                fill={star <= Math.round(averageRating) ? "currentColor" : "none"}
+                            />
+                        ))}
                     </div>
                 </div>
             )
@@ -73,38 +114,62 @@ export default function ProductPage() {
     const specs = [
         {
             title: "Kích thước & chi tiết",
-            content: "Thông tin chi tiết về kích thước của tủ đựng đồ..."
+            content: `Dài: ${product?.variants?.specs?.dimensions?.length || 'N/A'}cm • Rộng: ${product?.variants?.specs?.dimensions?.width || 'N/A'}cm • Cao: ${product?.variants?.specs?.dimensions?.height || 'N/A'}cm • Nặng: ${product?.variants?.specs?.weight || 'N/A'}kg`
         },
         {
             title: "Mô tả",
-            content: "Sản phẩm được làm từ gỗ công nghiệp cao cấp..."
+            content: product?.product_description || "Sản phẩm chưa có mô tả."
         },
         {
             title: "Vật liệu",
-            content: "Bề mặt phủ melamine chống trầy xước, lõi MDF xanh chống ẩm."
+            content: `Chất liệu: ${product?.variants?.specs?.material || 'N/A'} • Màu sắc: ${product?.variants?.specs?.color || 'N/A'} • Tồn kho: ${product?.variants?.stock ?? 'N/A'}`
         },
-
     ];
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-white text-gray-900 font-sans">
+                <Header />
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
+                    Đang tải dữ liệu sản phẩm...
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
+    if (error || !product) {
+        return (
+            <div className="min-h-screen bg-white text-gray-900 font-sans">
+                <Header />
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center text-red-600">
+                    {error || 'Không tìm thấy sản phẩm'}
+                </div>
+                <Footer />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-white text-gray-900 font-sans">
             <Header />
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <header className="mb-6">
-                    <h1 className="text-xl font-medium text-gray-500">Frame 1</h1>
+                    <h1 className="text-xl font-medium text-gray-500">{product.product_name}</h1>
                 </header>
 
-                {/* Main Configurator Section */}
                 <div className="flex flex-col lg:flex-row gap-8 mb-16 h-full min-h-[700px]">
-                    {/* Left: 3D Viewer */}
                     <div className="flex-1 bg-[#F1F2F4] rounded-2xl relative border border-gray-200 overflow-hidden flex flex-col justify-between p-8">
                         <div className="absolute top-8 left-8 z-10 max-w-sm">
                             <p className="text-lg font-medium text-gray-800">
-                                Tủ đựng đồ màu xanh lam đậm với ngăn kệ đứng
+                                {product.product_name}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-2">
+                                {product?.variants?.specs?.material || 'Nội thất cao cấp'} • {product?.variants?.specs?.color || 'Màu tiêu chuẩn'}
                             </p>
                         </div>
 
-                        {/* Placeholder for 3D render */}
+                        {/* GIỮ NGUYÊN PHẦN ẢNH LỚN NÀY ĐỂ SAU LÀM 3D */}
                         <div className="flex-1 flex items-center justify-center relative w-full mt-12 mb-16">
                             <div
                                 className="w-full max-w-2xl aspect-[16/9] bg-contain bg-center bg-no-repeat"
@@ -113,12 +178,12 @@ export default function ProductPage() {
                                     filter: "hue-rotate(200deg) saturate(0.8) brightness(0.9)"
                                 }}
                             />
-                            {/* Silhouette Placeholder */}
-                            <div className="absolute left-0 bottom-0 top-0 w-1/3 opacity-5 pointer-events-none bg-contain bg-left bg-no-repeat"
-                                style={{ backgroundImage: "url('https://cdn-icons-png.flaticon.com/512/101/101740.png')" }}></div>
+                            <div
+                                className="absolute left-0 bottom-0 top-0 w-1/3 opacity-5 pointer-events-none bg-contain bg-left bg-no-repeat"
+                                style={{ backgroundImage: "url('https://cdn-icons-png.flaticon.com/512/101/101740.png')" }}
+                            ></div>
                         </div>
 
-                        {/* Toolbar */}
                         <div className="flex justify-center w-full relative z-10">
                             <div className="bg-white/80 backdrop-blur-md shadow-sm border border-gray-200 rounded-full flex items-center p-2 gap-2">
                                 <button className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"><ZoomOut size={20} /></button>
@@ -133,15 +198,22 @@ export default function ProductPage() {
                         </div>
                     </div>
 
-                    {/* Right: Options Panel */}
                     <div className="w-full lg:w-[420px] flex flex-col pt-4">
                         <div className="flex items-center gap-4 mb-2">
-                            <span className="text-[28px] font-bold text-red-600">48.362.000VNĐ</span>
-                            <span className="px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-md">Giảm giá</span>
+                            <span className="text-[28px] font-bold text-red-600">
+                                {product?.variants?.price
+                                    ? `${Number(product.variants.price).toLocaleString('vi-VN')} VNĐ`
+                                    : 'Liên hệ'}
+                            </span>
+                            <span className="px-3 py-1 bg-blue-500 text-white text-xs font-medium rounded-md">
+                                {product.product_status}
+                            </span>
                         </div>
-                        <p className="text-xs text-gray-400 mb-4">Giá thấp nhất trong 30 ngày qua - 48.362.000VNĐ</p>
 
-                        {/* Tabs */}
+                        <p className="text-xs text-gray-400 mb-4">
+                            Màu: {product?.variants?.specs?.color || 'N/A'} • Chất liệu: {product?.variants?.specs?.material || 'N/A'} • Kho: {product?.variants?.stock ?? 'N/A'}
+                        </p>
+
                         <div className="flex bg-gray-100 rounded-full p-1 mb-4">
                             <button className="flex-1 bg-white shadow-sm rounded-full py-2 text-sm font-medium text-gray-900">Hình thức</button>
                             <button className="flex-1 rounded-full py-2 text-sm font-medium text-gray-500 hover:text-gray-900">Chức năng</button>
@@ -149,9 +221,7 @@ export default function ProductPage() {
 
                         <div className="h-px bg-gray-200 mb-4"></div>
 
-                        {/* Dimensions */}
                         <div className="space-y-4 mb-4">
-                            {/* Width Slider */}
                             <div className="pb-2">
                                 <div className="flex justify-between items-center mb-6">
                                     <span className="text-sm font-bold text-gray-900">Chiều rộng</span>
@@ -163,7 +233,6 @@ export default function ProductPage() {
                                         style={{ width: `${((width - 50) / 150) * 100}%` }}
                                     ></div>
 
-                                    {/* Tick marks */}
                                     {[50, 100, 150, 200].map((val) => {
                                         const pos = ((val - 50) / 150) * 100;
                                         return (
@@ -177,7 +246,9 @@ export default function ProductPage() {
 
                                     <input
                                         type="range"
-                                        min="50" max="200" step="50"
+                                        min="50"
+                                        max="200"
+                                        step="50"
                                         value={width}
                                         onChange={(e) => setWidth(Number(e.target.value))}
                                         className="absolute w-full h-full opacity-0 cursor-pointer z-20"
@@ -189,7 +260,7 @@ export default function ProductPage() {
                                     >
                                         {width}cm
                                     </div>
-                                    {/* Thumb */}
+
                                     <div
                                         className="absolute w-4 h-4 bg-white border-2 border-red-600 rounded-full pointer-events-none z-10 transition-all duration-150 -ml-2"
                                         style={{ left: `${((width - 50) / 150) * 100}%` }}
@@ -197,7 +268,6 @@ export default function ProductPage() {
                                 </div>
                             </div>
 
-                            {/* Height Slider */}
                             <div className="pt-2 pb-2">
                                 <div className="flex justify-between items-center mb-6">
                                     <span className="text-sm font-bold text-gray-900">Chiều cao</span>
@@ -209,7 +279,6 @@ export default function ProductPage() {
                                         style={{ width: `${((height - 50) / 150) * 100}%` }}
                                     ></div>
 
-                                    {/* Tick marks */}
                                     {[50, 100, 150, 200].map((val) => {
                                         const pos = ((val - 50) / 150) * 100;
                                         return (
@@ -223,7 +292,9 @@ export default function ProductPage() {
 
                                     <input
                                         type="range"
-                                        min="50" max="200" step="50"
+                                        min="50"
+                                        max="200"
+                                        step="50"
                                         value={height}
                                         onChange={(e) => setHeight(Number(e.target.value))}
                                         className="absolute w-full h-full opacity-0 cursor-pointer z-20"
@@ -235,7 +306,7 @@ export default function ProductPage() {
                                     >
                                         {height}cm
                                     </div>
-                                    {/* Thumb */}
+
                                     <div
                                         className="absolute w-4 h-4 bg-white border-2 border-red-600 rounded-full pointer-events-none z-10 transition-all duration-150 -ml-2"
                                         style={{ left: `${((height - 50) / 150) * 100}%` }}
@@ -243,7 +314,6 @@ export default function ProductPage() {
                                 </div>
                             </div>
 
-                            {/* Finishing Sub-tabs */}
                             <div className="flex items-center pt-2">
                                 <span className="text-sm font-bold text-gray-900 flex items-center gap-1 w-24">
                                     Hoàn thành <Info size={14} className="text-gray-400" />
@@ -264,7 +334,6 @@ export default function ProductPage() {
                                 </div>
                             </div>
 
-                            {/* Colors */}
                             <div className="pt-2">
                                 <span className="text-sm font-bold text-gray-900 mb-3 block">Màu sắc</span>
                                 <div className="flex flex-wrap gap-2 mb-4">
@@ -274,6 +343,7 @@ export default function ProductPage() {
                                             onClick={() => setActiveColor(i)}
                                             className={`w-8 h-8 rounded-full transition-all duration-200 ${colorClass} ${activeColor === i ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110'
                                                 }`}
+                                            title={product?.variants?.specs?.color || 'Màu sản phẩm'}
                                         ></button>
                                     ))}
                                 </div>
@@ -289,7 +359,7 @@ export default function ProductPage() {
 
                         <div className="mt-auto pt-6">
                             <div className="flex gap-4 mb-4">
-                                <button 
+                                <button
                                     onClick={() => navigate('/cart')}
                                     className="flex-1 bg-red-600 hover:bg-red-700 text-white rounded-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-colors"
                                 >
@@ -317,7 +387,6 @@ export default function ProductPage() {
                 </div>
             </div>
 
-            {/* Features Banner */}
             <div className="border-t border-b border-gray-200 bg-white">
                 <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between py-6">
@@ -346,61 +415,77 @@ export default function ProductPage() {
                 </div>
             </div>
 
-            {/* Product Gallery */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="mb-8">
                     <h3 className="text-2xl font-bold text-gray-900 border-b border-gray-200 pb-4 inline-block">Hình ảnh chi tiết sản phẩm</h3>
                 </div>
 
-                {/* Bento-box style Mosaic Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 h-auto md:h-[600px]">
+                    {productImages.length > 0 ? (
+                        <>
+                            <div className="md:col-span-2 md:row-span-2 h-[400px] md:h-full group overflow-hidden rounded-xl relative">
+                                <img
+                                    src={productImages[0]}
+                                    alt={product.product_name}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                            </div>
 
-                    {/* Main Hero Shot - Spans 2 cols, 2 rows */}
-                    <div className="md:col-span-2 md:row-span-2 h-[400px] md:h-full group overflow-hidden rounded-xl relative">
-                        <img
-                            src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=1200"
-                            alt="Living room with blue cabinet"
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                    </div>
+                            <div className="md:col-span-1 md:row-span-1 h-[250px] md:h-full group overflow-hidden rounded-xl relative">
+                                {productImages[1] ? (
+                                    <img
+                                        src={productImages[1]}
+                                        alt={product.product_name}
+                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-100">
+                                        Không có ảnh
+                                    </div>
+                                )}
+                            </div>
 
-                    {/* Top Right Detail Shot */}
-                    <div className="md:col-span-1 md:row-span-1 h-[250px] md:h-full group overflow-hidden rounded-xl relative">
-                        <img
-                            src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80&w=800"
-                            alt="Cabinet detail top"
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                        />
-                    </div>
+                            <div className="md:col-span-1 md:row-span-1 grid grid-cols-2 gap-4 h-[200px] md:h-full">
+                                <div className="group overflow-hidden rounded-xl relative">
+                                    {productImages[2] ? (
+                                        <img
+                                            src={productImages[2]}
+                                            alt={product.product_name}
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-100">
+                                            Không có ảnh
+                                        </div>
+                                    )}
+                                </div>
 
-                    {/* Bottom Right Split */}
-                    <div className="md:col-span-1 md:row-span-1 grid grid-cols-2 gap-4 h-[200px] md:h-full">
-                        {/* Inner Left */}
-                        <div className="group overflow-hidden rounded-xl relative">
-                            <img
-                                src="https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?auto=format&fit=crop&q=80&w=400"
-                                alt="Drawer detail inline"
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                            />
+                                <div className="group overflow-hidden rounded-xl relative">
+                                    {productImages[3] ? (
+                                        <img
+                                            src={productImages[3]}
+                                            alt={product.product_name}
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center text-gray-400 bg-gray-100">
+                                            Không có ảnh
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="md:col-span-3 h-[400px] flex items-center justify-center text-gray-400 bg-gray-100 rounded-xl">
+                            Không có ảnh sản phẩm
                         </div>
-
-                        {/* Inner Right */}
-                        <div className="group overflow-hidden rounded-xl relative">
-                            <img
-                                src="https://images.unsplash.com/photo-1595514535415-eeacc30f6de9?auto=format&fit=crop&q=80&w=400"
-                                alt="Cabinet corner detail"
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                            />
-                        </div>
-                    </div>
+                    )}
                 </div>
             </div>
 
-            {/* Product Specs */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-2">
                 <div className="flex flex-col md:flex-row gap-12">
-                    {/* Left: Title */}
                     <div className="md:w-1/3 flex flex-col gap-8">
                         <div>
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 pr-4">
@@ -409,7 +494,6 @@ export default function ProductPage() {
                         </div>
                     </div>
 
-                    {/* Right: Accordions */}
                     <div className="md:w-2/3 border-t border-gray-200">
                         {specs.map((spec, index) => {
                             const isOpen = openIndex === index;
@@ -438,15 +522,15 @@ export default function ProductPage() {
                 </div>
             </div>
 
-            {/* Reviews Section - Full Width */}
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-16">
                 <div className="border-t border-gray-200 pt-10">
                     <div className="mb-6">
-                        <h3 className="text-xl font-bold text-gray-900 leading-none">Đánh giá & Bình luận</h3>
+                        <h3 className="text-xl font-bold text-gray-900 leading-none">
+                            Đánh giá & Bình luận ({reviewCount})
+                        </h3>
                     </div>
 
                     <div className="flex flex-col lg:flex-row gap-12">
-                        {/* Left: Input Review Area */}
                         <div className="lg:w-1/3 lg:shrink-0">
                             <div className="p-5 border-2 border-gray-200 rounded-2xl bg-white shadow-sm h-full flex flex-col">
                                 <div className="mb-4">
@@ -483,61 +567,36 @@ export default function ProductPage() {
                             </div>
                         </div>
 
-                        {/* Right: Comments Scrolling List */}
                         <div className="lg:w-2/3 border-2 border-gray-200 rounded-2xl p-4 sm:p-5 bg-white shadow-sm h-[310px]">
                             <div className="flex flex-col overflow-y-auto gap-3 snap-y snap-mandatory h-full pr-2" style={{ scrollbarWidth: 'thin' }}>
-                                {/* Sample Review 1 */}
-                                <div className="w-full shrink-0 h-auto p-4 snap-start border-2 border-gray-200 rounded-xl flex flex-col">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="font-bold text-sm text-gray-900">Minh Tuấn</div>
-                                        <div className="flex space-x-0.5 text-yellow-500">
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
+                                {reviews.length > 0 ? (
+                                    reviews.map((review) => (
+                                        <div key={review.review_id} className="w-full shrink-0 h-auto p-4 snap-start border-2 border-gray-200 rounded-xl flex flex-col">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="font-bold text-sm text-gray-900">{review.username}</div>
+                                                <div className="flex space-x-0.5 text-yellow-500">
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <Star
+                                                            key={star}
+                                                            size={14}
+                                                            fill={star <= review.rating ? "currentColor" : "none"}
+                                                            className={star <= review.rating ? "" : "text-gray-300"}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-gray-600">{review.review_comment}</p>
+                                            <span className="text-xs text-gray-400 mt-2 block">
+                                                {new Date(review.review_date).toLocaleDateString('vi-VN')}
+                                            </span>
                                         </div>
-                                    </div>
-                                    <p className="text-sm text-gray-600">Sản phẩm rất đẹp, chất lượng hoàn thiện tuyệt vời. Đóng gói cẩn thận và giao hàng đúng hẹn. Màu sắc bên ngoài giống hệt trên hình, gỗ rất chắc chắn và có mùi thơm nhẹ dễ chịu.</p>
-                                    <span className="text-xs text-gray-400 mt-2 block">2 ngày trước</span>
-                                </div>
-
-                                {/* Sample Review 2 */}
-                                <div className="w-full shrink-0 h-auto p-4 snap-start border-2 border-gray-200 rounded-xl flex flex-col">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="font-bold text-sm text-gray-900">Hải Yến</div>
-                                        <div className="flex space-x-0.5 text-yellow-500">
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} className="text-gray-300" fill="none" />
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-600">Thiết kế khá thông minh, tiện dụng. Vận chuyển hơi chậm một chút nhưng được cái đóng gói siêu kỹ nên không trầy xước. Tổng thể là hài lòng nhé shop.</p>
-                                    <span className="text-xs text-gray-400 mt-2 block">1 tuần trước</span>
-                                </div>
-
-                                {/* Sample Review 3 */}
-                                <div className="w-full shrink-0 h-auto p-4 snap-start border-2 border-gray-200 rounded-xl flex flex-col">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="font-bold text-sm text-gray-900">Quốc Cường</div>
-                                        <div className="flex space-x-0.5 text-yellow-500">
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                            <Star size={14} fill="currentColor" />
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-gray-600">Tủ nhỏ gọn, phù hợp với phòng diện tích hẹp. Bản lề êm, không phát ra tiếng động. Kỹ thuật viên qua lắp đặt tận tình và chu đáo. 10/10 👍</p>
-                                    <span className="text-xs text-gray-400 mt-2 block">1 tháng trước</span>
-                                </div>
+                                    ))
+                                ) : (
+                                    <div className="text-sm text-gray-500">Chưa có đánh giá nào.</div>
+                                )}
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
             <Footer />

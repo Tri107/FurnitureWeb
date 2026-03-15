@@ -37,7 +37,7 @@ function App() {
         <Route path="/favorites" element={<Favorites />} />
 
         {/* New Product Configurator Page */}
-        <Route path="/detailproduct" element={<DetailProduct />} />
+        <Route path="/detailproduct/:id" element={<DetailProduct />} />
 
         {/* Admin */}
         <Route path="/admin" element={<AdminLayout />}>
