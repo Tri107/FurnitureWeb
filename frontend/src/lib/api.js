@@ -138,3 +138,5 @@ export const deleteBrand = (brandId) => apiFetch(`/brands/${brandId}`, "DELETE")
 // ================= PRODUCT =================
 export const getProducts = () => apiFetch("/products");
 export const getProductById = (id) => apiFetch(`/products/${id}`);
+export const getFeaturedProducts = (params = "") => apiFetch(`/products/home-featured${params ? `?${params}` : ""}`);
+export const getHomeCollections = (params = "") => apiFetch(`/products/home-collections${params ? `?${params}` : ""}`);

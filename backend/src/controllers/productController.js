@@ -35,6 +35,41 @@ const ProductController = {
         .json({ message: "Lỗi server khi lấy thông tin sản phẩm" });
     }
   },
+
+  getFeaturedProducts: async (req, res) => {
+    try {
+      const { limit = 8, sort = "newest" } = req.query;
+
+      const products = await ProductModel.getFeaturedProducts(limit, sort);
+
+      return res.status(200).json({
+        message: "Lấy sản phẩm nổi bật thành công",
+        data: products,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Lỗi server khi lấy sản phẩm nổi bật",
+      });
+    }
+  },
+
+  getHomeCollections: async (req, res) => {
+    try {
+      const { limit = 4 } = req.query;
+      const collections = await ProductModel.getHomeCollections(limit);
+
+      return res.status(200).json({
+        message: "Lấy collection homepage thành công",
+        data: collections,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        message: "Lỗi server khi lấy collection homepage",
+      });
+    }
+  },
 };
 
 export default ProductController;
