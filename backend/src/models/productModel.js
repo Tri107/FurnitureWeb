@@ -4,7 +4,19 @@ import Variant from "../models/variantModel.js";
 
 const ProductModel = {
   getAll: async () => {
-    const [rows] = await db.query(`SELECT * FROM products`);
+    const [rows] = await db.query(`
+      SELECT 
+        p.*,
+        c.category_name,
+        b.brand_name,
+        cl.collection_name
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN collections cl ON p.collection_id = cl.collection_id
+      WHERE p.is_disabled = 0
+      ORDER BY p.created_at DESC
+    `);
 
     const variantIds = rows
       .filter((r) => r.variant_ref)
@@ -27,11 +39,20 @@ const ProductModel = {
     return rows;
   },
 
-
   getById: async (productId) => {
-
     const [rows] = await db.query(
-      `SELECT * FROM products WHERE product_id = ?`,
+      `
+      SELECT 
+        p.*,
+        c.category_name,
+        b.brand_name,
+        cl.collection_name
+      FROM products p
+      LEFT JOIN categories c ON p.category_id = c.category_id
+      LEFT JOIN brands b ON p.brand_id = b.brand_id
+      LEFT JOIN collections cl ON p.collection_id = cl.collection_id
+      WHERE p.product_id = ? AND p.is_disabled = 0
+      `,
       [productId]
     );
 
@@ -47,7 +68,6 @@ const ProductModel = {
 
       product.variants = variant || null;
     } else {
-      product.variants = null;
       product.variants = null;
     }
 
