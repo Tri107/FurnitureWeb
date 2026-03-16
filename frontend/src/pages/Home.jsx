@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import { getProducts } from "@/lib/api";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 
 const defaultCategoryImages = {
   Bàn: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=1200&q=80&auto=format&fit=crop",
@@ -296,6 +297,7 @@ export default function Home() {
                     className="rounded-xl bg-white border border-slate-200 overflow-hidden"
                   >
                     <div className="relative">
+                      <FavoriteButton productId={p.id} />
                       <div className="aspect-[4/3] bg-slate-100">
                         <img
                           src={p.img}
