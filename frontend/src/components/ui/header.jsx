@@ -1,19 +1,69 @@
 import { useMemo, useRef, useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, User, X } from "lucide-react";
+import { getCategories, getCollections, getProducts } from "@/lib/api";
 
 function formatVND(v) {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
-  }).format(v);
+  }).format(v || 0);
 }
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  const [headerLoading, setHeaderLoading] = useState(true);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("accessToken");
+    const storedUser = localStorage.getItem("user");
+
+    if (storedToken && storedUser) {
+      setIsLoggedIn(true);
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error("Error parsing user data", err);
+      }
+    } else {
+      setIsLoggedIn(false);
+      setUser(null);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const fetchHeaderData = async () => {
+      try {
+        setHeaderLoading(true);
+
+        const [categoriesRes, collectionsRes, productsRes] = await Promise.all([
+          getCategories(),
+          getCollections(),
+          getProducts(),
+        ]);
+
+        setCategories(categoriesRes?.data || []);
+        setCollections(collectionsRes?.data || []);
+        setProducts(productsRes?.data || []);
+      } catch (error) {
+        console.error("Lỗi load dữ liệu header:", error);
+      } finally {
+        setHeaderLoading(false);
+      }
+    };
+
+    fetchHeaderData();
+  }, []);
 
   const cartItems = useMemo(
     () => [
@@ -38,220 +88,51 @@ export default function Header() {
   const cartCount = cartItems.reduce((s, it) => s + it.qty, 0);
   const cartTotal = cartItems.reduce((s, it) => s + it.price * it.qty, 0);
 
-  const mega = useMemo(
-    () => ({
-      living: {
-        label: "Phòng Khách",
-        megaTitle: "PHÒNG KHÁCH",
-        desc: "Sofa, bàn kệ, ghế & combo tối ưu cho phòng khách.",
-        featured: [
-          {
-            title: "Top Sofa chữ L",
-            sub: "Gợi ý theo xu hướng",
-            href: "/products?category=living&sub=sofa-l",
-            img: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=1200&q=80&auto=format&fit=crop",
-          },
-          {
-            title: "Combo Sofa + Bàn Trà",
-            sub: "Mua trọn bộ tiết kiệm",
-            href: "/products?category=living&sub=combo-sofa-ban-tra",
-            img: "https://images.unsplash.com/photo-1549187774-b4e9b0445b41?w=1200&q=80&auto=format&fit=crop",
-          },
-        ],
-        groups: [
-          {
-            title: "Sofa",
-            items: [
-              { label: "Sofa chữ L", href: "/products?category=living&sub=sofa-l" },
-              { label: "Sofa băng", href: "/products?category=living&sub=sofa-bang" },
-              { label: "Sofa đơn", href: "/products?category=living&sub=sofa-don" },
-              { label: "Sofa giường", href: "/products?category=living&sub=sofa-giuong" },
-            ],
-          },
-          {
-            title: "Bàn & Kệ",
-            items: [
-              { label: "Bàn trà", href: "/products?category=living&sub=ban-tra" },
-              { label: "Kệ TV", href: "/products?category=living&sub=ke-tv" },
-              { label: "Tủ trang trí", href: "/products?category=living&sub=tu-trang-tri" },
-              { label: "Kệ sách", href: "/products?category=living&sub=ke-sach" },
-            ],
-          },
-          {
-            title: "Ghế",
-            items: [
-              { label: "Ghế thư giãn", href: "/products?category=living&sub=ghe-thu-gian" },
-              { label: "Ghế đôn", href: "/products?category=living&sub=ghe-don" },
-              { label: "Ghế bập bênh", href: "/products?category=living&sub=ghe-bap-benh" },
-            ],
-          },
-          {
-            title: "Combo",
-            items: [
-              { label: "Combo sofa + bàn trà", href: "/products?category=living&sub=combo-sofa-ban-tra" },
-              { label: "Combo đầy đủ (Sofa + Bàn + Kệ TV)", href: "/products?category=living&sub=combo-day-du" },
-            ],
-          },
-        ],
-      },
+  const productByCategory = useMemo(() => {
+    const grouped = {};
 
-      bedroom: {
-        label: "Phòng Ngủ",
-        megaTitle: "PHÒNG NGỦ",
-        desc: "Giường, tủ, nệm & phụ kiện cho giấc ngủ êm ái.",
-        featured: [
-          {
-            title: "Giường có ngăn kéo",
-            sub: "Tối ưu lưu trữ",
-            href: "/products?category=bedroom&sub=giuong-ngan-keo",
-            img: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200&q=80&auto=format&fit=crop",
-          },
-          {
-            title: "Combo Nệm + Ga gối",
-            sub: "Mềm & thoáng",
-            href: "/products?category=bedroom&sub=ga-goi",
-            img: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=1200&q=80&auto=format&fit=crop",
-          },
-        ],
-        groups: [
-          {
-            title: "Giường ngủ",
-            items: [
-              { label: "Giường đơn", href: "/products?category=bedroom&sub=giuong-don" },
-              { label: "Giường đôi", href: "/products?category=bedroom&sub=giuong-doi" },
-              { label: "Giường có ngăn kéo", href: "/products?category=bedroom&sub=giuong-ngan-keo" },
-              { label: "Giường tầng", href: "/products?category=bedroom&sub=giuong-tang" },
-            ],
-          },
-          {
-            title: "Tủ & Lưu trữ",
-            items: [
-              { label: "Tủ quần áo 2/3 cánh/cửa lùa", href: "/products?category=bedroom&sub=tu-quan-ao" },
-              { label: "Tủ đầu giường", href: "/products?category=bedroom&sub=tu-dau-giuong" },
-              { label: "Bàn trang điểm", href: "/products?category=bedroom&sub=ban-trang-diem" },
-              { label: "Kệ đầu giường", href: "/products?category=bedroom&sub=ke-dau-giuong" },
-            ],
-          },
-          {
-            title: "Nệm & Phụ kiện",
-            items: [
-              { label: "Nệm cao su", href: "/products?category=bedroom&sub=nem-cao-su" },
-              { label: "Nệm lò xo", href: "/products?category=bedroom&sub=nem-lo-xo" },
-              { label: "Ga gối", href: "/products?category=bedroom&sub=ga-goi" },
-              { label: "Đèn ngủ", href: "/products?category=bedroom&sub=den-ngu" },
-            ],
-          },
-        ],
-      },
+    products.forEach((p) => {
+      const categoryName = p.category_name || "Khác";
+      if (!grouped[categoryName]) grouped[categoryName] = [];
+      grouped[categoryName].push(p);
+    });
 
-      dining: {
-        label: "Phòng Ăn",
-        megaTitle: "PHÒNG ĂN",
-        desc: "Bàn ăn, ghế & tủ trang trí cho bữa cơm ấm cúng.",
-        featured: [
-          {
-            title: "Bàn ăn mặt đá",
-            sub: "Sang & bền",
-            href: "/products?category=dining&sub=ban-an-mat-da",
-            img: "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=1200&q=80&auto=format&fit=crop",
-          },
-          {
-            title: "Bàn ăn 6 ghế",
-            sub: "Phù hợp gia đình",
-            href: "/products?category=dining&sub=ban-an-6-ghe",
-            img: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=1200&q=80&auto=format&fit=crop",
-          },
-        ],
-        groups: [
-          {
-            title: "Bàn ăn",
-            items: [
-              { label: "Bàn ăn 4 ghế", href: "/products?category=dining&sub=ban-an-4-ghe" },
-              { label: "Bàn ăn 6 ghế", href: "/products?category=dining&sub=ban-an-6-ghe" },
-              { label: "Bàn ăn mặt đá", href: "/products?category=dining&sub=ban-an-mat-da" },
-              { label: "Bàn ăn gỗ tự nhiên", href: "/products?category=dining&sub=ban-an-go-tu-nhien" },
-            ],
-          },
-          {
-            title: "Ghế ăn",
-            items: [
-              { label: "Ghế gỗ", href: "/products?category=dining&sub=ghe-go" },
-              { label: "Ghế bọc nệm", href: "/products?category=dining&sub=ghe-boc-nem" },
-              { label: "Ghế nhựa hiện đại", href: "/products?category=dining&sub=ghe-nhua" },
-            ],
-          },
-          {
-            title: "Tủ & Trang trí",
-            items: [
-              { label: "Tủ rượu", href: "/products?category=dining&sub=tu-ruou" },
-              { label: "Tủ chén", href: "/products?category=dining&sub=tu-chen" },
-              { label: "Kệ trang trí phòng ăn", href: "/products?category=dining&sub=ke-trang-tri" },
-            ],
-          },
-        ],
-      },
+    return grouped;
+  }, [products]);
 
-      decor: {
-        label: "Trang Trí",
-        megaTitle: "TRANG TRÍ",
-        desc: "Đèn, tranh, gương & decor làm nhà bạn có gu hơn.",
-        featured: [
-          {
-            title: "Đèn cây",
-            sub: "Tạo điểm nhấn",
-            href: "/products?category=decor&sub=den-cay",
-            img: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=1200&q=80&auto=format&fit=crop",
-          },
-          {
-            title: "Thảm trải sàn",
-            sub: "Ấm & êm",
-            href: "/products?category=decor&sub=tham",
-            img: "https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=1200&q=80&auto=format&fit=crop",
-          },
-        ],
-        groups: [
-          {
-            title: "Trang trí tường",
-            items: [
-              { label: "Tranh treo tường", href: "/products?category=decor&sub=tranh" },
-              { label: "Gương trang trí", href: "/products?category=decor&sub=guong" },
-              { label: "Đồng hồ treo tường", href: "/products?category=decor&sub=dong-ho" },
-            ],
-          },
-          {
-            title: "Đèn",
-            items: [
-              { label: "Đèn chùm", href: "/products?category=decor&sub=den-chum" },
-              { label: "Đèn bàn", href: "/products?category=decor&sub=den-ban" },
-              { label: "Đèn cây", href: "/products?category=decor&sub=den-cay" },
-              { label: "Đèn LED trang trí", href: "/products?category=decor&sub=den-led" },
-            ],
-          },
-          {
-            title: "Phụ kiện decor",
-            items: [
-              { label: "Thảm trải sàn", href: "/products?category=decor&sub=tham" },
-              { label: "Rèm cửa", href: "/products?category=decor&sub=rem" },
-              { label: "Bình hoa", href: "/products?category=decor&sub=binh-hoa" },
-              { label: "Cây giả trang trí", href: "/products?category=decor&sub=cay-gia" },
-              { label: "Tượng decor", href: "/products?category=decor&sub=tuong" },
-            ],
-          },
-        ],
-      },
-    }),
-    []
-  );
+  const productByCollection = useMemo(() => {
+    const grouped = {};
 
-  const keys = ["living", "bedroom", "dining", "decor"];
+    products.forEach((p) => {
+      const collectionName = p.collection_name || "Khác";
+      if (!grouped[collectionName]) grouped[collectionName] = [];
+      grouped[collectionName].push(p);
+    });
 
+    return grouped;
+  }, [products]);
+
+  const [activeType, setActiveType] = useState(null); // category | collection
   const [activeKey, setActiveKey] = useState(null);
   const [openMega, setOpenMega] = useState(false);
   const megaCloseTimer = useRef(null);
 
-  const showMega = (key) => {
+  const showMega = (type, key) => {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
+    setActiveType(type);
     setActiveKey(key);
+    setOpenMega(true);
+    setOpenRight(null);
+    setSearchOpen(false);
+  };
+
+  const showCollectionMega = () => {
+    if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
+    setActiveType("collection");
+    setActiveKey((prev) => {
+      if (prev && productByCollection[prev]) return prev;
+      return collections[0]?.collection_name || null;
+    });
     setOpenMega(true);
     setOpenRight(null);
     setSearchOpen(false);
@@ -261,6 +142,7 @@ export default function Header() {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
     megaCloseTimer.current = setTimeout(() => {
       setOpenMega(false);
+      setActiveType(null);
       setActiveKey(null);
     }, 140);
   };
@@ -272,15 +154,49 @@ export default function Header() {
   const closeMega = () => {
     if (megaCloseTimer.current) clearTimeout(megaCloseTimer.current);
     setOpenMega(false);
+    setActiveType(null);
     setActiveKey(null);
   };
 
+  const goToCategoryProducts = (categoryName) => {
+    closeMega();
+    navigate(`/products?category=${encodeURIComponent(categoryName)}`);
+  };
+
+  const goToCollectionProducts = (collectionName) => {
+    closeMega();
+    navigate(`/products?collection=${encodeURIComponent(collectionName)}`);
+  };
+
+  const goToActiveMegaProducts = () => {
+    if (activeType === "category" && activeKey) {
+      navigate(`/products?category=${encodeURIComponent(activeKey)}`);
+    } else if (activeType === "collection" && activeKey) {
+      navigate(`/products?collection=${encodeURIComponent(activeKey)}`);
+    } else {
+      navigate("/products");
+    }
+    closeMega();
+  };
+
+  const activeCategoryProducts =
+    activeType === "category" ? productByCategory[activeKey] || [] : [];
+
+  const activeCollectionProducts =
+    activeType === "collection" ? productByCollection[activeKey] || [] : [];
+
+  const megaProducts =
+    activeType === "category" ? activeCategoryProducts : activeCollectionProducts;
+
+  const rightWrapRef = useRef(null);
   const [openRight, setOpenRight] = useState(null);
+
   const toggleRight = (k) => {
     closeMega();
     setSearchOpen(false);
     setOpenRight((prev) => (prev === k ? null : k));
   };
+
   const closeRight = () => setOpenRight(null);
 
   const [searchOpen, setSearchOpen] = useState(false);
@@ -299,7 +215,6 @@ export default function Header() {
     setQuery("");
   };
 
-  const rightWrapRef = useRef(null);
   useEffect(() => {
     const onDoc = (e) => {
       if (!rightWrapRef.current) return;
@@ -314,26 +229,22 @@ export default function Header() {
 
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
+
     const q = query.toLowerCase();
-    const pool = [
-      ...cartItems.map((x) => ({ ...x, href: "/products" })),
-      {
-        id: "s1",
-        name: "Đèn Trang Trí Đứng",
-        price: 1850000,
-        href: "/products?category=decor",
-        img: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?w=400&q=80&auto=format&fit=crop",
-      },
-      {
-        id: "s2",
-        name: "Giường Ngủ Gỗ King Size",
-        price: 12900000,
-        href: "/products?category=bedroom",
-        img: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&q=80&auto=format&fit=crop",
-      },
-    ];
-    return pool.filter((p) => (p.name || "").toLowerCase().includes(q)).slice(0, 6);
-  }, [query, cartItems]);
+
+    return products
+      .filter((p) => (p.product_name || "").toLowerCase().includes(q))
+      .slice(0, 6)
+      .map((p) => ({
+        id: p.product_id,
+        name: p.product_name,
+        price: p?.variants?.price || 0,
+        href: `/detailproduct/${p.product_id}`,
+        img:
+          p?.variants?.url?.[0] ||
+          "https://via.placeholder.com/400x300?text=No+Image",
+      }));
+  }, [query, products]);
 
   useEffect(() => {
     closeMega();
@@ -353,8 +264,6 @@ export default function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [searchOpen]);
 
-  const activeMega = activeKey ? mega[activeKey] : null;
-
   const onSubmitSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -372,26 +281,53 @@ export default function Header() {
             Sản Phẩm
           </Link>
 
-          {keys.map((key) => (
-            <button
-              key={key}
-              type="button"
-              onMouseEnter={() => showMega(key)}
-              onMouseLeave={scheduleCloseMega}
-              className={[
-                "relative hover:text-orange-400 transition",
-                activeKey === key && openMega ? "text-orange-400" : "",
-              ].join(" ")}
-            >
-              {mega[key].label}
-              <span
+          {!headerLoading &&
+            categories.map((category) => (
+              <button
+                key={category.category_id}
+                type="button"
+                onMouseEnter={() => showMega("category", category.category_name)}
+                onMouseLeave={scheduleCloseMega}
                 className={[
-                  "absolute -bottom-2 left-0 h-[2px] w-full bg-orange-500 transition-opacity",
-                  activeKey === key && openMega ? "opacity-100" : "opacity-0",
+                  "relative hover:text-orange-400 transition",
+                  activeType === "category" &&
+                  activeKey === category.category_name &&
+                  openMega
+                    ? "text-orange-400"
+                    : "",
                 ].join(" ")}
-              />
-            </button>
-          ))}
+              >
+                {category.category_name}
+                <span
+                  className={[
+                    "absolute -bottom-2 left-0 h-[2px] w-full bg-orange-500 transition-opacity",
+                    activeType === "category" &&
+                    activeKey === category.category_name &&
+                    openMega
+                      ? "opacity-100"
+                      : "opacity-0",
+                  ].join(" ")}
+                />
+              </button>
+            ))}
+
+          <button
+            type="button"
+            onMouseEnter={showCollectionMega}
+            onMouseLeave={scheduleCloseMega}
+            className={[
+              "relative hover:text-orange-400 transition",
+              activeType === "collection" && openMega ? "text-orange-400" : "",
+            ].join(" ")}
+          >
+            Collection
+            <span
+              className={[
+                "absolute -bottom-2 left-0 h-[2px] w-full bg-orange-500 transition-opacity",
+                activeType === "collection" && openMega ? "opacity-100" : "opacity-0",
+              ].join(" ")}
+            />
+          </button>
         </nav>
 
         <div ref={rightWrapRef} className="ml-auto flex items-center gap-3 relative">
@@ -400,7 +336,7 @@ export default function Header() {
             className={[
               "flex items-center gap-2 rounded-full bg-white/10 border border-white/15",
               "transition-all duration-200 ease-out overflow-hidden",
-              searchOpen ? "w-[240px] px-2.5 py-1.5" : "w-9 px-1.5 py-1.5"
+              searchOpen ? "w-[240px] px-2.5 py-1.5" : "w-9 px-1.5 py-1.5",
             ].join(" ")}
           >
             <button
@@ -408,8 +344,8 @@ export default function Header() {
               onClick={() => {
                 if (!searchOpen) openSearch();
                 else searchInputRef.current?.focus();
-              }}className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition"
-              
+              }}
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition"
               aria-label="Search"
             >
               <Search className="h-[18px] w-[18px] text-white/90" />
@@ -443,13 +379,15 @@ export default function Header() {
             <div className="absolute right-0 top-[56px] z-[90] w-[360px] rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
               <div className="p-2">
                 {searchResults.length === 0 ? (
-                  <p className="p-3 text-sm text-white/70">Không tìm thấy sản phẩm phù hợp.</p>
+                  <p className="p-3 text-sm text-white/70">
+                    Không tìm thấy sản phẩm phù hợp.
+                  </p>
                 ) : (
                   <div className="space-y-1">
                     {searchResults.map((r) => (
                       <Link
                         key={r.id}
-                        to={r.href || "/products"}
+                        to={r.href}
                         onClick={() => {
                           closeSearch();
                           closeRight();
@@ -462,7 +400,9 @@ export default function Header() {
                           className="h-10 w-10 rounded-lg object-cover border border-white/10"
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-white truncate">{r.name}</p>
+                          <p className="text-sm font-semibold text-white truncate">
+                            {r.name}
+                          </p>
                           <p className="text-xs text-white/70">{formatVND(r.price)}</p>
                         </div>
                         <span className="text-white/50 text-sm">→</span>
@@ -526,14 +466,23 @@ export default function Header() {
                         key={it.id}
                         className="flex items-center gap-3 rounded-xl p-2 bg-white/5 border border-white/10"
                       >
-                        <img src={it.img} alt={it.name} className="h-14 w-14 rounded-lg object-cover" />
+                        <img
+                          src={it.img}
+                          alt={it.name}
+                          className="h-14 w-14 rounded-lg object-cover"
+                        />
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-white truncate">{it.name}</p>
+                          <p className="text-sm font-semibold text-white truncate">
+                            {it.name}
+                          </p>
                           <p className="text-xs text-white/70 mt-0.5">
-                            {formatVND(it.price)} • SL: <span className="text-white">{it.qty}</span>
+                            {formatVND(it.price)} • SL:{" "}
+                            <span className="text-white">{it.qty}</span>
                           </p>
                         </div>
-                        <p className="text-sm font-semibold text-white">{formatVND(it.price * it.qty)}</p>
+                        <p className="text-sm font-semibold text-white">
+                          {formatVND(it.price * it.qty)}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -541,7 +490,9 @@ export default function Header() {
                   <div className="p-4 border-t border-white/10">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-white/70">Tạm tính</span>
-                      <span className="font-semibold text-white">{formatVND(cartTotal)}</span>
+                      <span className="font-semibold text-white">
+                        {formatVND(cartTotal)}
+                      </span>
                     </div>
 
                     <div className="mt-3 grid grid-cols-2 gap-2">
@@ -565,18 +516,15 @@ export default function Header() {
               )}
 
               {openRight === "account" && (
-                <div className="w-[260px] rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
-                  <div className="flex items-center justify-between p-4 border-b border-white/10">
-                    <p className="text-sm font-semibold">Tài khoản</p>
-                    <button
-                      type="button"
-                      onClick={closeRight}
-                      className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition"
-                      aria-label="Close"
-                    >
-                      <X className="h-[18px] w-[18px] text-white/70" />
-                    </button>
-                  </div>
+                <div className="w-[300px] relative rounded-2xl border border-white/10 bg-[#06162d]/95 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={closeRight}
+                    className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 transition"
+                    aria-label="Close"
+                  >
+                    <X className="h-[18px] w-[18px] text-white/70" />
+                  </button>
 
                   {!isLoggedIn ? (
                     <div className="p-3 space-y-2">
@@ -594,22 +542,22 @@ export default function Header() {
                       >
                         Đăng ký
                       </Link>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsLoggedIn(true);
-                          closeRight();
-                        }}
-                        className="mt-2 w-full text-xs text-white/60 hover:text-white/80 transition"
-                      >
-                        (test) set logged in
-                      </button>
                     </div>
                   ) : (
                     <div className="p-3 space-y-1">
+                      <div className="px-3 py-2 mb-2 border-b border-white/5 pr-10">
+                        <p className="text-xs text-white/50 uppercase tracking-wider">
+                          Tài khoản
+                        </p>
+                        <p
+                          className="text-sm font-medium text-white truncate"
+                          title={user?.email}
+                        >
+                          {user?.email || "Người dùng"}
+                        </p>
+                      </div>
                       <Link
-                        to="/account"
+                        to="/userprofile"
                         onClick={closeRight}
                         className="block rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
                       >
@@ -625,7 +573,10 @@ export default function Header() {
                       <button
                         type="button"
                         onClick={() => {
+                          localStorage.removeItem("accessToken");
+                          localStorage.removeItem("user");
                           setIsLoggedIn(false);
+                          setUser(null);
                           closeRight();
                         }}
                         className="w-full text-left rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
@@ -666,72 +617,146 @@ export default function Header() {
       >
         <div className="bg-[#06162d]/92 backdrop-blur-xl border-t border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
           <div className="mx-auto max-w-7xl px-3 lg:px-10 py-8">
-            {!activeMega ? null : (
+            {!activeKey ? null : (
               <div className="grid grid-cols-12 gap-10">
                 <div className="col-span-12 lg:col-span-3">
                   <p className="text-xs tracking-[0.28em] text-white/60 uppercase">
-                    {activeMega.megaTitle}
+                    {activeType === "category" ? "DANH MỤC" : "COLLECTION"}
                   </p>
-                  <h3 className="mt-3 text-2xl font-bold">{activeMega.label}</h3>
-                  <p className="mt-2 text-sm text-white/70 leading-6">{activeMega.desc}</p>
 
-                  <Link
-                    to={`/products?category=${activeKey}`}
-                    onClick={closeMega}
+                  <h3 className="mt-3 text-2xl font-bold">{activeKey}</h3>
+
+                  <p className="mt-2 text-sm text-white/70 leading-6">
+                    {activeType === "category"
+                      ? `Khám phá các sản phẩm thuộc danh mục ${activeKey}.`
+                      : `Khám phá các sản phẩm thuộc collection ${activeKey}.`}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={goToActiveMegaProducts}
                     className="inline-flex items-center gap-2 mt-5 text-sm font-semibold text-orange-400 hover:text-orange-300 transition"
                   >
                     Xem tất cả <span className="translate-y-[1px]">→</span>
-                  </Link>
+                  </button>
 
                   <div className="mt-6 h-px bg-white/10" />
+
+                  {activeType === "collection" && (
+                    <div className="mt-6 space-y-2">
+                      {collections.map((collection) => (
+                        <button
+                          key={collection.collection_id}
+                          type="button"
+                          onMouseEnter={() =>
+                            setActiveKey(collection.collection_name)
+                          }
+                          onClick={() =>
+                            goToCollectionProducts(collection.collection_name)
+                          }
+                          className={[
+                            "w-full text-left rounded-lg px-3 py-2 text-sm transition",
+                            activeKey === collection.collection_name
+                              ? "bg-white/10 text-orange-400"
+                              : "text-white/75 hover:text-white hover:bg-white/5",
+                          ].join(" ")}
+                        >
+                          {collection.collection_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {activeType === "category" && (
+                    <div className="mt-6 space-y-2">
+                      {categories.map((category) => (
+                        <button
+                          key={category.category_id}
+                          type="button"
+                          onMouseEnter={() =>
+                            setActiveKey(category.category_name)
+                          }
+                          onClick={() =>
+                            goToCategoryProducts(category.category_name)
+                          }
+                          className={[
+                            "w-full text-left rounded-lg px-3 py-2 text-sm transition",
+                            activeKey === category.category_name
+                              ? "bg-white/10 text-orange-400"
+                              : "text-white/75 hover:text-white hover:bg-white/5",
+                          ].join(" ")}
+                        >
+                          {category.category_name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="col-span-12 lg:col-span-6">
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {activeMega.groups.map((g) => (
-                      <div key={g.title}>
-                        <p className="text-sm font-semibold text-white mb-3">{g.title}</p>
-                        <div className="space-y-2">
-                          {g.items.map((it) => (
-                            <Link
-                              key={it.href}
-                              to={it.href}
-                              onClick={closeMega}
-                              className="group flex items-center justify-between rounded-lg px-3 py-2 text-sm text-white/75 hover:text-white hover:bg-white/5 transition"
-                            >
-                              <span>{it.label}</span>
-                              <span className="opacity-0 group-hover:opacity-100 transition text-white/60">
-                                →
-                              </span>
-                            </Link>
-                          ))}
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                    {megaProducts.slice(0, 6).map((product) => (
+                      <Link
+                        key={product.product_id}
+                        to={`/detailproduct/${product.product_id}`}
+                        onClick={closeMega}
+                        className="group flex items-center gap-3 rounded-xl p-3 bg-white/5 hover:bg-white/10 transition border border-white/10"
+                      >
+                        <img
+                          src={
+                            product?.variants?.url?.[0] ||
+                            "https://via.placeholder.com/300x200?text=No+Image"
+                          }
+                          alt={product.product_name}
+                          className="h-14 w-14 rounded-lg object-cover"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-white truncate">
+                            {product.product_name}
+                          </p>
+                          <p className="text-xs text-white/70">
+                            {formatVND(product?.variants?.price || 0)}
+                          </p>
                         </div>
-                      </div>
+                        <span className="opacity-0 group-hover:opacity-100 transition text-white/60">
+                          →
+                        </span>
+                      </Link>
                     ))}
                   </div>
                 </div>
 
                 <div className="col-span-12 lg:col-span-3">
-                  <p className="text-sm font-semibold text-white mb-3">Gợi ý nổi bật</p>
+                  <p className="text-sm font-semibold text-white mb-3">
+                    Gợi ý nổi bật
+                  </p>
+
                   <div className="space-y-4">
-                    {(activeMega.featured || []).map((f) => (
+                    {megaProducts.slice(0, 2).map((product) => (
                       <Link
-                        key={f.href}
-                        to={f.href}
+                        key={product.product_id}
+                        to={`/detailproduct/${product.product_id}`}
                         onClick={closeMega}
                         className="group block rounded-xl overflow-hidden border border-white/10 bg-white/5 hover:bg-white/10 transition"
                       >
                         <div className="relative h-28">
                           <img
-                            src={f.img}
-                            alt={f.title}
+                            src={
+                              product?.variants?.url?.[0] ||
+                              "https://via.placeholder.com/600x300?text=No+Image"
+                            }
+                            alt={product.product_name}
                             className="absolute inset-0 h-full w-full object-cover opacity-90 group-hover:opacity-100 transition"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                         </div>
                         <div className="p-3">
-                          <p className="text-sm font-semibold text-white">{f.title}</p>
-                          <p className="text-xs text-white/70 mt-1">{f.sub}</p>
+                          <p className="text-sm font-semibold text-white">
+                            {product.product_name}
+                          </p>
+                          <p className="text-xs text-white/70 mt-1">
+                            {formatVND(product?.variants?.price || 0)}
+                          </p>
                         </div>
                       </Link>
                     ))}

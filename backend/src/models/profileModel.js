@@ -1,16 +1,13 @@
 import db from '../config/mysql.js';
 
 const ProfileModel = {
-  // Tạo profile mặc định
   createDefaultProfile: async (accountId) => {
     try {
-      const defaultUsername = `user_${accountId}`; 
-
       const query = `
         INSERT INTO user_profiles (account_id, username, phone_number, user_address) 
-        VALUES (?, ?, NULL, NULL)
+        VALUES (?, NULL, NULL, NULL)
       `;
-      const [result] = await db.execute(query, [accountId, defaultUsername]);
+      const [result] = await db.execute(query, [accountId]);
       return result;
     } catch (error) {
       throw error;
@@ -19,8 +16,12 @@ const ProfileModel = {
 
   getProfileByAccountId: async (accountId) => {
     try {
-      
-      const query = `SELECT * FROM user_profiles WHERE account_id = ?`;
+      const query = `
+        SELECT p.*, a.email 
+        FROM user_profiles p
+        JOIN accounts a ON p.account_id = a.account_id 
+        WHERE p.account_id = ?
+      `;
       const [rows] = await db.execute(query, [accountId]);
       return rows[0];
     } catch (error) {
@@ -31,15 +32,21 @@ const ProfileModel = {
   updateProfile: async (accountId, data) => {
     try {
       
-      const { username, phone_number, address } = data;
+      const { username, phone_number, user_address } = data;
       
       const query = `
         UPDATE user_profiles 
         SET username = ?, phone_number = ?, user_address = ? 
         WHERE account_id = ?
       `;
-      // Map biến address (từ frontend) vào cột user_address (trong DB)
-      const [result] = await db.execute(query, [username, phone_number, address, accountId]);
+      const values = [
+        username ?? null, 
+        phone_number ?? null, 
+        user_address ?? null, 
+        accountId
+      ];
+
+      const [result] = await db.execute(query, values);
       return result;
     } catch (error) {
       throw error;

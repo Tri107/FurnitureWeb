@@ -1,4 +1,5 @@
 const API_URL = "http://localhost:9999/api";
+const FAV_API_URL = "http://localhost:9999/api/favorites";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("accessToken");
@@ -77,15 +78,30 @@ const apiFetch = async (
   }
 };
 
+export async function getFavorites(accountId) {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(`${FAV_API_URL}/${accountId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error("Không thể lấy danh sách favorites");
+  }
+
+  return res.json();
+}
+
 // ================= AUTH =================
 export const registerUser = (data) => apiFetch("/auth/register", "POST", data);
-export const loginUser = (data) => apiFetch("/auth/login", "POST", data);
-export const verifyOtp = (data) =>
-  apiFetch("/auth/register/verify", "POST", data);
-export const googleLogin = (data) =>
-  apiFetch("/auth/google-login", "POST", data);
-export const logoutUser = () => apiFetch("/auth/logout", "POST");
-
+export const loginUser    = (data) => apiFetch("/auth/login", "POST", data);
+export const verifyOtp    = (data) => apiFetch("/auth/register/verify", "POST", data);
+export const googleLogin  = (data) => apiFetch("/auth/google-login", "POST", data);
+export const logoutUser   = () => apiFetch("/auth/logout", "POST"); 
+export const getMyProfile = () => apiFetch("/profile/me", "GET");
+export const updateProfile = (data) => apiFetch("/profile/update", "PUT", data);
 // ================= DISCOUNT =================
 export const getDiscounts = () => apiFetch("/discounts");
 export const createDiscount = (data) => apiFetch("/discounts", "POST", data);
@@ -141,14 +157,11 @@ export const deleteBrand = (brandId) =>
 // ================= PRODUCT =================
 export const getProducts = () => apiFetch("/products");
 export const getProductById = (id) => apiFetch(`/products/${id}`);
-export const createProduct = (data) =>
-  apiFetch("/products/add-product", "POST", data);
-export const createVariant = (data) =>
-  apiFetch("/products/add-variant", "POST", data);
-export const updateProduct = (id, data) =>
-  apiFetch(`/products/${id}`, "PUT", data);
-export const deleteProduct = (id) => apiFetch(`/products/${id}`, "DELETE");
+export const getFeaturedProducts = (params = "") => apiFetch(`/products/home-featured${params ? `?${params}` : ""}`);
+export const getHomeCollections = (params = "") => apiFetch(`/products/home-collections${params ? `?${params}` : ""}`);
 
+export const createProduct = (data) => apiFetch("/products/add-product", "POST", data);
+export const createVariant = (data) => apiFetch("/products/add-variant", "POST", data);
 // Upload images (multipart/form-data — cannot use apiFetch)
 export const uploadProductImages = async (files) => {
   const formData = new FormData();
@@ -171,3 +184,11 @@ export const uploadProductImages = async (files) => {
   }
   return res.json();
 };
+
+export const updateProduct = (id, data) => apiFetch(`/products/${id}`, "PUT", data);
+
+export const deleteProduct = (id) => apiFetch(`/products/${id}`, "DELETE");
+
+
+
+
