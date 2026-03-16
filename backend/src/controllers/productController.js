@@ -118,6 +118,8 @@ const ProductController = {
       return res
         .status(500)
         .json({ message: "Lỗi server khi upload ảnh" });
+    }
+  },
   getFeaturedProducts: async (req, res) => {
     try {
       const { limit = 8, sort = "newest" } = req.query;
