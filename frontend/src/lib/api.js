@@ -1,5 +1,4 @@
 const API_URL = "http://localhost:9999/api";
-const FAV_API_URL = "http://localhost:9999/api/favorites";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("accessToken");
@@ -77,40 +76,6 @@ const apiFetch = async (
     throw error;
   }
 };
-
-export async function getFavorites(accountId) {
-  const token = localStorage.getItem("accessToken");
-
-  const res = await fetch(`${FAV_API_URL}/${accountId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  if (!res.ok) {
-    throw new Error("Không thể lấy danh sách favorites");
-  }
-
-  return res.json();
-}
-
-export async function addFavorite(accountId, productId) {
-  const token = localStorage.getItem("accessToken");
-
-  const res = await fetch(FAV_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      accountId: accountId,
-      productId: productId,
-    }),
-  });
-
-  return res.json();
-}
 
 // ================= AUTH =================
 export const registerUser = (data) => apiFetch("/auth/register", "POST", data);
@@ -206,7 +171,3 @@ export const uploadProductImages = async (files) => {
 export const updateProduct = (id, data) => apiFetch(`/products/${id}`, "PUT", data);
 
 export const deleteProduct = (id) => apiFetch(`/products/${id}`, "DELETE");
-
-
-
-

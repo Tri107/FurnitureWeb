@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import useFavoriteActions from "@/hooks/useFavoriteActions";
-import { getFavorites } from "@/lib/api";
+import { getFavorites } from "@/lib/favoriteApi";
 
 export default function FavoriteButton({ productId }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -35,9 +35,8 @@ export default function FavoriteButton({ productId }) {
     }
 
     try {
-      await toggleFavorite(productId, user.id);
+      await toggleFavorite(productId, user.id, liked);
 
-      // đổi trạng thái icon
       setLiked((prev) => !prev);
     } catch (err) {
       console.error("Favorite error", err);

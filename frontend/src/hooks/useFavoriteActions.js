@@ -1,10 +1,13 @@
-import { addFavorite } from "@/lib/api";
+import { addFavorite, removeFavorite } from "@/lib/favoriteApi";
 
 export default function useFavoriteActions() {
-  const toggleFavorite = async (productId, userId) => {
+  const toggleFavorite = async (productId, userId, liked) => {
     try {
-      
-      await addFavorite(userId, productId);
+      if (liked) {
+        await removeFavorite(userId, productId);
+      } else {
+        await addFavorite(userId, productId);
+      }
     } catch (err) {
       console.error("Favorite error", err);
     }
