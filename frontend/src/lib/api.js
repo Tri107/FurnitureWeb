@@ -14,7 +14,7 @@ const apiFetch = async (
   endpoint,
   method = "GET",
   body = null,
-  isRetry = false,
+  isRetry = false
 ) => {
   const options = {
     method,
@@ -105,38 +105,90 @@ export const updateProfile = (data) => apiFetch("/profile/update", "PUT", data);
 // ================= DISCOUNT =================
 export const getDiscounts = () => apiFetch("/discounts");
 export const createDiscount = (data) => apiFetch("/discounts", "POST", data);
-export const updateDiscount = (id, data) => apiFetch(`/discounts/${id}`, "PUT", data);
+export const updateDiscount = (id, data) =>
+  apiFetch(`/discounts/${id}`, "PUT", data);
 export const deleteDiscount = (id) => apiFetch(`/discounts/${id}`, "DELETE");
+
 // ================= ACCOUNT (Admin) =================
 export const getAccounts = () => apiFetch("/account");
 export const getAccountById = (id) => apiFetch(`/account/${id}`);
 export const createAccount = (data) => apiFetch("/account", "POST", data);
-export const updateAccount = (id, data) => apiFetch(`/account/${id}`, "PUT", data);
-export const changeAccountPassword = (id, data) => apiFetch(`/account/${id}/password`, "PUT", data);
+export const updateAccount = (id, data) =>
+  apiFetch(`/account/${id}`, "PUT", data);
+export const changeAccountPassword = (id, data) =>
+  apiFetch(`/account/${id}/password`, "PUT", data);
 export const deleteAccount = (id) => apiFetch(`/account/${id}`, "DELETE");
-export const restoreAccount = (id) => apiFetch(`/account/${id}/restore`, "PATCH");
+export const restoreAccount = (id) =>
+  apiFetch(`/account/${id}/restore`, "PATCH");
+
 // ================= COLLECTION =================
 export const getCollections = () => apiFetch("/collections");
-export const createCollection = (data) => apiFetch("/collections", "POST", data);
-export const updateCollection = (collectionId, data) => apiFetch(`/collections/${collectionId}`, "PUT", data);
-export const deleteCollection = (collectionId) => apiFetch(`/collections/${collectionId}`, "DELETE");
+export const createCollection = (data) =>
+  apiFetch("/collections", "POST", data);
+export const updateCollection = (collectionId, data) =>
+  apiFetch(`/collections/${collectionId}`, "PUT", data);
+export const deleteCollection = (collectionId) =>
+  apiFetch(`/collections/${collectionId}`, "DELETE");
+
 // ================= PAYMENT =================
 export const getPayments = () => apiFetch("/payments");
 export const createPayment = (data) => apiFetch("/payments", "POST", data);
-export const updatePayment = (paymentId, data) => apiFetch(`/payments/${paymentId}`, "PUT", data);
-export const deletePayment = (paymentId) => apiFetch(`/payments/${paymentId}`, "DELETE");
+export const updatePayment = (paymentId, data) =>
+  apiFetch(`/payments/${paymentId}`, "PUT", data);
+export const deletePayment = (paymentId) =>
+  apiFetch(`/payments/${paymentId}`, "DELETE");
+
 // ================= CATEGORY =================
 export const getCategories = () => apiFetch("/categories");
 export const createCategory = (data) => apiFetch("/categories", "POST", data);
-export const updateCategory = (categoryId, data) => apiFetch(`/categories/${categoryId}`, "PUT", data);
-export const deleteCategory = (categoryId) => apiFetch(`/categories/${categoryId}`, "DELETE");
+export const updateCategory = (categoryId, data) =>
+  apiFetch(`/categories/${categoryId}`, "PUT", data);
+export const deleteCategory = (categoryId) =>
+  apiFetch(`/categories/${categoryId}`, "DELETE");
+
 // ================= BRAND =================
 export const getBrands = () => apiFetch("/brands");
 export const createBrand = (data) => apiFetch("/brands", "POST", data);
-export const updateBrand = (brandId, data) => apiFetch(`/brands/${brandId}`, "PUT", data);
-export const deleteBrand = (brandId) => apiFetch(`/brands/${brandId}`, "DELETE");
+export const updateBrand = (brandId, data) =>
+  apiFetch(`/brands/${brandId}`, "PUT", data);
+export const deleteBrand = (brandId) =>
+  apiFetch(`/brands/${brandId}`, "DELETE");
+
 // ================= PRODUCT =================
 export const getProducts = () => apiFetch("/products");
 export const getProductById = (id) => apiFetch(`/products/${id}`);
 export const getFeaturedProducts = (params = "") => apiFetch(`/products/home-featured${params ? `?${params}` : ""}`);
 export const getHomeCollections = (params = "") => apiFetch(`/products/home-collections${params ? `?${params}` : ""}`);
+
+export const createProduct = (data) => apiFetch("/products/add-product", "POST", data);
+export const createVariant = (data) => apiFetch("/products/add-variant", "POST", data);
+// Upload images (multipart/form-data — cannot use apiFetch)
+export const uploadProductImages = async (files) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+
+  const token = localStorage.getItem("accessToken");
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}/products/upload`, {
+    method: "POST",
+    headers,
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || "Upload ảnh thất bại");
+  }
+  return res.json();
+};
+
+export const updateProduct = (id, data) => apiFetch(`/products/${id}`, "PUT", data);
+
+export const deleteProduct = (id) => apiFetch(`/products/${id}`, "DELETE");
+
+
+
+
