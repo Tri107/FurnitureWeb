@@ -1,4 +1,4 @@
-import { addFavorite, removeFavorite } from "@/lib/favoriteApi";
+import { addFavorite, removeFavorite } from "@/lib/api";
 
 export default function useFavoriteActions() {
   const toggleFavorite = async (productId, userId, liked) => {

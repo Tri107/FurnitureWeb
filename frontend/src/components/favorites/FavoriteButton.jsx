@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import useFavoriteActions from "@/hooks/useFavoriteActions";
-import { getFavorites } from "@/lib/favoriteApi";
+import { getFavorites } from "@/lib/api";
 
 export default function FavoriteButton({ productId }) {
   const user = JSON.parse(localStorage.getItem("user"));
