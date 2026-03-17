@@ -134,6 +134,26 @@ CREATE Table favorites (
     FOREIGN KEY (product_id) REFERENCES products (product_id)
 );
 
+CREATE TABLE cart_items (
+    cart_item_id INT PRIMARY KEY AUTO_INCREMENT,
+
+    account_id INT NOT NULL,
+    product_id INT NOT NULL,
+
+    quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
+
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE (account_id, product_id),
+
+    FOREIGN KEY (account_id) REFERENCES accounts (account_id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (product_id) REFERENCES products (product_id)
+        ON DELETE CASCADE
+);
+
 --data insertion
 INSERT INTO
     categories (category_name)
