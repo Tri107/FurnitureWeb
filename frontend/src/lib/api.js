@@ -95,7 +95,6 @@ export async function getFavorites(accountId) {
 }
 
 export async function addFavorite(accountId, productId) {
-  console.log('addFavorite');
   const token = localStorage.getItem("accessToken");
   
   const res = await fetch(FAV_API_URL, {
@@ -114,7 +113,6 @@ export async function addFavorite(accountId, productId) {
 }
 
 export const removeFavorite = async (accountId, productId) => {
-  console.log('removeFavorite'); 
   const token = localStorage.getItem("accessToken");
    
   const res = await fetch(FAV_API_URL, {

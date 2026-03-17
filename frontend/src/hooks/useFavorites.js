@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getFavorites } from "@/lib/api";
+import { getFavorites, removeFavorite as removeFavoriteAPI } from "@/lib/api";
 
 export default function useFavorites() {
   const [favorites, setFavorites] = useState([]);
@@ -38,12 +38,30 @@ export default function useFavorites() {
     fetchFavorites();
   }, []);
 
-  const removeFavorite = (productId) => {
-    setFavorites((prev) => prev.filter((p) => p.id !== productId));
+  const removeFavorite = async (productId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) return;
+
+      await removeFavoriteAPI(user.id, productId);
+
+      setFavorites((prev) => prev.filter((p) => p.id !== productId));
+    } catch (err) {
+      console.error("Remove favorite error", err);
+    }
   };
 
-  const clearFavorites = () => {
-    setFavorites([]);
+  const clearFavorites = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) return;
+
+      await Promise.all(favorites.map((p) => removeFavoriteAPI(user.id, p.id)));
+
+      setFavorites([]);
+    } catch (err) {
+      console.error("Clear favorites error", err);
+    }
   };
 
   const addToCart = (product) => {
