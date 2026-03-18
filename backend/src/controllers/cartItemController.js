@@ -3,7 +3,9 @@ import cartItemModel from '../models/cartItemModel.js';
 const cartItemController = {
     getCartItems: async (req, res) => {
         try {
-            const rows = await cartItemModel.getAll();
+            const { accountId } = req.params;
+            console.log(accountId);
+            const rows = await cartItemModel.getAll(accountId);
             res.json({ success: true, data: rows });
         } catch (error) {
             return res.status(500).json({ message: 'Internal Server Error' });

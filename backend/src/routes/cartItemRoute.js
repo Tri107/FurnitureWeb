@@ -4,7 +4,7 @@ import { verifyToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', verifyToken, cartItemController.getCartItems);
+router.get('/:accountId', verifyToken, cartItemController.getCartItems);
 router.post('/', verifyToken, cartItemController.addCartItem);
 router.put('/:cartItemId', verifyToken, cartItemController.updateCartItem);
 router.delete('/:cartItemId', verifyToken, cartItemController.removeCartItem);
