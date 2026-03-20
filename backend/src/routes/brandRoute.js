@@ -4,7 +4,7 @@ import { verifyToken, verifyAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', verifyToken, verifyAdmin, brandController.getBrands);
+router.get('/',  brandController.getBrands);
 router.post('/', verifyToken, verifyAdmin, brandController.createBrand);
 router.put('/:brandId', verifyToken, verifyAdmin, brandController.updateBrand);
 router.delete('/:brandId', verifyToken, verifyAdmin, brandController.deleteBrand);
