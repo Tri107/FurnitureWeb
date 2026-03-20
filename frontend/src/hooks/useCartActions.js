@@ -19,9 +19,9 @@ export const useCartActions = (refetch) => {
     }
   };
 
-  const handleUpdateQuantity = async (productId, quantity) => {
+  const handleUpdateQuantity = async (cartItemId, quantity) => {
     try {
-      await updateCartItem(productId, quantity);
+      await updateCartItem(cartItemId, quantity);
       refetch();
     } catch (err) {
       toast.error("Update failed");

@@ -54,8 +54,8 @@ export const addToCart = async (productId, quantity = 1) => {
 };
 
 // UPDATE quantity
-export const updateCartItem = async (productId, quantity) => {
-  const res = await fetch(`${CART_API_URL}/${productId}`, {
+export const updateCartItem = async (cartItemId, quantity) => {
+  const res = await fetch(`${CART_API_URL}/${cartItemId}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify({

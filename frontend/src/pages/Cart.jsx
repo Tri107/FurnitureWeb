@@ -28,6 +28,7 @@ export default function Cart() {
 
   // map data cho đúng UI
   const items = cartItems.map((it) => ({
+    cart_item_id: it.cart_item_id,
     id: it.product_id,
     name: it.product_name,
     price: it.price || 0,
@@ -174,7 +175,7 @@ export default function Cart() {
                               <div className="mt-4 flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-[5px]">
                                   <button
-                                    onClick={() => updateQty(it.id, it.qty - 1)}
+                                    onClick={() => updateQty(it.cart_item_id, it.qty - 1)}
                                     className="h-11 w-11 rounded-full border border-slate-300 bg-white flex items-center justify-center hover:bg-slate-50"
                                     aria-label="Giảm số lượng"
                                   >
@@ -186,7 +187,7 @@ export default function Cart() {
                                   </span>
 
                                   <button
-                                    onClick={() => updateQty(it.id, it.qty + 1)}
+                                    onClick={() => updateQty(it.cart_item_id, it.qty + 1)}
                                     className="h-11 w-11 rounded-full border border-slate-300 bg-white flex items-center justify-center hover:bg-slate-50"
                                     aria-label="Tăng số lượng"
                                   >
@@ -221,7 +222,7 @@ export default function Cart() {
 
                             <button
                               type="button"
-                              onClick={() => removeItem(it.id)}
+                              onClick={() => removeItem(it.cart_item_id)}
                               className="flex items-center gap-2 hover:text-red-600"
                             >
                               <Trash2 className="h-4 w-4" />
