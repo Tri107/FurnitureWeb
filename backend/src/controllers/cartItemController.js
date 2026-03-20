@@ -4,7 +4,6 @@ const cartItemController = {
     getCartItems: async (req, res) => {
         try {
             const { accountId } = req.params;
-            console.log(accountId);
             const rows = await cartItemModel.getAll(accountId);
             res.json({ success: true, data: rows });
         } catch (error) {
