@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 
-const VariantSchema = new mongoose.Schema({
-  price: Number,
-  stock: Number,
+
+const VariantItemSchema = new mongoose.Schema({
+  sku: { type: String, required: true },
+  price: { type: Number, required: true },
+  stock: { type: Number, default: 0 },
   specs: {
     dimensions: {
       length: Number,
@@ -13,7 +15,18 @@ const VariantSchema = new mongoose.Schema({
     material: String,
     color: String
   },
-  url: [String]
+  status: { 
+    type: String, 
+    default: "available", 
+    enum: ["available", "reserved"] 
+  }
 });
 
-export default mongoose.model("Variant", VariantSchema);
+const ProductVariantSchema = new mongoose.Schema({
+  model3d: { type: String, default: null }, 
+  images: [String], 
+  
+  variants: [VariantItemSchema] 
+}, { timestamps: true });
+
+export default mongoose.model("ProductVariant", ProductVariantSchema);
