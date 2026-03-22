@@ -1,7 +1,6 @@
 const CART_API_URL = "http://localhost:9999/api/cart-items";
 
 const getToken = () => {
-  console.log(localStorage.getItem("accessToken"));
   return localStorage.getItem("accessToken");
 };
 
