@@ -564,6 +564,13 @@ export default function Header() {
                         Thông tin cá nhân
                       </Link>
                       <Link
+                        to="/history-orders"
+                        onClick={closeRight}
+                        className="block rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
+                      >
+                        Lịch sử đơn hàng
+                      </Link>
+                      <Link
                         to="/favorites"
                         onClick={closeRight}
                         className="block rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
