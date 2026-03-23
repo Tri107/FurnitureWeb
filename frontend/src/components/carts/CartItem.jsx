@@ -19,7 +19,7 @@ export default function CartItem({ item, onUpdate, onRemove }) {
                   <p>
                     Màu sắc : <span className="text-slate-800">{item.color}</span>
                   </p>
-                  <p>Kích thước: {item.size}</p>
+                  <p>Chất liệu: {item.material}</p>
                 </div>
               </div>
             </div>

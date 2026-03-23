@@ -8,7 +8,7 @@ export default function useCartPage(cartItems = []) {
   const [coupon, setCoupon] = useState(null);
   const [couponMsg, setCouponMsg] = useState("");
   const [assembly, setAssembly] = useState(true);
-
+  console.table(cartItems);
   const items = useMemo(
     () =>
       cartItems.map((it) => ({
@@ -19,8 +19,9 @@ export default function useCartPage(cartItems = []) {
         color: it.color || "N/A",
         size: it.variant_ref || "N/A",
         qty: it.quantity,
-        image: it.image || "https://via.placeholder.com/300",
+        image: it.variants.images || "https://via.placeholder.com/300",
         deliveryText: "Hàng sẽ được giao trong vòng 5-7 ngày",
+        material: it.material
       })),
     [cartItems],
   );
