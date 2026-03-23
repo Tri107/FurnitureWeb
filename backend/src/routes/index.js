@@ -1,3 +1,4 @@
+
 import express from "express";
 import accountRoute from "./accountRoute.js";
 import authRoute from "./authRoute.js";
@@ -11,6 +12,7 @@ import favoriteRoute from "./favoriteRoute.js";
 import reviewRoute from "./reviewRoute.js";
 import productRoute from "./productRoute.js";
 import cartItemRoute from "./cartItemRoute.js";
+import chatRoute from './chatRoute.js'
 
 const router = express.Router();
 
@@ -26,5 +28,7 @@ router.use("/favorites", favoriteRoute);
 router.use("/reviews", reviewRoute);
 router.use("/products", productRoute);
 router.use("/cart-items", cartItemRoute);
+router.use('/chat', chatRoute)
+
 
 export default router;
