@@ -14,6 +14,7 @@ export default function Products() {
 
   const selectedCategoryFromUrl = searchParams.get("category") || "";
   const selectedCollectionFromUrl = searchParams.get("collection") || "";
+  const pageFromUrl = Number(searchParams.get("page")) || 1;
 
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -32,6 +33,10 @@ export default function Products() {
   );
 
   const [priceRange, setPriceRange] = useState([0, 20000000]);
+
+  // PHÂN TRANG
+  const ITEMS_PER_PAGE = 9;
+  const [currentPage, setCurrentPage] = useState(pageFromUrl > 0 ? pageFromUrl : 1);
 
   useEffect(() => {
     if (selectedCategoryFromUrl) {
@@ -60,7 +65,7 @@ export default function Products() {
         const mappedProducts = (res?.data || []).map((item, index) => ({
           id: item.product_id,
           name: item.product_name,
-          price: item?.variants?.price || 0,
+          price: Number(item?.variants?.price) || 0,
           oldPrice: null,
           categoryName: item.category_name || "",
           brandName: item.brand_name || "",
@@ -159,6 +164,35 @@ export default function Products() {
     sort,
   ]);
 
+  // Reset về trang 1 khi filter/sort thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategories, selectedBrands, selectedCollections, priceRange, sort]);
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage]);
+
+  // Chống currentPage vượt quá số trang hiện có
+  useEffect(() => {
+    if (totalPages === 0) {
+      setCurrentPage(1);
+      return;
+    }
+
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const startItem =
+    filteredProducts.length === 0 ? 0 : (currentPage - 1) * ITEMS_PER_PAGE + 1;
+  const endItem = Math.min(currentPage * ITEMS_PER_PAGE, filteredProducts.length);
+
   const filterSummary = useMemo(() => {
     if (loadingProducts) return "Đang tải sản phẩm...";
     if (productError) return "Không thể tải sản phẩm";
@@ -171,14 +205,40 @@ export default function Products() {
       return `Collection: ${selectedCollectionFromUrl} • ${filteredProducts.length} sản phẩm`;
     }
 
-    return `Hiển thị ${filteredProducts.length} sản phẩm`;
+    return `Hiển thị ${startItem}-${endItem} / ${filteredProducts.length} sản phẩm`;
   }, [
     loadingProducts,
     productError,
     selectedCategoryFromUrl,
     selectedCollectionFromUrl,
     filteredProducts.length,
+    startItem,
+    endItem,
   ]);
+
+  const renderPaginationButtons = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => setCurrentPage(i)}
+          className={`min-w-10 h-10 px-3 rounded-lg border text-sm transition ${
+            currentPage === i
+              ? "bg-slate-900 text-white border-slate-900"
+              : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return pages;
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -186,9 +246,7 @@ export default function Products() {
 
       <main className="flex-1 bg-slate-50 py-10">
         <div className="max-w-7xl mx-auto px-4">
-
           {/* TITLE */}
-
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-xl font-semibold">Tất Cả Sản Phẩm</h1>
@@ -207,15 +265,11 @@ export default function Products() {
           </div>
 
           <div className="grid grid-cols-12 gap-8">
-
             {/* FILTER */}
-
             <aside className="col-span-3">
               <Card>
                 <CardContent className="p-6 space-y-6">
-
                   {/* CATEGORY */}
-
                   <div>
                     <h3 className="font-semibold mb-3">Danh mục</h3>
 
@@ -224,9 +278,7 @@ export default function Products() {
                         <label key={categoryName} className="flex items-center gap-2">
                           <Checkbox
                             checked={selectedCategories.includes(categoryName)}
-                            onCheckedChange={() =>
-                              toggleCategory(categoryName)
-                            }
+                            onCheckedChange={() => toggleCategory(categoryName)}
                           />
                           {categoryName}
                         </label>
@@ -235,7 +287,6 @@ export default function Products() {
                   </div>
 
                   {/* BRAND */}
-
                   <div>
                     <h3 className="font-semibold mb-3">Thương hiệu</h3>
 
@@ -244,9 +295,7 @@ export default function Products() {
                         <label key={brandName} className="flex items-center gap-2">
                           <Checkbox
                             checked={selectedBrands.includes(brandName)}
-                            onCheckedChange={() =>
-                              toggleBrand(brandName)
-                            }
+                            onCheckedChange={() => toggleBrand(brandName)}
                           />
                           {brandName}
                         </label>
@@ -255,7 +304,6 @@ export default function Products() {
                   </div>
 
                   {/* COLLECTION */}
-
                   <div>
                     <h3 className="font-semibold mb-3">Collection</h3>
 
@@ -264,9 +312,7 @@ export default function Products() {
                         <label key={collectionName} className="flex items-center gap-2">
                           <Checkbox
                             checked={selectedCollections.includes(collectionName)}
-                            onCheckedChange={() =>
-                              toggleCollection(collectionName)
-                            }
+                            onCheckedChange={() => toggleCollection(collectionName)}
                           />
                           {collectionName}
                         </label>
@@ -275,31 +321,61 @@ export default function Products() {
                   </div>
 
                   {/* PRICE */}
+                <div>
+  <h3 className="font-semibold mb-3">Khoảng giá</h3>
 
-                  <div>
-                    <h3 className="font-semibold mb-3">Khoảng giá</h3>
+  <Slider
+    min={0}
+    max={20000000}
+    step={500000}
+    value={priceRange}
+    onValueChange={(v) => setPriceRange(v)}
+  />
 
-                    <Slider
-                      min={0}
-                      max={20000000}
-                      step={500000}
-                      value={priceRange}
-                      onValueChange={(v) => setPriceRange(v)}
-                    />
+  <p className="text-xs text-slate-500 mt-2">
+    {formatVND(priceRange[0])} - {formatVND(priceRange[1])}
+  </p>
 
-                    <p className="text-xs text-slate-500 mt-2">
-                      {formatVND(priceRange[0])} - {formatVND(priceRange[1])}
-                    </p>
-                  </div>
+  <div className="grid grid-cols-2 gap-3 mt-4">
+    <div>
+      <label className="block text-xs text-slate-500 mb-1">Giá từ</label>
+      <input
+        type="number"
+        min={0}
+        max={priceRange[1]}
+        step={500000}
+        value={priceRange[0]}
+        onChange={(e) => {
+          const value = Number(e.target.value) || 0;
+          setPriceRange([Math.min(value, priceRange[1]), priceRange[1]]);
+        }}
+        className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+      />
+    </div>
 
+    <div>
+      <label className="block text-xs text-slate-500 mb-1">Đến</label>
+      <input
+        type="number"
+        min={priceRange[0]}
+        max={20000000}
+        step={500000}
+        value={priceRange[1]}
+        onChange={(e) => {
+          const value = Number(e.target.value) || 0;
+          setPriceRange([priceRange[0], Math.max(value, priceRange[0])]);
+        }}
+        className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+      />
+    </div>
+  </div>
+</div>
                 </CardContent>
               </Card>
             </aside>
 
             {/* PRODUCT GRID */}
-
             <section className="col-span-9">
-
               {loadingProducts ? (
                 <div className="bg-white border rounded-xl p-10 text-center text-slate-500">
                   Đang tải sản phẩm...
@@ -309,67 +385,92 @@ export default function Products() {
                   {productError}
                 </div>
               ) : (
+                <>
+                  {filteredProducts.length === 0 ? (
+                    <div className="bg-white border rounded-xl p-10 text-center text-slate-500">
+                      Không có sản phẩm phù hợp
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-3 gap-6">
+                        {paginatedProducts.map((p) => (
+                          <Link
+                            key={p.id}
+                            to={`/detailproduct/${p.id}`}
+                            className="block rounded-xl bg-white border border-slate-200 overflow-hidden hover:shadow-lg transition"
+                          >
+                            <div className="relative">
+                              <div className="aspect-[4/3] bg-slate-100">
+                                <img
+                                  src={p.img}
+                                  alt={p.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
 
-                <div className="grid grid-cols-3 gap-6">
+                              {p.tag && (
+                                <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                                  {p.tag}
+                                </span>
+                              )}
+                            </div>
 
-                  {filteredProducts.map((p) => (
+                            <div className="p-3">
+                              <p className="text-sm font-semibold line-clamp-2">
+                                {p.name}
+                              </p>
 
-                    <Link
-                      key={p.id}
-                      to={`/detailproduct/${p.id}`}
-                      className="block rounded-xl bg-white border border-slate-200 overflow-hidden hover:shadow-lg transition"
-                    >
+                              <div className="mt-2">
+                                <p className="text-sm font-bold">
+                                  {formatVND(p.price)}
+                                </p>
+                              </div>
 
-                      <div className="relative">
-
-                        <div className="aspect-[4/3] bg-slate-100">
-
-                          <img
-                            src={p.img}
-                            alt={p.name}
-                            className="w-full h-full object-cover"
-                          />
-
-                        </div>
-
-                        {p.tag && (
-                          <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
-                            {p.tag}
-                          </span>
-                        )}
-
+                              <div className="mt-2 text-xs text-slate-500 space-y-1">
+                                {p.categoryName && <p>Danh mục: {p.categoryName}</p>}
+                                {p.brandName && <p>Thương hiệu: {p.brandName}</p>}
+                                {p.collectionName && (
+                                  <p>Collection: {p.collectionName}</p>
+                                )}
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
                       </div>
 
-                      <div className="p-3">
+                      {/* PAGINATION */}
+                      {totalPages > 1 && (
+                        <div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
+                          <button
+                            onClick={() =>
+                              setCurrentPage((prev) => Math.max(prev - 1, 1))
+                            }
+                            disabled={currentPage === 1}
+                            className="h-10 px-4 rounded-lg border bg-white text-sm text-slate-700 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition"
+                          >
+                            Trước
+                          </button>
 
-                        <p className="text-sm font-semibold line-clamp-2">
-                          {p.name}
-                        </p>
+                          {renderPaginationButtons()}
 
-                        <div className="mt-2">
-                          <p className="text-sm font-bold">
-                            {formatVND(p.price)}
-                          </p>
+                          <button
+                            onClick={() =>
+                              setCurrentPage((prev) =>
+                                Math.min(prev + 1, totalPages)
+                              )
+                            }
+                            disabled={currentPage === totalPages}
+                            className="h-10 px-4 rounded-lg border bg-white text-sm text-slate-700 border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-100 transition"
+                          >
+                            Sau
+                          </button>
                         </div>
-
-                        <div className="mt-2 text-xs text-slate-500 space-y-1">
-                          {p.categoryName && <p>Danh mục: {p.categoryName}</p>}
-                          {p.brandName && <p>Thương hiệu: {p.brandName}</p>}
-                          {p.collectionName && <p>Collection: {p.collectionName}</p>}
-                        </div>
-
-                      </div>
-
-                    </Link>
-
-                  ))}
-
-                </div>
-
+                      )}
+                    </>
+                  )}
+                </>
               )}
-
             </section>
-
           </div>
         </div>
       </main>
