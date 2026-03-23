@@ -25,7 +25,7 @@ const handleResponse = async (res) => {
 
 // GET cart
 export const getCart = async () => {
-  const user = JSON.parse(localStorage.getItem("user"));  
+  const user = JSON.parse(localStorage.getItem("user"));
   const res = await fetch(`${CART_API_URL}/${user.id}`, {
     method: "GET",
     headers: getHeaders(),
@@ -35,9 +35,15 @@ export const getCart = async () => {
 };
 
 // ADD to cart
-export const addToCart = async (productId, quantity = 1) => {
+export const addToCart = async (
+  productId,
+  quantity = 1,
+  price,
+  material,
+  color,
+) => {
   const user = JSON.parse(localStorage.getItem("user"));
-  const accountId = user.id; 
+  const accountId = user.id;
 
   const res = await fetch(`${CART_API_URL}`, {
     method: "POST",
@@ -46,6 +52,9 @@ export const addToCart = async (productId, quantity = 1) => {
       accountId,
       productId,
       quantity,
+      price,
+      material,
+      color
     }),
   });
 

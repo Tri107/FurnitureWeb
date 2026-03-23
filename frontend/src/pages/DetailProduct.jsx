@@ -4,6 +4,8 @@ import Header from "../components/ui/header";
 import Footer from "../components/ui/footer";
 import ModelViewer3D from "../components/3D/ModelViewer3D";
 import { getProductById } from "../lib/api";
+import { useCart } from "../hooks/useCart";
+import { useCartActions } from "../hooks/useCartActions";
 import {
   ZoomIn, ZoomOut, Ruler, Box, LayoutGrid, List, Share, Minus, Plus,
   Info, ShoppingCart, Heart, ChevronRight, Star, Truck, RotateCcw,
@@ -20,6 +22,9 @@ export default function ProductPage() {
   const [openIndex, setOpenIndex] = useState(0);
  
   const [activeVariantIndex, setActiveVariantIndex] = useState(0);
+
+  const { refetch } = useCart();
+  const { handleAddToCart: addToCartAction } = useCartActions(refetch);
 
   const finishingTabs = ["Màu sắc", "Ván ép", "Hiệu ứng vân gỗ"];
 
@@ -112,6 +117,18 @@ export default function ProductPage() {
       });
     }
     if (targetIndex !== -1) setActiveVariantIndex(targetIndex);
+  };
+
+  const handleAddToCart = () => {
+    if (!activeVariant) return;
+
+    const productId = id;
+    const quantity = 1;
+    const price = activeVariant.price || product.price || 0;
+    const material = activeVariant.specs?.material || "N/A";
+    const color = activeVariant.colorName || "N/A";
+    
+    addToCartAction(productId, price, material, color);
   };
 
   const handleColorClick = (colorName) => {
@@ -325,7 +342,7 @@ export default function ProductPage() {
             <div className="mt-auto pt-6 border-t border-gray-100">
               <div className="flex gap-4 mb-4">
                 <button
-                  onClick={() => navigate("/cart")}
+                  onClick={handleAddToCart}
                   disabled={!activeVariant || activeVariant.stock <= 0}
                   className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-colors"
                 >
