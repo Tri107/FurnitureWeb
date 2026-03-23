@@ -27,7 +27,6 @@ export default function Home() {
 
   const addToCart = (product) => {
     handleAddToCart(product.id);
-    alert(`Đã thêm "${product.name}" vào giỏ hàng`);
   };
 
   const heroImages = useMemo(

@@ -8,13 +8,18 @@ import {
 import toast from "react-hot-toast";
 
 export const useCartActions = (refetch) => {
-  const handleAddToCart = async (productId) => {
+  const handleAddToCart = async (
+    productId,
+    price = 0,
+    material = null,
+    color = null,
+  ) => {
     try {
-      await addToCart(productId, 1);
+      await addToCart(productId, 1, price, material, color);
       toast.success("Added to cart");
       refetch();
     } catch (err) {
-      console.table(err);
+      console.log(err);
       toast.error("Add to cart failed");
     }
   };
