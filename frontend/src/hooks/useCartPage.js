@@ -8,7 +8,7 @@ export default function useCartPage(cartItems = []) {
   const [coupon, setCoupon] = useState(null);
   const [couponMsg, setCouponMsg] = useState("");
   const [assembly, setAssembly] = useState(true);
-  console.table(cartItems);
+  
   const items = useMemo(
     () =>
       cartItems.map((it) => ({
