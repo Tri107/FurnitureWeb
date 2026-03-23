@@ -2,11 +2,13 @@ import db from '../config/mysql.js';
 const table_name = 'cart_items';
 
 const CartItemModel = {
-    getAll: async () => {
+    getAll: async (accountId) => {
         const [rows] = await db.query(`
             SELECT *
-            FROM ${table_name}
-        `);
+            FROM ${table_name} ci
+            JOIN products p ON p.product_id = ci.product_id
+            WHERE account_id = ?
+        `, [accountId]);
         return rows;
     },
 

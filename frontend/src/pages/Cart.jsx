@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { useCart } from "@/hooks/useCart";
+import { useCartActions } from "@/hooks/useCartActions";
+
 import {
   Heart,
   Trash2,
@@ -20,19 +23,20 @@ import {
 
 export default function Cart() {
   const navigate = useNavigate();
-  const [items, setItems] = useState([
-    {
-      id: "p1",
-      name: "Tủ cạnh",
-      price: 48362000,
-      color: "Xanh hoàng hôn",
-      size: "Chiều rộng: 214cm, Chiều cao: 88cm, Chiều sâu: 36cm",
-      qty: 1,
-      image:
-        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80",
-      deliveryText: "Hàng sẽ được giao trong vòng 8-9 tuần",
-    },
-  ]);
+  const { cartItems, loading, refetch } = useCart();
+  const { handleUpdateQuantity, handleRemove } = useCartActions(refetch);
+
+  // map data cho đúng UI
+  const items = cartItems.map((it) => ({
+    id: it.product_id,
+    name: it.product_name,
+    price: it.price || 0,
+    color: "N/A", // nếu chưa có variant
+    size: it.variant_ref || "N/A",
+    qty: it.quantity,
+    image: it.image || "https://via.placeholder.com/300",
+    deliveryText: "Hàng sẽ được giao trong vòng 5-7 ngày",
+  }));
 
   const [couponInput, setCouponInput] = useState("");
   const [coupon, setCoupon] = useState(null);
@@ -44,12 +48,13 @@ export default function Cart() {
 
   const subtotal = useMemo(
     () => items.reduce((sum, it) => sum + it.price * it.qty, 0),
-    [items]
+    [items],
   );
 
   const discount = useMemo(() => {
     if (!coupon) return 0;
-    if (coupon.type === "percent") return Math.round((subtotal * coupon.value) / 100);
+    if (coupon.type === "percent")
+      return Math.round((subtotal * coupon.value) / 100);
     if (coupon.type === "amount") return coupon.value;
     return 0;
   }, [coupon, subtotal]);
@@ -69,13 +74,11 @@ export default function Cart() {
       return;
     }
 
-    setItems((prev) =>
-      prev.map((it) => (it.id === id ? { ...it, qty: nextQty } : it))
-    );
+    handleUpdateQuantity(id, nextQty);
   };
 
   const removeItem = (id) => {
-    setItems((prev) => prev.filter((it) => it.id !== id));
+    handleRemove(id);
   };
 
   const applyCoupon = () => {
@@ -103,13 +106,23 @@ export default function Cart() {
     setCouponMsg("Mã không hợp lệ hoặc đã hết hạn.");
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
       <main className="flex-1 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 py-8">
-          <h1 className="text-2xl font-bold text-slate-900">Giỏ hàng của bạn</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Giỏ hàng của bạn
+          </h1>
 
           <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div className="lg:col-span-8">
@@ -149,7 +162,9 @@ export default function Cart() {
                                   <div className="mt-3 space-y-2 text-base text-slate-600">
                                     <p>
                                       Màu sắc :{" "}
-                                      <span className="text-slate-800">{it.color}</span>
+                                      <span className="text-slate-800">
+                                        {it.color}
+                                      </span>
                                     </p>
                                     <p>Kích thước: {it.size}</p>
                                   </div>
@@ -237,13 +252,19 @@ export default function Cart() {
                     {discount > 0 && (
                       <div className="flex items-center justify-between text-slate-700">
                         <span>Ưu đãi ({coupon?.code})</span>
-                        <span className="text-red-600">- {formatVND(discount)}</span>
+                        <span className="text-red-600">
+                          - {formatVND(discount)}
+                        </span>
                       </div>
                     )}
 
                     <div className="flex items-center justify-between text-slate-700">
                       <span>Vận chuyển</span>
-                      <span>{shippingFee === 0 ? "Miễn phí" : formatVND(shippingFee)}</span>
+                      <span>
+                        {shippingFee === 0
+                          ? "Miễn phí"
+                          : formatVND(shippingFee)}
+                      </span>
                     </div>
 
                     <div className="flex items-center justify-between text-slate-700">
@@ -305,14 +326,18 @@ export default function Cart() {
                   <div className="h-px w-full bg-slate-200" />
 
                   <div className="flex items-center justify-between">
-                    <p className="text-lg font-normal text-slate-900">Tổng Tiền</p>
-                    <p className="text-[20px] font-bold text-red-600">{formatVND(total)}</p>
+                    <p className="text-lg font-normal text-slate-900">
+                      Tổng Tiền
+                    </p>
+                    <p className="text-[20px] font-bold text-red-600">
+                      {formatVND(total)}
+                    </p>
                   </div>
 
                   <Button
                     className="h-12 w-full rounded-full bg-red-600 text-base hover:bg-red-700"
                     disabled={items.length === 0}
-                    onClick={() => navigate('/checkout')}
+                    onClick={() => navigate("/checkout")}
                   >
                     Thanh toán
                   </Button>

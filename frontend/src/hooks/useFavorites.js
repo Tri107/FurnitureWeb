@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import { getFavorites, removeFavorite as removeFavoriteAPI } from "@/lib/api";
 
+import { useCart } from "@/hooks/useCart";
+import { useCartActions } from "@/hooks/useCartActions";
+
 export default function useFavorites() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { refetch } = useCart();
+  const { handleAddToCart } = useCartActions(refetch);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -65,6 +71,7 @@ export default function useFavorites() {
   };
 
   const addToCart = (product) => {
+    handleAddToCart(product.id);
     alert(`Đã thêm "${product.name}" vào giỏ hàng`);
   };
 
