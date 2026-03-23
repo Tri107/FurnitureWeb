@@ -140,3 +140,7 @@ export const getProducts = () => apiFetch("/products");
 export const getProductById = (id) => apiFetch(`/products/${id}`);
 export const getFeaturedProducts = (params = "") => apiFetch(`/products/home-featured${params ? `?${params}` : ""}`);
 export const getHomeCollections = (params = "") => apiFetch(`/products/home-collections${params ? `?${params}` : ""}`);
+// ================= CHAT =================
+export const getChatConversations = () => apiFetch("/chat/conversations/list");
+export const getChatMessages = (conversationId) => apiFetch(`/chat/messages/${conversationId}`);
+export const createOrGetConversation = (data) => apiFetch("/chat/conversation", "POST", data);

@@ -8,7 +8,8 @@ import {
   Settings,
   Wrench,
   Truck,
-  LogOut
+  LogOut,
+  MessageCircle
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -47,7 +48,8 @@ export default function Sidebar() {
         <Item to="/admin/collections" icon={<Package size={18} />} label="Collections" />
         <Item to="/admin/discounts" icon={<CreditCard size={18} />} label="Khuyến mãi" />
         <Item to="/admin/accounts" icon={<Users size={18} />} label="Người dùng" />
-          <Item to="/admin/brands" icon={<Package size={18} />} label="Thương hiệu" />
+        <Item to="/admin/brands" icon={<Package size={18} />} label="Thương hiệu" />
+        <Item to="/admin/chat" icon={<MessageCircle size={18} />} label="Hỗ trợ Chat" />
       </nav>
 
       {/* Logout */}
