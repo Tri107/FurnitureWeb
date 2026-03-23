@@ -4,6 +4,8 @@ import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import { getProducts } from "@/lib/api";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
+import { useCart } from "@/hooks/useCart";
+import { useCartActions } from "@/hooks/useCartActions";
 
 const defaultCategoryImages = {
   Bàn: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=1200&q=80&auto=format&fit=crop",
@@ -19,6 +21,14 @@ export default function Home() {
   const [tab, setTab] = useState("all");
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [productError, setProductError] = useState("");
+
+  const { refetch } = useCart();
+  const { handleAddToCart } = useCartActions(refetch);
+
+  const addToCart = (product) => {
+    handleAddToCart(product.id);
+    alert(`Đã thêm "${product.name}" vào giỏ hàng`);
+  };
 
   const heroImages = useMemo(
     () => [
@@ -336,7 +346,7 @@ export default function Home() {
                         </span>
                       </div>
 
-                      <div className="mt-2 flex items-end justify-between">
+                      <div className="mt-2 flex items-end justify-between gap-2">
                         <div>
                           <p className="text-[12px] font-bold text-slate-900">
                             {formatVND(p.price)}
@@ -348,12 +358,21 @@ export default function Home() {
                           )}
                         </div>
 
-                        <Link
-                          to={`/detailproduct/${p.id}`}
-                          className="text-[11px] px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
-                        >
-                          Xem
-                        </Link>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            to={`/detailproduct/${p.id}`}
+                            className="text-[11px] px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
+                          >
+                            Xem
+                          </Link>
+
+                          <button
+                            onClick={() => addToCart(p)}
+                            className="text-[11px] px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+                          >
+                            🛒
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
