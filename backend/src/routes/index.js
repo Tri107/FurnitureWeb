@@ -10,6 +10,7 @@ import paymentRoute from './paymentRoute.js'
 import favoriteRoute from './favoriteRoute.js'
 import reviewRoute from './reviewRoute.js'
 import productRoute from './productRoute.js'
+import chatRoute from './chatRoute.js'
 
 const router = express.Router();
 
@@ -24,5 +25,6 @@ router.use('/payments',paymentRoute)
 router.use('/favorites',favoriteRoute)
 router.use('/reviews', reviewRoute)
 router.use('/products', productRoute)
+router.use('/chat', chatRoute)
 
 export default router;

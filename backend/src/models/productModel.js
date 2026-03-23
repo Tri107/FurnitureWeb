@@ -19,7 +19,7 @@ const ProductModel = {
     `);
 
     const variantIds = rows
-      .filter((r) => r.variant_ref)
+      .filter((r) => r.variant_ref && mongoose.Types.ObjectId.isValid(r.variant_ref))
       .map((r) => new mongoose.Types.ObjectId(r.variant_ref));
 
     const variants = await Variant.find({
@@ -62,7 +62,7 @@ const ProductModel = {
       return null;
     }
 
-    if (product.variant_ref) {
+    if (product.variant_ref && mongoose.Types.ObjectId.isValid(product.variant_ref)) {
       const objectId = new mongoose.Types.ObjectId(product.variant_ref);
       const variant = await Variant.findById(objectId).lean();
 

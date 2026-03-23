@@ -4,7 +4,7 @@ import { verifyToken, verifyAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', verifyToken, verifyAdmin, paymentController.getPayments);
+router.get('/', verifyToken,  paymentController.getPayments);
 router.post('/', verifyToken, verifyAdmin, paymentController.createPayment);
 router.put('/:paymentId', verifyToken, verifyAdmin, paymentController.updatePayment);
 router.delete('/:paymentId', verifyToken, verifyAdmin, paymentController.deletePayment);

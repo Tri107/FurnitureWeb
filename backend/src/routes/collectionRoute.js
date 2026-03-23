@@ -4,7 +4,7 @@ import { verifyToken, verifyAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', verifyToken, verifyAdmin, collectionController.getCollections);
+router.get('/', collectionController.getCollections);
 router.post('/', verifyToken, verifyAdmin, collectionController.createCollection);
 router.put('/:collectionId', verifyToken, verifyAdmin, collectionController.updateCollection);
 router.delete('/:collectionId', verifyToken, verifyAdmin, collectionController.deleteCollection);
