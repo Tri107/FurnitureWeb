@@ -13,11 +13,12 @@ const cartItemController = {
 
     addCartItem: async (req, res) => {
         try {
-            const { accountId, productId, quantity, price, material, color } = req.body;
-            if (!accountId || !productId || !quantity) {
+            const { accountId, productId, quantity, sku, price, color } = req.body;
+            if (!accountId || !productId || !quantity || !sku) {
                 return res.status(400).json({ message: 'Missing required fields' });
             }
-            const affectedRows = await cartItemModel.add(accountId, productId, quantity, price, material, color);
+            const snapshot = { price, color };
+            const affectedRows = await cartItemModel.add(accountId, productId, sku, quantity, snapshot);
             if (affectedRows === 0) {
                 return res.status(400).json({ message: 'Failed to add item to cart' });
             }

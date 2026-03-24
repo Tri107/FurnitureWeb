@@ -123,12 +123,11 @@ export default function ProductPage() {
     if (!activeVariant) return;
 
     const productId = id;
-    const quantity = 1;
+    const sku = activeVariant.sku || "N/A";
     const price = activeVariant.price || product.price || 0;
-    const material = activeVariant.specs?.material || "N/A";
     const color = activeVariant.colorName || "N/A";
     
-    addToCartAction(productId, price, material, color);
+    addToCartAction(productId, sku, price, color);
   };
 
   const handleColorClick = (colorName) => {

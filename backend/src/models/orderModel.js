@@ -47,7 +47,7 @@ const OrderModel = {
   },
 
   create: async (orderData) => {
-    const { account_id, total_price, items } = orderData;
+    const { account_id, total_price, items, address, note } = orderData;
     // Use manual transaction over the connection
     const connection = await db.getConnection();
     try {
@@ -55,27 +55,23 @@ const OrderModel = {
 
       // Insert Order
       const [orderResult] = await connection.query(
-        `INSERT INTO orders (total_price, account_id) VALUES (?, ?)`,
-        [total_price, account_id]
+        `INSERT INTO orders (total_price, account_id, address, note) VALUES (?, ?, ?, ?)`,
+        [total_price, account_id, address || null, note || null]
       );
       const orderId = orderResult.insertId;
 
       // Insert Order Items
       for (let item of items) {
         // Find Variant in MongoDB to record snapshot
-        const variantDoc = await Variant.findById(item.variant_id).lean();
-        if (!variantDoc) throw new Error(`Variant document not found for ID: ${item.variant_id}`);
+        const variantDoc = await Variant.findOne({ "variants.sku": item.sku }).lean();
+        if (!variantDoc) throw new Error(`Variant document not found for SKU: ${item.sku}`);
 
-        let specificVariant = variantDoc;
-        // Nếu document có chứa mảng variants (nesting), tìm chính xác bản thể theo sku
-        if (item.sku && variantDoc.variants && Array.isArray(variantDoc.variants)) {
-          specificVariant = variantDoc.variants.find(v => v.sku === item.sku);
-          if (!specificVariant) {
-            throw new Error(`Variant SKU ${item.sku} not found inside document ${item.variant_id}`);
-          }
+        const specificVariant = variantDoc.variants.find(v => v.sku === item.sku);
+        if (!specificVariant) {
+          throw new Error(`Variant SKU ${item.sku} not found inside document`);
         }
 
-        const { _id, __v, createdAt, updatedAt, stock, ...variantData } = specificVariant;
+        const { _id, ...variantData } = specificVariant;
         const variant_snapshot = JSON.stringify(variantData);
 
         await connection.query(

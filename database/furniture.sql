@@ -87,9 +87,13 @@ CREATE Table orders (
         'CANCELLED'
     ) DEFAULT 'PENDING',
     total_price DECIMAL(10, 3) NOT NULL,
+    address VARCHAR(255),
+    note TEXT,
     account_id INT NOT NULL,
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
+
+-- ALTER TABLE orders ADD COLUMN address VARCHAR(255), ADD COLUMN note TEXT;
 
 CREATE Table order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -135,23 +139,16 @@ CREATE Table favorites (
 );
 
 CREATE TABLE cart_items (
-    cart_item_id INT PRIMARY KEY AUTO_INCREMENT,
-
-    account_id INT NOT NULL,
-    product_id INT NOT NULL,
-
-    quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
-
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    UNIQUE (account_id, product_id),
-
-    FOREIGN KEY (account_id) REFERENCES accounts (account_id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (product_id) REFERENCES products (product_id)
-        ON DELETE CASCADE
+  cart_item_id INT AUTO_INCREMENT PRIMARY KEY,
+  account_id INT NOT NULL,
+  product_id INT NOT NULL,
+  sku VARCHAR(100) NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  snapshot JSON NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  UNIQUE KEY unique_cart_item (account_id, product_id, sku)
 );
 
 --data insertion
@@ -853,7 +850,3 @@ END
 DELIMITER;
 
 
-SELECT oi.quantity, oi.product_id, p.product_name, oi.variant_snapshot, oi.order_id, oi.discount_id
-       FROM order_items oi 
-       JOIN products p ON oi.product_id = p.product_id 
-       WHERE oi.order_id = 6

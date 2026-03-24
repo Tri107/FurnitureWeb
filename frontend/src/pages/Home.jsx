@@ -26,7 +26,7 @@ export default function Home() {
   const { handleAddToCart } = useCartActions(refetch);
 
   const addToCart = (product) => {
-    handleAddToCart(product.id);
+    handleAddToCart(product.id, "FAST-BUY-SKU", product.price, "Mặc định");
   };
 
   const heroImages = useMemo(
@@ -113,8 +113,8 @@ export default function Home() {
   };
 
   const goToCollections = () => {
-  navigate("/products"); 
-};
+    navigate("/products");
+  };
   const goToCategoryProducts = (categoryName) => {
     navigate(`/products?category=${encodeURIComponent(categoryName)}`);
   };
@@ -129,9 +129,8 @@ export default function Home() {
             {heroImages.map((img, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
-                  index === heroIndex ? "opacity-100" : "opacity-0"
-                }`}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${index === heroIndex ? "opacity-100" : "opacity-0"
+                  }`}
                 style={{ backgroundImage: `url(${img})` }}
               />
             ))}
@@ -307,70 +306,47 @@ export default function Home() {
                   >
                     <div className="relative">
                       <FavoriteButton productId={p.id} />
-                      <div className="aspect-[4/3] bg-slate-100">
-                        <img
-                          src={p.img}
-                          alt={p.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
+                      <Link to={`/detailproduct/${p.id}`} className="block">
+                        <div className="aspect-[4/3] bg-slate-100">
+                          <img
+                            src={p.img}
+                            alt={p.name}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
 
-                      {p.tag && (
-                        <span className="absolute top-2 left-2 rounded bg-black/70 px-2 py-1 text-[10px] text-white">
-                          {p.tag}
-                        </span>
-                      )}
+                        {p.tag && (
+                          <span className="absolute top-2 left-2 rounded bg-black/70 px-2 py-1 text-[10px] text-white">
+                            {p.tag}
+                          </span>
+                        )}
+                      </Link>
                     </div>
 
                     <div className="p-3">
-                      <p className="text-[12px] font-semibold text-slate-900 line-clamp-2 min-h-[32px]">
-                        {p.name}
-                      </p>
+                      <Link to={`/detailproduct/${p.id}`} className="hover:underline">
+                        <p className="text-[12px] font-semibold text-slate-900 line-clamp-2 min-h-[32px]">
+                          {p.name}
+                        </p>
+                      </Link>
 
-                      <div className="mt-1 flex items-center gap-1">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span
-                            key={i}
-                            className={
-                              i < (p.rating ?? 0)
-                                ? "text-yellow-400 text-[10px]"
-                                : "text-slate-300 text-[10px]"
-                            }
-                          >
-                            ★
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <span
+                              key={i}
+                              className={
+                                i < (p.rating ?? 0)
+                                  ? "text-yellow-400 text-[10px]"
+                                  : "text-slate-300 text-[10px]"
+                              }
+                            >
+                              ★
+                            </span>
+                          ))}
+                          <span className="text-[11px] text-slate-500 ml-1">
+                            ({p.reviews ?? 0})
                           </span>
-                        ))}
-                        <span className="text-[11px] text-slate-500 ml-1">
-                          ({p.reviews ?? 0})
-                        </span>
-                      </div>
-
-                      <div className="mt-2 flex items-end justify-between gap-2">
-                        <div>
-                          <p className="text-[12px] font-bold text-slate-900">
-                            {formatVND(p.price)}
-                          </p>
-                          {p.oldPrice && (
-                            <p className="text-[11px] text-slate-400 line-through">
-                              {formatVND(p.oldPrice)}
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <Link
-                            to={`/detailproduct/${p.id}`}
-                            className="text-[11px] px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50"
-                          >
-                            Xem
-                          </Link>
-
-                          <button
-                            onClick={() => addToCart(p)}
-                            className="text-[11px] px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
-                          >
-                            🛒
-                          </button>
                         </div>
                       </div>
                     </div>

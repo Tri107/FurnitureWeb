@@ -138,6 +138,8 @@ export const googleLogin  = (data) => apiFetch("/auth/google-login", "POST", dat
 export const logoutUser   = () => apiFetch("/auth/logout", "POST"); 
 export const getMyProfile = () => apiFetch("/profile/me", "GET");
 export const updateProfile = (data) => apiFetch("/profile/update", "PUT", data);
+// ================= ORDER =================
+export const createOrder = (data) => apiFetch("/orders", "POST", data);
 // ================= DISCOUNT =================
 export const getDiscounts = () => apiFetch("/discounts");
 export const createDiscount = (data) => apiFetch("/discounts", "POST", data);

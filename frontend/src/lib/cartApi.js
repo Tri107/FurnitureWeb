@@ -38,9 +38,9 @@ export const getCart = async () => {
 export const addToCart = async (
   productId,
   quantity = 1,
+  sku,
   price,
-  material,
-  color,
+  color
 ) => {
   const user = JSON.parse(localStorage.getItem("user"));
   const accountId = user.id;
@@ -52,8 +52,8 @@ export const addToCart = async (
       accountId,
       productId,
       quantity,
+      sku,
       price,
-      material,
       color
     }),
   });
@@ -86,9 +86,11 @@ export const removeCartItem = async (productId) => {
 
 // CLEAR cart
 export const clearCart = async () => {
-  const res = await fetch(`${CART_API_URL}`, {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const res = await fetch(`${CART_API_URL}/clear`, {
     method: "DELETE",
     headers: getHeaders(),
+    body: JSON.stringify({ accountId: user.id })
   });
 
   return handleResponse(res);

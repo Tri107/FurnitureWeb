@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, User, X } from "lucide-react";
 import { getCategories, getCollections, getProducts } from "@/lib/api";
+import { useCart } from "@/hooks/useCart";
 
 function formatVND(v) {
   return new Intl.NumberFormat("vi-VN", {
@@ -65,25 +66,32 @@ export default function Header() {
     fetchHeaderData();
   }, []);
 
-  const cartItems = useMemo(
-    () => [
-      {
-        id: "c1",
-        name: "Sofa Vải Nỉ Bắc Âu",
-        price: 8500000,
-        qty: 1,
-        img: "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=400&q=80&auto=format&fit=crop",
-      },
-      {
-        id: "c2",
-        name: "Bàn Trà Gỗ Sồi Tự Nhiên",
-        price: 2800000,
-        qty: 2,
-        img: "https://images.unsplash.com/photo-1533090368676-1fd25485db88?w=400&q=80&auto=format&fit=crop",
-      },
-    ],
-    []
-  );
+  const { cartItems: rawCartItems } = useCart();
+
+  const cartItems = useMemo(() => {
+    return (rawCartItems || []).map((it) => {
+      let snapshot = {};
+      try {
+        snapshot = typeof it.snapshot === "string" ? JSON.parse(it.snapshot || "{}") : (it.snapshot || {});
+      } catch (e) {
+        console.error("Error parsing snapshot", e);
+      }
+
+      const imageArray = it.variants?.images;
+      const img = Array.isArray(imageArray) && imageArray.length > 0
+        ? imageArray[0]
+        : (typeof imageArray === "string" ? imageArray : "https://via.placeholder.com/400x300?text=No+Image");
+
+      return {
+        id: it.cart_item_id,
+        name: it.product_name,
+        price: snapshot.price || 0,
+        sku: it.sku || "N/A",
+        qty: it.quantity,
+        img: img,
+      };
+    });
+  }, [rawCartItems]);
 
   const cartCount = cartItems.reduce((s, it) => s + it.qty, 0);
   const cartTotal = cartItems.reduce((s, it) => s + it.price * it.qty, 0);
@@ -291,8 +299,8 @@ export default function Header() {
                 className={[
                   "relative hover:text-orange-400 transition",
                   activeType === "category" &&
-                  activeKey === category.category_name &&
-                  openMega
+                    activeKey === category.category_name &&
+                    openMega
                     ? "text-orange-400"
                     : "",
                 ].join(" ")}
@@ -302,8 +310,8 @@ export default function Header() {
                   className={[
                     "absolute -bottom-2 left-0 h-[2px] w-full bg-orange-500 transition-opacity",
                     activeType === "category" &&
-                    activeKey === category.category_name &&
-                    openMega
+                      activeKey === category.category_name &&
+                      openMega
                       ? "opacity-100"
                       : "opacity-0",
                   ].join(" ")}
@@ -462,28 +470,35 @@ export default function Header() {
 
                   <div className="max-h-[320px] overflow-auto p-3 space-y-2">
                     {cartItems.map((it) => (
-                      <div
-                        key={it.id}
-                        className="flex items-center gap-3 rounded-xl p-2 bg-white/5 border border-white/10"
-                      >
-                        <img
-                          src={it.img}
-                          alt={it.name}
-                          className="h-14 w-14 rounded-lg object-cover"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-white truncate">
-                            {it.name}
-                          </p>
-                          <p className="text-xs text-white/70 mt-0.5">
-                            {formatVND(it.price)} • SL:{" "}
-                            <span className="text-white">{it.qty}</span>
+                      <Link to={`/detailproduct/${it.id}`}
+                        onClick={closeRight}>
+                        <div
+                          key={it.id}
+                          className="flex items-center gap-3 rounded-xl p-2 bg-white/5 border border-white/10"
+                        >
+                          <img
+                            src={it.img}
+                            alt={it.name}
+                            className="h-14 w-14 rounded-lg object-cover"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-white truncate">
+                              {it.name}
+                            </p>
+                            <p className="text-[10px] text-white/50 truncate">
+                              {it.sku}
+                            </p>
+                            <p className="text-xs text-white/70 mt-0.5">
+                              {formatVND(it.price)} • SL:{" "}
+                              <span className="text-white">{it.qty}</span>
+                            </p>
+                          </div>
+                          <p className="text-sm font-semibold text-white">
+                            {formatVND(it.price * it.qty)}
                           </p>
                         </div>
-                        <p className="text-sm font-semibold text-white">
-                          {formatVND(it.price * it.qty)}
-                        </p>
-                      </div>
+                      </Link>
+
                     ))}
                   </div>
 
@@ -501,7 +516,7 @@ export default function Header() {
                         onClick={closeRight}
                         className="text-center rounded-xl border border-white/15 bg-white/5 py-2 text-sm font-semibold hover:bg-white/10 transition"
                       >
-                        Xem giỏ
+                        Xem giỏ hàng
                       </Link>
                       <Link
                         to="/checkout"

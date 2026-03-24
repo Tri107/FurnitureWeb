@@ -5,19 +5,24 @@ import {
   clearCart,
 } from "../lib/cartApi";
 
+import { useCart } from "./useCart";
 import toast from "react-hot-toast";
 
-export const useCartActions = (refetch) => {
+export const useCartActions = (backupRefetch) => {
+  const cartContext = useCart();
+  const refetch = cartContext?.refetch || backupRefetch;
+  const { optimisticUpdate, optimisticRemove, optimisticAdd } = cartContext || {};
   const handleAddToCart = async (
     productId,
+    sku = "UNKNOWN-SKU",
     price = 0,
-    material = null,
     color = null,
   ) => {
     try {
-      await addToCart(productId, 1, price, material, color);
+      if (optimisticAdd) optimisticAdd();
+      await addToCart(productId, 1, sku, price, color);// default quantity = 1
       toast.success("Added to cart");
-      refetch();
+      if (refetch) refetch();
     } catch (err) {
       console.log(err);
       toast.error("Add to cart failed");
@@ -25,21 +30,25 @@ export const useCartActions = (refetch) => {
   };
 
   const handleUpdateQuantity = async (cartItemId, quantity) => {
+    if (optimisticUpdate) optimisticUpdate(cartItemId, quantity);
     try {
       await updateCartItem(cartItemId, quantity);
-      refetch();
+      if (refetch) refetch();
     } catch (err) {
       toast.error("Update failed");
+      if (refetch) refetch();
     }
   };
 
   const handleRemove = async (productId) => {
+    if (optimisticRemove) optimisticRemove(productId);
     try {
       await removeCartItem(productId);
       toast.success("Removed");
-      refetch();
+      if (refetch) refetch();
     } catch (err) {
       toast.error("Remove failed");
+      if (refetch) refetch();
     }
   };
 
@@ -47,9 +56,10 @@ export const useCartActions = (refetch) => {
     try {
       await clearCart();
       toast.success("Cart cleared");
-      refetch();
+      if (refetch) refetch();
     } catch (err) {
       toast.error("Clear failed");
+      if (refetch) refetch();
     }
   };
 
