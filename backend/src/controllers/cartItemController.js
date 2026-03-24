@@ -45,6 +45,23 @@ const cartItemController = {
         }
     },
 
+    updateCartItemColor: async (req, res) => {
+        try {
+            const { cartItemId } = req.params;
+            const { color } = req.body;
+            if (!color) {
+                return res.status(400).json({ message: 'Color is required' });
+            }
+            const affectedRows = await cartItemModel.updateColor(cartItemId, color);
+            if (affectedRows === 0) {
+                return res.status(404).json({ message: 'Cart item not found' });
+            }
+            res.json({ success: true });
+        } catch (error) {
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    },
+
     removeCartItem: async (req, res) => {
         try {
             const { cartItemId } = req.params;
