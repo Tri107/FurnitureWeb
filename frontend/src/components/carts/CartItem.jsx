@@ -1,6 +1,8 @@
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 
-export default function CartItem({ item, onUpdate, onRemove }) {
+export default function CartItem({ item, onUpdate, onUpdateColor, onRemove }) {
+  const [selectedColor, setSelectedColor] = useState(item.color);
   return (
     <div className="rounded-md border border-slate-200 bg-white shadow-sm">
       <div className="p-5">
@@ -20,6 +22,40 @@ export default function CartItem({ item, onUpdate, onRemove }) {
                     Màu sắc : <span className="text-slate-800">{item.color}</span>
                   </p>
                   <p>Chất liệu: {item.material}</p>
+
+                  <div>
+                    <p className="text-sm font-medium text-slate-700">Chọn màu:</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {item.availableColors?.map((colorName) => {
+                        const isSelected = colorName === selectedColor;
+                        return (
+                          <button
+                            key={colorName}
+                            type="button"
+                            className={`w-8 h-8 rounded-full border ${isSelected ? 'border-red-500 ring-2 ring-offset-2 ring-red-300 scale-110' : 'border-gray-300'} transition-all duration-200 transform hover:scale-110`}
+                            style={{
+                              backgroundColor:
+                                colorName === 'Trắng' ? '#FFFFFF' :
+                                colorName === 'Nâu' ? '#8B4513' :
+                                colorName === 'Nâu đậm' ? '#C69B7B' :
+                                colorName === 'Đen' ? '#2A2A2A' :
+                                colorName === 'Đen nhám' ? '#2A2A2A' :
+                                colorName === 'Gỗ sồi' ? '#E5E4E0' :
+                                colorName === 'Xám' ? '#808080' :
+                                colorName === 'Xanh Navy' ? '#000080' :
+                                colorName === 'Nâu da bò' ? '#A52A2A' :
+                                colorName === 'Vân gỗ sáng' ? '#DEB887' : '#CCCCCC',
+                            }}
+                            onClick={() => {
+                              setSelectedColor(colorName); // immediate UI feedback
+                              onUpdateColor(item.cart_item_id, colorName);
+                            }}
+                            title={colorName}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
