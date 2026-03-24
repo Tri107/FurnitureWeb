@@ -5,6 +5,11 @@ export default function CartItem({ item, onUpdate, onUpdateColor, onRemove }) {
   const [selectedColor, setSelectedColor] = useState(item.color);
   const [isUpdatingColor, setIsUpdatingColor] = useState(false);
 
+  // Tính giá dựa trên màu đã chọn
+  const selectedVariant = item.variants?.find(v => v.specs?.color === selectedColor);
+  const currentPrice = selectedVariant ? selectedVariant.price : item.price;
+  const totalPrice = currentPrice * item.qty;
+
   const handleColorSelect = async (colorName) => {
     setSelectedColor(colorName);
     setIsUpdatingColor(true);
@@ -100,7 +105,7 @@ export default function CartItem({ item, onUpdate, onUpdateColor, onRemove }) {
               </div>
 
               <p className="flex h-11 items-center text-[22px] font-normal text-red-600">
-                {item.totalPrice}
+                {totalPrice.toLocaleString('vi-VN')}₫
               </p>
             </div>
           </div>

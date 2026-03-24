@@ -31,6 +31,7 @@ export default function useCartPage(cartItems = []) {
           image: it.variants?.images?.[0] || "https://via.placeholder.com/300",
           deliveryText: "Hàng sẽ được giao trong vòng 5-7 ngày",
           material: it.material,
+          variants: it.variants?.variants || [], // Thêm variants array
         };
       }),
     [cartItems],
