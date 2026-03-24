@@ -54,10 +54,39 @@ const CartItemModel = {
     },
 
     updateColor: async (cartItemId, color) => {
-        const [result] = await db.query(
-            `UPDATE ${table_name} SET color = ? WHERE cart_item_id = ?`,
-            [color, cartItemId]
+        const [cartRows] = await db.query(
+            `SELECT ci.product_id, ci.quantity, p.variant_ref FROM ${table_name} ci JOIN products p ON p.product_id = ci.product_id WHERE ci.cart_item_id = ?`,
+            [cartItemId]
         );
+
+        if (cartRows.length === 0) {
+            throw new Error('Cart item not found');
+        }
+
+        const { product_id, quantity, variant_ref } = cartRows[0];
+
+        if (!variant_ref || !isValidObjectId(variant_ref)) {
+            throw new Error('Invalid variant reference');
+        }
+
+        const variantDoc = await Variant.findById(variant_ref).lean();
+        if (!variantDoc) {
+            throw new Error('Variant not found');
+        }
+
+        const selectedVariant = variantDoc.variants.find(v => v.specs?.color?.trim() === color.trim());
+        if (!selectedVariant) {
+            throw new Error('Variant with specified color not found');
+        }
+
+        const newPrice = selectedVariant.price;
+
+        // Update color và unit price
+        const [result] = await db.query(
+            `UPDATE ${table_name} SET color = ?, price = ? WHERE cart_item_id = ?`,
+            [color, newPrice, cartItemId]
+        );
+
         return result.affectedRows;
     },
 

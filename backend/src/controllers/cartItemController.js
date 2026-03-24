@@ -52,13 +52,14 @@ const cartItemController = {
             if (!color) {
                 return res.status(400).json({ message: 'Color is required' });
             }
-            const affectedRows = await cartItemModel.updateColor(cartItemId, color);
+            const affectedRows = await cartItemModel.updateColor(cartItemId, color.trim());
             if (affectedRows === 0) {
                 return res.status(404).json({ message: 'Cart item not found' });
             }
             res.json({ success: true });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            console.error('Error updating cart item color:', error.message);
+            return res.status(400).json({ message: error.message });
         }
     },
 
