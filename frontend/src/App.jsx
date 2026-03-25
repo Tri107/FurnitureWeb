@@ -21,9 +21,16 @@ import Collection from "./pages/admin/Collection";
 import Payment from "./pages/admin/Payment";
 import CategoryPage from "./pages/admin/Category";   
 import BrandPage from "./pages/admin/Brands";
+import AdminChat from "./pages/admin/Chat";
+
+import Chatbox from "./components/ui/Chatbox";
+
+
 function App() {
   return (
     <BrowserRouter>
+
+     
       <Routes>
         {/* Public */}
         <Route path="/products" element={<Products />} />
@@ -35,8 +42,6 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<Otp />} />
         <Route path="/favorites" element={<Favorites />} />
-
-        {/* New Product Configurator Page */}
         <Route path="/detailproduct/:id" element={<DetailProduct />} />
 
         {/* Admin */}
@@ -47,10 +52,17 @@ function App() {
           <Route path="accounts" element={<AccountPage />} />
           <Route path="collections" element={<Collection />} />
           <Route path="payment" element={<Payment />} />
-           <Route path="categories" element={<CategoryPage />} />
-            <Route path="brands" element={<BrandPage />} />
+          <Route path="categories" element={<CategoryPage />} />
+          <Route path="brands" element={<BrandPage />} />
+          <Route path="chat" element={<AdminChat />} />
         </Route>
       </Routes>
+
+      {/* 🔥 CHATBOX GLOBAL (nổi góc phải) */}
+      <div className="fixed bottom-5 right-5 z-50">
+        <Chatbox />
+      </div>
+
     </BrowserRouter>
   );
 }

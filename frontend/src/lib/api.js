@@ -1,3 +1,5 @@
+
+
 const API_URL = "http://localhost:9999/api";
 const FAV_API_URL = "http://localhost:9999/api/favorites";
 
@@ -129,6 +131,29 @@ export const removeFavorite = async (accountId, productId) => {
 
   return res.json();
 };
+// Upload images (multipart/form-data — cannot use apiFetch)
+export const uploadProductImages = async (files) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+
+  const token = localStorage.getItem("accessToken");
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}/products/upload`, {
+    method: "POST",
+    headers,
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || "Upload ảnh thất bại");
+  }
+  return res.json();
+};
+
 
 // ================= AUTH =================
 export const registerUser = (data) => apiFetch("/auth/register", "POST", data);
@@ -138,8 +163,6 @@ export const googleLogin  = (data) => apiFetch("/auth/google-login", "POST", dat
 export const logoutUser   = () => apiFetch("/auth/logout", "POST"); 
 export const getMyProfile = () => apiFetch("/profile/me", "GET");
 export const updateProfile = (data) => apiFetch("/profile/update", "PUT", data);
-// ================= ORDER =================
-export const createOrder = (data) => apiFetch("/orders", "POST", data);
 // ================= DISCOUNT =================
 export const getDiscounts = () => apiFetch("/discounts");
 export const createDiscount = (data) => apiFetch("/discounts", "POST", data);
@@ -197,32 +220,13 @@ export const getProducts = () => apiFetch("/products");
 export const getProductById = (id) => apiFetch(`/products/${id}`);
 export const getFeaturedProducts = (params = "") => apiFetch(`/products/home-featured${params ? `?${params}` : ""}`);
 export const getHomeCollections = (params = "") => apiFetch(`/products/home-collections${params ? `?${params}` : ""}`);
-
 export const createProduct = (data) => apiFetch("/products/add-product", "POST", data);
 export const createVariant = (data) => apiFetch("/products/add-variant", "POST", data);
-// Upload images (multipart/form-data — cannot use apiFetch)
-export const uploadProductImages = async (files) => {
-  const formData = new FormData();
-  files.forEach((file) => formData.append("images", file));
-
-  const token = localStorage.getItem("accessToken");
-  const headers = {};
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const res = await fetch(`${API_URL}/products/upload`, {
-    method: "POST",
-    headers,
-    credentials: "include",
-    body: formData,
-  });
-
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.message || "Upload ảnh thất bại");
-  }
-  return res.json();
-};
-
 export const updateProduct = (id, data) => apiFetch(`/products/${id}`, "PUT", data);
-
 export const deleteProduct = (id) => apiFetch(`/products/${id}`, "DELETE");
+// ================= CHAT =================
+export const getChatConversations = () => apiFetch("/chat/conversations/list");
+export const getChatMessages = (conversationId) => apiFetch(`/chat/messages/${conversationId}`);
+export const createOrGetConversation = (data) => apiFetch("/chat/conversation", "POST", data);
+// ================= ORDER =================
+export const createOrder = (data) => apiFetch("/orders", "POST", data);
