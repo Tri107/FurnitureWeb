@@ -53,6 +53,14 @@ const CartItemModel = {
         return result.affectedRows;
     },
 
+    updateColor: async (cartItemId, color) => {
+        const [result] = await db.query(
+            `UPDATE ${table_name} SET color = ? WHERE cart_item_id = ?`,
+            [color, cartItemId]
+        );
+        return result.affectedRows;
+    },
+
     remove: async (cartItemId) => {
         const [result] = await db.query(
             `DELETE FROM ${table_name} WHERE cart_item_id = ?`,
