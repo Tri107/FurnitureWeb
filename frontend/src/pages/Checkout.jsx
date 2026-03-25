@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
+import toast from "react-hot-toast";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
 import ShippingForm from "@/components/ui/ShippingForm";
@@ -8,22 +9,16 @@ import PaymentMethod from "@/components/ui/PaymentMethod";
 import CheckoutCart from "@/components/ui/CheckoutCart";
 import PromoCode from "@/components/ui/PromoCode";
 import OrderSummary from "@/components/ui/OrderSummary";
+import { useCart } from "@/hooks/useCart";
+import useCartPage from "@/hooks/useCartPage";
+import { getMyProfile, createOrder } from "@/lib/api";
+import { clearCart } from "@/lib/cartApi";
 
 export default function Checkout() {
-
-
-  // Same demo items as Cart for checkout
-  const [items, setItems] = useState([
-    {
-      id: "p1",
-      name: "Tủ cạnh nhiều ngăn (214cm)", // Text from the image: "Tủ cạnh nhiều ngăn (214cm)"
-      price: 48362000,
-      color: "Xanh hoàng hôn", // Text from the image: "Xanh hoàng hôn"
-      qty: 1,
-      image:
-        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=900&q=80",
-    },
-  ]);
+  const navigate = useNavigate();
+  const { cartItems, optimisticClear } = useCart();
+  const cart = useCartPage(cartItems);
+  const items = cart.items;
 
   const [shippingData, setShippingData] = useState({
     fullName: "",
@@ -36,75 +31,66 @@ export default function Checkout() {
     note: ""
   });
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return; // User not logged in?
+        const result = await getMyProfile();
+        if (result && result.data) {
+          setShippingData(prev => ({
+            ...prev,
+            fullName: result.data.username || "",
+            phone: result.data.phone_number || "",
+            email: result.data.email || ""
+          }));
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile info", err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const [paymentMethod, setPaymentMethod] = useState("cod");
-
-  const [couponInput, setCouponInput] = useState("");
-  const [coupon, setCoupon] = useState(null);
-  const [couponMsg, setCouponMsg] = useState("");
-
-  const shippingFee = 0; // "Miễn phí" in image
-
-  const subtotal = useMemo(
-    () => items.reduce((sum, it) => sum + it.price * it.qty, 0),
-    [items]
-  );
-
-  const discount = useMemo(() => {
-    if (!coupon) return 0;
-    if (coupon.type === "percent") return Math.round((subtotal * coupon.value) / 100);
-    if (coupon.type === "amount") return coupon.value;
-    return 0;
-  }, [coupon, subtotal]);
-
-  // The image "Tổng thanh toán" is Subtotal - discount + shippingFee
-  // It doesn't show VAT explicitly as a separate line item before total like Cart, 
-  // or maybe it's included. We will match the UI which just shows Subtotal, Shipping, Total.
-  const total = useMemo(() => {
-    return Math.max(0, subtotal - discount + shippingFee);
-  }, [subtotal, discount, shippingFee]);
-
-  const updateQty = (id, nextQty) => {
-    if (nextQty < 1) {
-      alert("Số lượng sản phẩm tối thiểu là 1.");
-      return;
-    }
-    setItems((prev) =>
-      prev.map((it) => (it.id === id ? { ...it, qty: nextQty } : it))
-    );
-  };
-
-  const removeItem = (id) => {
-    setItems((prev) => prev.filter((it) => it.id !== id));
-  };
-
-  const applyCoupon = () => {
-    const code = couponInput.trim().toUpperCase();
-    if (!code) {
-      setCoupon(null);
-      setCouponMsg("");
-      return;
-    }
-    if (code === "GIAM10") {
-      setCoupon({ code, type: "percent", value: 10 });
-      setCouponMsg("Đã áp dụng mã GIAM10.");
-      return;
-    }
-    if (code === "GIAM200K") {
-      setCoupon({ code, type: "amount", value: 200000 });
-      setCouponMsg("Đã áp dụng mã GIAM200K.");
-      return;
-    }
-    setCoupon(null);
-    setCouponMsg("Mã không hợp lệ hoặc đã hết hạn.");
-  };
-
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!shippingData.fullName || !shippingData.phone || !shippingData.address || !shippingData.city || !shippingData.district || !shippingData.ward) {
       alert("Vui lòng điền đầy đủ thông tin giao hàng.");
       return;
     }
-    alert(`Đặt hàng thành công!\nPhương thức: ${paymentMethod}\nTổng tiền: ${total.toLocaleString("vi-VN")} VNĐ`);
-    // Navigate home or clear cart
+    
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) {
+        toast.error("Vui lòng đăng nhập để tiếp tục.");
+        return;
+      }
+      const user = JSON.parse(userStr);
+      
+      const fullAddress = `${shippingData.address}, ${shippingData.ward}, ${shippingData.district}, ${shippingData.city}`;
+      const mappedItems = items.map(it => ({
+        product_id: it.id,
+        sku: it.sku,
+        quantity: it.qty
+      }));
+
+      const payload = {
+        account_id: user.id,
+        total_price: cart.total,
+        address: fullAddress,
+        note: shippingData.note,
+        items: mappedItems
+      };
+
+      await createOrder(payload);
+      
+      toast.success("Đặt hàng thành công");
+      optimisticClear();
+      await clearCart();
+      navigate("/");
+    } catch (error) {
+      toast.error(error.message || "Lỗi khi đặt hàng");
+    }
   };
 
   return (
@@ -127,23 +113,21 @@ export default function Checkout() {
 
             {/* Right Column: Cart, Promo, Summary */}
             <div className="lg:col-span-5">
-              <CheckoutCart 
-                items={items} 
-                updateQty={updateQty} 
-                removeItem={removeItem} 
-              />
-              <PromoCode 
-                couponInput={couponInput}
-                setCouponInput={setCouponInput}
-                applyCoupon={applyCoupon}
-                couponMsg={couponMsg}
-              />
-              <OrderSummary 
+              <CheckoutCart
                 items={items}
-                subtotal={subtotal}
-                shippingFee={shippingFee}
-                discount={discount}
-                total={total}
+              />
+              <PromoCode
+                couponInput={cart.couponInput}
+                setCouponInput={cart.setCouponInput}
+                applyCoupon={cart.applyCoupon}
+                couponMsg={cart.couponMsg}
+              />
+              <OrderSummary
+                items={items}
+                subtotal={cart.subtotal}
+                shippingFee={cart.shippingFee}
+                discount={cart.discount}
+                total={cart.total}
                 onPlaceOrder={handlePlaceOrder}
               />
             </div>

@@ -12,26 +12,28 @@ export default function useCartPage(cartItems = []) {
   const items = useMemo(
     () =>
       cartItems.map((it) => {
-        const availableColors = Array.from(
-          new Set(
-            (it.variants?.variants || [])
-              .map((v) => v.specs?.color)
-              .filter((c) => c)
-          )
-        );
+        let snap = {};
+        try {
+          snap = typeof it.snapshot === 'string' ? JSON.parse(it.snapshot || '{}') : (it.snapshot || {});
+        } catch (e) {}
+
+        const imageArray = it.variants?.images;
+        const img = Array.isArray(imageArray) && imageArray.length > 0 
+          ? imageArray[0] 
+          : (typeof imageArray === 'string' ? imageArray : "https://via.placeholder.com/300");
 
         return {
           cart_item_id: it.cart_item_id,
           id: it.product_id,
           name: it.product_name,
-          price: it.price || 0,
-          color: it.color || "N/A",
-          availableColors,
+          sku: it.sku || "N/A",
+          price: snap.price || 0,
+          color: snap.color || "N/A",
+          size: "N/A",
           qty: it.quantity,
-          image: it.variants?.images?.[0] || "https://via.placeholder.com/300",
+          image: img,
           deliveryText: "Hàng sẽ được giao trong vòng 5-7 ngày",
-          material: it.material,
-          variants: it.variants?.variants || [], // Thêm variants array
+          material: "N/A"
         };
       }),
     [cartItems],

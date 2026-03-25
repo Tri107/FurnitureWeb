@@ -4,7 +4,7 @@ export default function OrderSummary({ items, subtotal, shippingFee, discount, t
   return (
     <div className="border border-slate-200 rounded-2xl p-6 bg-white">
       <h2 className="text-lg font-bold text-slate-900 mb-5">Tóm tắt đơn hàng</h2>
-      
+
       <div className="space-y-4 mb-6">
         {/* Item summary list */}
         {items.map(item => (

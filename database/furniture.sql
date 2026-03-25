@@ -87,9 +87,13 @@ CREATE Table orders (
         'CANCELLED'
     ) DEFAULT 'PENDING',
     total_price DECIMAL(10, 3) NOT NULL,
+    address VARCHAR(255),
+    note TEXT,
     account_id INT NOT NULL,
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
+
+-- ALTER TABLE orders ADD COLUMN address VARCHAR(255), ADD COLUMN note TEXT;
 
 CREATE Table order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -135,23 +139,16 @@ CREATE Table favorites (
 );
 
 CREATE TABLE cart_items (
-    cart_item_id INT PRIMARY KEY AUTO_INCREMENT,
-
-    account_id INT NOT NULL,
-    product_id INT NOT NULL,
-
-    quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
-
-    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    UNIQUE (account_id, product_id),
-
-    FOREIGN KEY (account_id) REFERENCES accounts (account_id)
-        ON DELETE CASCADE,
-
-    FOREIGN KEY (product_id) REFERENCES products (product_id)
-        ON DELETE CASCADE
+  cart_item_id INT AUTO_INCREMENT PRIMARY KEY,
+  account_id INT NOT NULL,
+  product_id INT NOT NULL,
+  sku VARCHAR(100) NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  snapshot JSON NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (account_id) REFERENCES accounts(account_id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+  UNIQUE KEY unique_cart_item (account_id, product_id, sku)
 );
 
 --data insertion
@@ -465,7 +462,7 @@ FROM favorites f
 WHERE
     p.is_disabled = FALSE;
 
-DELIMITER / /
+DELIMITER //
 -- functions
 --funcition validate reference constraint
 CREATE FUNCTION is_valid_entity (
@@ -493,9 +490,7 @@ BEGIN
         )
         ELSE FALSE
     END;
-END
-/
-/
+END 
 
 -- stored procedures
 --procedure to add a new product
@@ -549,8 +544,7 @@ VALUES
     );
 
 END
-/
-/
+
 
 -- procedure to update product
 CREATE PROCEDURE update_product (
@@ -608,8 +602,7 @@ BEGIN
     WHERE product_id = p_product_id;
 
 END
-/
-/
+
 
 -- procedure to delete a product
 CREATE PROCEDURE delete_product (
@@ -630,8 +623,7 @@ BEGIN
     WHERE product_id = p_product_id;
 
 END
-/
-/
+
 
 --procedure to add category, brand, collection
 CREATE PROCEDURE add_entity (
@@ -654,12 +646,11 @@ BEGIN
         ' (', p_name_column, ') VALUES (?)'
     );
 
-    PREPARE stmt FROM sql_stmt;
-    EXECUTE stmt USING p_name_value;
+    PREPARE stmt FROM @sql_stmt;
+    EXECUTE stmt USING @p_name_value;
     DEALLOCATE PREPARE stmt;
 END
-/
-/
+
 
 --procedure to update category, brand, collection
 CREATE PROCEDURE update_entity (
@@ -703,20 +694,19 @@ BEGIN
         ' WHERE ', p_id_column, ' = ?'
     );
 
-    PREPARE stmt FROM sql_stmt;
+    PREPARE stmt FROM @sql_stmt;
 
     IF p_name_value IS NOT NULL AND p_toggle_is_disabled IS NOT NULL THEN
-        EXECUTE stmt USING p_name_value, p_toggle_is_disabled, p_id_value;
+        EXECUTE stmt USING @p_name_value, @p_toggle_is_disabled, @p_id_value;
     ELSEIF p_name_value IS NOT NULL THEN
-        EXECUTE stmt USING p_name_value, p_id_value;
+        EXECUTE stmt USING @p_name_value, @p_id_value;
     ELSE
-        EXECUTE stmt USING p_toggle_is_disabled, p_id_value;
+        EXECUTE stmt USING @p_toggle_is_disabled, @p_id_value;
     END IF;
 
     DEALLOCATE PREPARE stmt;
 END
-/
-/
+
 
 --procedure to delete category, brand, collection
 CREATE PROCEDURE delete_entity (
@@ -736,8 +726,8 @@ BEGIN
         ' = ?'
     );
 
-    PREPARE stmt_check FROM sql_check;
-    EXECUTE stmt_check USING p_id_value;
+    PREPARE stmt_check FROM @sql_check;
+    EXECUTE stmt_check USING @p_id_value;
     DEALLOCATE PREPARE stmt_check;
 
     SET ref_count = @ref_count;
@@ -755,12 +745,11 @@ BEGIN
         ' = ? AND is_disabled = TRUE'
     );
 
-    PREPARE stmt_delete FROM sql_delete;
-    EXECUTE stmt_delete USING p_id_value;
+    PREPARE stmt_delete FROM @sql_delete;
+    EXECUTE stmt_delete USING @p_id_value;
     DEALLOCATE PREPARE stmt_delete;
 END
-/
-/
+
 
 CREATE PROCEDURE add_account (
     IN p_email VARCHAR(255),
@@ -770,8 +759,7 @@ BEGIN
     INSERT INTO accounts (email, password_hash)
     VALUES (p_email, p_password_hash);
 END
-/
-/
+
 
 CREATE PROCEDURE update_account (
     IN p_account_id INT,
@@ -790,8 +778,7 @@ BEGIN
         refresh_token = COALESCE(p_refresh_token, refresh_token)
     WHERE account_id = p_account_id;
 END
-/
-/
+
 
 CREATE PROCEDURE add_user_profile (
     IN p_account_id INT,
@@ -813,8 +800,7 @@ BEGIN
     INSERT INTO user_profiles (username, phone_number, user_address, account_id)
     VALUES (p_username, p_phone_number, p_user_address, p_account_id);
 END
-/
-/
+
 
 CREATE PROCEDURE update_user_profile (
     IN p_account_id INT,
@@ -849,8 +835,7 @@ BEGIN
         user_address = COALESCE(p_user_address, user_address)
     WHERE account_id = p_account_id;
 END
-/
-/
+
 
 CREATE PROCEDURE add_order (
     IN p_account_id INT,
@@ -860,7 +845,8 @@ BEGIN
     INSERT INTO orders (account_id, total_price)
     VALUES (p_account_id, p_total_price);
 END
-/
-/
+
 
 DELIMITER;
+
+

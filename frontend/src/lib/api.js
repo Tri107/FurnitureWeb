@@ -1,4 +1,5 @@
 
+
 const API_URL = "http://localhost:9999/api";
 const FAV_API_URL = "http://localhost:9999/api/favorites";
 
@@ -227,4 +228,5 @@ export const deleteProduct = (id) => apiFetch(`/products/${id}`, "DELETE");
 export const getChatConversations = () => apiFetch("/chat/conversations/list");
 export const getChatMessages = (conversationId) => apiFetch(`/chat/messages/${conversationId}`);
 export const createOrGetConversation = (data) => apiFetch("/chat/conversation", "POST", data);
-
+// ================= ORDER =================
+export const createOrder = (data) => apiFetch("/orders", "POST", data);

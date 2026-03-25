@@ -36,11 +36,12 @@ const CartItemModel = {
         return rows;
     },
 
-    add: async (accountId, productId, quantity, price, material, color) => {
+    add: async (accountId, productId, sku, quantity, snapshot) => {
+        const snapshotStr = JSON.stringify(snapshot);
         const [result] = await db.query(
-            `INSERT INTO ${table_name} (account_id, product_id, quantity, price, material, color) VALUES (?, ?, ?, ?, ?, ?) 
-            ON DUPLICATE KEY UPDATE quantity = quantity + ?, price = VALUES(price), material = VALUES(material), color = VALUES(color)`,
-            [accountId, productId, quantity, price, material, color, quantity]
+            `INSERT INTO ${table_name} (account_id, product_id, sku, quantity, snapshot) VALUES (?, ?, ?, ?, ?) 
+            ON DUPLICATE KEY UPDATE quantity = quantity + ?, snapshot = VALUES(snapshot)`,
+            [accountId, productId, sku, quantity, snapshotStr, quantity]
         );
         return result.affectedRows;
     },

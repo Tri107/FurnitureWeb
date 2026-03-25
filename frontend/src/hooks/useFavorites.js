@@ -71,7 +71,7 @@ export default function useFavorites() {
   };
 
   const addToCart = (product) => {
-    handleAddToCart(product.id);
+    handleAddToCart(product.id, "FAST-BUY-SKU", product.price || 1000000, "Mặc định");
     alert(`Đã thêm "${product.name}" vào giỏ hàng`);
   };
 
