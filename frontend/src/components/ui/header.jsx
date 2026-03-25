@@ -328,7 +328,7 @@ export default function Header() {
               activeType === "collection" && openMega ? "text-orange-400" : "",
             ].join(" ")}
           >
-            Collection
+            Bộ Sưu Tập
             <span
               className={[
                 "absolute -bottom-2 left-0 h-[2px] w-full bg-orange-500 transition-opacity",
