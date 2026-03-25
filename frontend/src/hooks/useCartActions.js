@@ -1,6 +1,7 @@
 import {
   addToCart,
   updateCartItem,
+  updateCartItemColor,
   removeCartItem,
   clearCart,
 } from "../lib/cartApi";
@@ -40,6 +41,17 @@ export const useCartActions = (backupRefetch) => {
     }
   };
 
+  const handleUpdateColor = async (cartItemId, color) => {
+    try {
+      await updateCartItemColor(cartItemId, color);
+      refetch();
+      toast.success("Color updated in cart");
+    } catch (err) {
+      console.log(err);
+      toast.error("Update color failed");
+    }
+  };
+
   const handleRemove = async (productId) => {
     if (optimisticRemove) optimisticRemove(productId);
     try {
@@ -66,6 +78,7 @@ export const useCartActions = (backupRefetch) => {
   return {
     handleAddToCart,
     handleUpdateQuantity,
+    handleUpdateColor,
     handleRemove,
     handleClearCart,
   };

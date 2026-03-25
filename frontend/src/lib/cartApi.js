@@ -84,6 +84,15 @@ export const removeCartItem = async (productId) => {
   return handleResponse(res);
 };
 
+export const updateCartItemColor = async (cartItemId, color) => {
+  const res = await fetch(`${CART_API_URL}/${cartItemId}/color`, {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify({ color }),
+  });
+  return handleResponse(res);
+};
+
 // CLEAR cart
 export const clearCart = async () => {
   const user = JSON.parse(localStorage.getItem("user"));
