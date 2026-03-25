@@ -13,7 +13,7 @@ import { formatVND } from "../lib/utils";
 export default function Cart() {
   const navigate = useNavigate();
   const { cartItems, loading, refetch } = useCart();
-  const { handleUpdateQuantity, handleRemove } = useCartActions(refetch);
+  const { handleUpdateQuantity, handleUpdateColor, handleRemove } = useCartActions(refetch);
 
   const cart = useCartPage(cartItems);
 
@@ -46,6 +46,7 @@ export default function Cart() {
                   }
                   handleUpdateQuantity(id, qty);
                 }}
+                onUpdateColor={handleUpdateColor}
                 onRemove={handleRemove}
               />
             </div>

@@ -11,18 +11,29 @@ export default function useCartPage(cartItems = []) {
   
   const items = useMemo(
     () =>
-      cartItems.map((it) => ({
-        cart_item_id: it.cart_item_id,
-        id: it.product_id,
-        name: it.product_name,
-        price: it.price || 0,
-        color: it.color || "N/A",
-        size: it.variant_ref || "N/A",
-        qty: it.quantity,
-        image: it.variants.images || "https://via.placeholder.com/300",
-        deliveryText: "Hàng sẽ được giao trong vòng 5-7 ngày",
-        material: it.material
-      })),
+      cartItems.map((it) => {
+        const availableColors = Array.from(
+          new Set(
+            (it.variants?.variants || [])
+              .map((v) => v.specs?.color)
+              .filter((c) => c)
+          )
+        );
+
+        return {
+          cart_item_id: it.cart_item_id,
+          id: it.product_id,
+          name: it.product_name,
+          price: it.price || 0,
+          color: it.color || "N/A",
+          availableColors,
+          qty: it.quantity,
+          image: it.variants?.images?.[0] || "https://via.placeholder.com/300",
+          deliveryText: "Hàng sẽ được giao trong vòng 5-7 ngày",
+          material: it.material,
+          variants: it.variants?.variants || [], // Thêm variants array
+        };
+      }),
     [cartItems],
   );
 
