@@ -22,6 +22,14 @@ export default function useCartPage(cartItems = []) {
           ? imageArray[0] 
           : (typeof imageArray === 'string' ? imageArray : "https://via.placeholder.com/300");
 
+        const availableColors = Array.from(
+          new Set(
+            (it.variants?.variants || [])
+              .map((v) => v.specs?.color)
+              .filter((c) => c)
+          )
+        );
+
         return {
           cart_item_id: it.cart_item_id,
           id: it.product_id,
@@ -33,7 +41,8 @@ export default function useCartPage(cartItems = []) {
           qty: it.quantity,
           image: img,
           deliveryText: "Hàng sẽ được giao trong vòng 5-7 ngày",
-          material: "N/A"
+          material: "N/A",
+          availableColors
         };
       }),
     [cartItems],
