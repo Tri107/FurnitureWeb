@@ -9,5 +9,6 @@ router.post('/', verifyToken, cartItemController.addCartItem);
 router.put('/:cartItemId', verifyToken, cartItemController.updateCartItem);
 router.delete('/clear', verifyToken, cartItemController.clearCart);
 router.delete('/:cartItemId', verifyToken, cartItemController.removeCartItem);
+router.patch('/:cartItemId/color', verifyToken, cartItemController.updateCartItemColor);
 
 export default router;
