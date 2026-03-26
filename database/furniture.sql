@@ -124,7 +124,6 @@ CREATE Table reviews (
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     product_id INT NOT NULL,
     account_id INT NOT NULL,
-    UNIQUE (product_id, account_id),
     FOREIGN KEY (product_id) REFERENCES products (product_id),
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
