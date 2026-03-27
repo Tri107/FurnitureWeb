@@ -8,6 +8,7 @@ import Cart from "./pages/Cart";
 import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
 import UserProfile from "./pages/UserProfile";
+import History from "./pages/History";
 import DetailProduct from "./pages/DetailProduct";
 
 import AdminLayout from "./components/layout/AdminLayout";
@@ -20,8 +21,9 @@ import AccountPage from "./pages/admin/Account";
 import Collection from "./pages/admin/Collection";
 import Payment from "./pages/admin/Payment";
 import CategoryPage from "./pages/admin/Category";   
-import BrandPage from "./pages/admin/Brands";
+import Brands from "./pages/admin/Brands";
 import AdminChat from "./pages/admin/Chat";
+import Orders from "./pages/admin/Orders";
 
 import Chatbox from "./components/ui/Chatbox";
 
@@ -30,7 +32,6 @@ function App() {
   return (
     <BrowserRouter>
 
-     
       <Routes>
         {/* Public */}
         <Route path="/products" element={<Products />} />
@@ -38,6 +39,7 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/" element={<Home />} />
         <Route path="/userprofile" element={<UserProfile />} />
+        <Route path="/history" element={<History />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/otp" element={<Otp />} />
@@ -53,12 +55,13 @@ function App() {
           <Route path="collections" element={<Collection />} />
           <Route path="payment" element={<Payment />} />
           <Route path="categories" element={<CategoryPage />} />
-          <Route path="brands" element={<BrandPage />} />
+          <Route path="brands" element={<Brands />} />
+          <Route path="orders" element={<Orders />} />
           <Route path="chat" element={<AdminChat />} />
         </Route>
       </Routes>
 
-      {/* 🔥 CHATBOX GLOBAL (nổi góc phải) */}
+      {/* CHATBOX GLOBAL (nổi góc phải) */}
       <div className="fixed bottom-5 right-5 z-50">
         <Chatbox />
       </div>

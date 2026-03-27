@@ -230,6 +230,10 @@ export const getChatMessages = (conversationId) => apiFetch(`/chat/messages/${co
 export const createOrGetConversation = (data) => apiFetch("/chat/conversation", "POST", data);
 // ================= ORDER =================
 export const createOrder = (data) => apiFetch("/orders", "POST", data);
+export const getOrders = () => apiFetch("/orders");
+export const getOrdersByUserId = (userId) => apiFetch(`/orders/user/${userId}`);
+export const getOrderById = (id) => apiFetch(`/orders/${id}`);
+export const updateOrderStatus = (id, data) => apiFetch(`/orders/${id}`, "PUT", data);
 // ================= REVIEW =================
 export const getReviews = (productId) =>
   apiFetch(`/reviews${productId ? `?productId=${productId}` : ""}`);

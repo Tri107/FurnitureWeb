@@ -579,7 +579,7 @@ export default function Header() {
                         Thông tin cá nhân
                       </Link>
                       <Link
-                        to="/history-orders"
+                        to="/history"
                         onClick={closeRight}
                         className="block rounded-xl px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 transition"
                       >

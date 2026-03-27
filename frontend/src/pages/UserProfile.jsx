@@ -215,6 +215,30 @@ const UserProfile = () => {
 
             </CardFooter>
           </Card>
+
+          {/* Card 3: Lịch sử đơn hàng */}
+          <Card className="border-none shadow-sm h-full flex flex-col md:col-span-2">
+            <CardHeader className="flex flex-row items-center space-x-4 pb-4">
+              <div className="p-2 bg-green-100 rounded-lg text-green-600">
+                <Truck size={24} />
+              </div>
+              <CardTitle>Lịch sử đơn hàng</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow text-sm">
+              <p className="text-muted-foreground mb-4">
+                Xem lại danh sách các đơn hàng bạn đã đặt và theo dõi tình trạng vận chuyển của chúng.
+              </p>
+            </CardContent>
+            <CardFooter className="border-t pt-4 mt-auto">
+              <Button 
+                variant="link" 
+                className="text-orange-600 p-0 h-auto flex items-center"
+                onClick={() => window.location.href = "/history"}
+              >
+                Xem lịch sử đơn hàng <ChevronRight size={16} />
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
       </main>
       <Footer />
