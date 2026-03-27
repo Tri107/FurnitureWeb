@@ -82,7 +82,7 @@ CREATE Table orders (
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     order_status ENUM(
         'PENDING',
-        'SHIPPED',
+        'DELIVERING',
         'DELIVERED',
         'CANCELLED'
     ) DEFAULT 'PENDING',
@@ -92,6 +92,12 @@ CREATE Table orders (
     account_id INT NOT NULL,
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
+ALTER TABLE orders MODIFY COLUMN order_status ENUM(
+        'PENDING',
+        'DELIVERING',
+        'DELIVERED',
+        'CANCELLED'
+    ) DEFAULT 'PENDING'; 
 
 -- ALTER TABLE orders ADD COLUMN address VARCHAR(255), ADD COLUMN note TEXT;
 
@@ -122,12 +128,14 @@ CREATE Table reviews (
     ),
     review_comment TEXT,
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    review_update_date DATETIME,
     product_id INT NOT NULL,
     account_id INT NOT NULL,
+    order_id INT NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products (product_id),
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
-
+-- alter table reviews add column review_update_date DATETIME;
 CREATE Table favorites (
     account_id INT NOT NULL,
     product_id INT NOT NULL,

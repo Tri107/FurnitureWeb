@@ -8,6 +8,6 @@ router.get('/', verifyToken, verifyAdmin, orderController.getAllOrders);
 router.get('/user/:id', verifyToken, orderController.getOrdersByAccountId)
 router.get('/:id', verifyToken, orderController.getOrderById);
 router.post('/', verifyToken, orderController.createOrder);
-router.put('/:id/status', verifyToken, verifyAdmin, orderController.updateOrderStatus);
+router.put('/:id', verifyToken, verifyAdmin, orderController.updateOrderStatus);
 
 export default router;

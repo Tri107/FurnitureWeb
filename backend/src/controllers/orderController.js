@@ -54,7 +54,7 @@ const OrderController = {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      const validStatuses = ['PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+      const validStatuses = ['PENDING', 'DELIVERING', 'DELIVERED', 'CANCELLED'];
       
       if (!validStatuses.includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
