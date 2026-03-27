@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { RefreshCcw, ShieldCheck, CreditCard, Truck } from "lucide-react";
 
 export default function CartSummary({
@@ -11,11 +10,6 @@ export default function CartSummary({
   shippingFee, // Phí vận chuyển (0 hoặc số tiền)
   assembly, // Boolean: có chọn dịch vụ lắp ráp không
   setAssembly, // Function: cập nhật trạng thái assembly
-  couponInput, // String: mã coupon user nhập
-  setCouponInput, // Function: cập nhật couponInput
-  applyCoupon, // Function: xử lý áp dụng coupon
-  couponMsg, // String: thông báo kết quả coupon
-  coupon, // Object: thông tin coupon đã áp dụng
   isEmpty, // Boolean: giỏ hàng rỗng không
   onCheckout, // Function: xử lý thanh toán
 }) {
@@ -32,13 +26,6 @@ export default function CartSummary({
             <span>{subtotal}</span>
           </div>
 
-          {discount > 0 && (
-            <div className="flex items-center justify-between text-slate-700">
-              <span>Ưu đãi ({coupon?.code})</span>
-              <span className="text-red-600">- {discount}</span>
-            </div>
-          )}
-
           <div className="flex items-center justify-between text-slate-700">
             <span>Vận chuyển</span>
             <span>{shippingFee === 0 ? "Miễn phí" : shippingFee}</span>
@@ -48,25 +35,6 @@ export default function CartSummary({
             <span>VAT (10%)</span>
             <span>{vat}</span>
           </div>
-        </div>
-
-        <div>
-          <div className="flex overflow-hidden rounded-full border border-slate-200 bg-white">
-            <Input
-              value={couponInput}
-              onChange={(e) => setCouponInput(e.target.value)}
-              placeholder="Nhập mã giảm giá"
-              className="h-10 border-0 rounded-none shadow-none focus-visible:ring-0"
-            />
-            <Button
-              className="h-10 rounded-none rounded-r-full bg-red-600 px-5 hover:bg-red-700"
-              onClick={applyCoupon}
-            >
-              Áp Dụng
-            </Button>
-          </div>
-
-          {couponMsg ? <p className="mt-2 text-xs text-slate-600">{couponMsg}</p> : null}
         </div>
 
         <div className="h-px w-full bg-slate-200" />
