@@ -1,4 +1,5 @@
 import OrderModel from '../models/orderModel.js';
+import ProductModel from '../models/productModel.js';
 
 const OrderController = {
   getAllOrders: async (req, res) => {
@@ -42,7 +43,15 @@ const OrderController = {
         return res.status(400).json({ message: "Missing required fields" });
       }
       
+      console.log("Creating order with items from body:", JSON.stringify(items, null, 2));
+
       const orderId = await OrderModel.create({ account_id, total_price, items, address, note });
+
+      // Cập nhật stock bất đồng bộ (giảm stock theo sku)
+      ProductModel.decrementStock(items).catch(err => {
+        console.error("Async stock update failed:", err);
+      });
+
       return res.status(201).json({ message: "Order created successfully", orderId });
     } catch (error) {
       console.error(error);

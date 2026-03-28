@@ -101,18 +101,149 @@ const ProductModel = {
   },
 
   createVariant: async (variantData) => {
-    const { price, stock, specs, url } = variantData;
-
-    const variant = new Variant({
-      price,
-      stock,
-      specs,
-      url,
-    });
-
+    // variantData should now match ProductVariantSchema (with nested variants array)
+    const variant = new Variant(variantData);
     const saved = await variant.save();
     return saved._id.toString();
   },
+
+  // === UPDATE METHODS ===
+
+  update: async (productId, productData) => {
+    const {
+      product_name,
+      product_description,
+      product_status,
+      is_disabled,
+      category_id,
+      brand_id,
+      collection_id,
+      variant_ref,
+    } = productData;
+
+    await db.query(`CALL update_product(?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
+      productId,
+      product_name || null,
+      product_description || null,
+      product_status || null,
+      is_disabled != null ? is_disabled : null,
+      category_id || null,
+      brand_id || null,
+      collection_id || null,
+      variant_ref || null,
+    ]);
+  },
+
+  updateVariant: async (variantRef, variantData) => {
+    if (!isValidObjectId(variantRef)) {
+      throw new Error("Invalid variant_ref");
+    }
+
+    const objectId = new mongoose.Types.ObjectId(variantRef);
+    const updated = await Variant.findByIdAndUpdate(
+      objectId,
+      { $set: { variants: variantData.variants } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      throw new Error("Variant document not found");
+    }
+
+    return updated;
+  },
+
+  updateVariantImages: async (variantRef, imageUrls) => {
+    if (!isValidObjectId(variantRef)) {
+      throw new Error("Invalid variant_ref");
+    }
+
+    const objectId = new mongoose.Types.ObjectId(variantRef);
+    const updated = await Variant.findByIdAndUpdate(
+      objectId,
+      { $set: { images: imageUrls } },
+      { new: true }
+    );
+
+    if (!updated) {
+      throw new Error("Variant document not found");
+    }
+
+    return updated;
+  },
+
+  updateVariantModel: async (variantRef, modelUrl) => {
+    if (!isValidObjectId(variantRef)) {
+      throw new Error("Invalid variant_ref");
+    }
+
+    const objectId = new mongoose.Types.ObjectId(variantRef);
+    const updated = await Variant.findByIdAndUpdate(
+      objectId,
+      { $set: { model3d: modelUrl } },
+      { new: true }
+    );
+
+    if (!updated) {
+      throw new Error("Variant document not found");
+    }
+
+    return updated;
+  },
+
+  getVariantByRef: async (variantRef) => {
+    if (!isValidObjectId(variantRef)) {
+      throw new Error("Invalid variant_ref");
+    }
+
+    const objectId = new mongoose.Types.ObjectId(variantRef);
+    const variant = await Variant.findById(objectId).lean();
+    return variant;
+  },
+
+  decrementStock: async (items) => {
+    try {
+      const promises = items.map(async (item) => {
+        const productId = item.product_id || item.id;
+        const sku = item.sku;
+        const qty = Number(item.quantity || item.qty);
+
+        if (!productId || !sku || isNaN(qty)) return;
+
+        const [rows] = await db.query(
+          "SELECT variant_ref, product_name FROM products WHERE product_id = ?",
+          [productId]
+        );
+
+        if (rows.length === 0 || !rows[0].variant_ref) return;
+
+        const variantRef = rows[0].variant_ref;
+
+        const updatedDoc = await Variant.findOneAndUpdate(
+          {
+            _id: new mongoose.Types.ObjectId(variantRef),
+            "variants.sku": sku
+          },
+          { $inc: { "variants.$.stock": -qty } },
+          { new: true }
+        ).lean();
+
+        if (updatedDoc) {
+          updatedDoc.variants.find(v => v.sku === sku);
+        } else {
+          const realDoc = await Variant.findById(variantRef).lean();
+          if (realDoc) {
+            realDoc.variants.map(v => v.sku);
+          }
+        }
+      });
+
+      await Promise.all(promises);
+    } catch (error) {
+      console.error("[Stock Critical Error]:", error);
+    }
+  },
+
 };
 
 export default ProductModel;

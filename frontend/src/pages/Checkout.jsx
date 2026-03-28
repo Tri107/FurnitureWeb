@@ -58,7 +58,7 @@ export default function Checkout() {
       alert("Vui lòng điền đầy đủ thông tin giao hàng.");
       return;
     }
-    
+
     try {
       const userStr = localStorage.getItem("user");
       if (!userStr) {
@@ -66,7 +66,7 @@ export default function Checkout() {
         return;
       }
       const user = JSON.parse(userStr);
-      
+
       const fullAddress = `${shippingData.address}, ${shippingData.ward}, ${shippingData.district}, ${shippingData.city}`;
       const mappedItems = items.map(it => ({
         product_id: it.id,
@@ -83,7 +83,7 @@ export default function Checkout() {
       };
 
       await createOrder(payload);
-      
+
       toast.success("Đặt hàng thành công");
       optimisticClear();
       await clearCart();

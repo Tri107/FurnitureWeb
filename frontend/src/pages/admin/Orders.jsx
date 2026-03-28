@@ -50,29 +50,30 @@ const OrderRow = React.memo(({ item, onUpdateStatus, onViewDetails }) => {
         {Number(item.total_price).toLocaleString("vi-VN")}đ
       </td>
 
-      <td className="px-6 py-4">
-        <Select
-          value={item.order_status}
-          onValueChange={(value) => onUpdateStatus(item.order_id, value)}
-        >
-          {/* Fixed color trigger (bg-white) as requested */}
-          <SelectTrigger className="w-[140px] bg-white border-slate-200 shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${statusColors[item.order_status].split(' ')[0]}`} />
-              <span className="text-xs font-medium">{statusLabels[item.order_status]}</span>
-            </div>
-          </SelectTrigger>
-          <SelectContent className="bg-white">
-            {Object.keys(statusLabels).map((status) => (
-              <SelectItem key={status} value={status}>
-                <div className="flex items-center gap-2">
+      <td className="px-6 py-4 ">
+        <div className="flex items-center justify-center">
+          <Select
+            value={item.order_status}
+            onValueChange={(value) => onUpdateStatus(item.order_id, value)}
+          >
+            <SelectTrigger className="w-[140px] bg-white border-slate-200 shadow-sm">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${statusColors[item.order_status].split(' ')[0]}`} />
+                <span className="text-xs font-medium">{statusLabels[item.order_status]}</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent className="bg-white">
+              {Object.keys(statusLabels).map((status) => (
+                <SelectItem key={status} value={status}>
+                  <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${statusColors[status].split(' ')[0]}`} />
                     <span>{statusLabels[status]}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </td>
 
       <td className="px-6 py-4">
@@ -150,17 +151,17 @@ export default function Orders() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-            <Card className="rounded-2xl shrink-0 border-slate-200">
-                <CardContent className="p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <ShoppingBag size={20} />
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground font-medium">Tổng đơn hàng</p>
-                        <p className="text-xl font-bold text-slate-900">{orders.length}</p>
-                    </div>
-                </CardContent>
-            </Card>
+          <Card className="rounded-2xl shrink-0 border-slate-200">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                <ShoppingBag size={20} />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground font-medium">Tổng đơn hàng</p>
+                <p className="text-xl font-bold text-slate-900">{orders.length}</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <div className="relative w-72">
@@ -168,9 +169,9 @@ export default function Orders() {
             size={16}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
-          <Input 
-            placeholder="Tìm theo email hoặc ID..." 
-            className="pl-9 bg-white border-slate-200 focus:ring-blue-500/20" 
+          <Input
+            placeholder="Tìm theo email hoặc ID..."
+            className="pl-9 bg-white border-slate-200 focus:ring-blue-500/20"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -187,7 +188,7 @@ export default function Orders() {
                   <th className="px-6 py-4 font-semibold">ID</th>
                   <th className="px-6 py-4 font-semibold">Khách hàng</th>
                   <th className="px-6 py-4 font-semibold">Ngày đặt</th>
-                  <th className="px-6 py-4 font-semibold text-right">Tổng tiền</th>
+                  <th className="px-6 py-4 font-semibold text-left">Tổng tiền</th>
                   <th className="px-6 py-4 font-semibold text-center">Trạng thái</th>
                   <th className="px-6 py-4 text-right font-semibold">Hành động</th>
                 </tr>
@@ -205,16 +206,16 @@ export default function Orders() {
                   </tr>
                 ) : filteredOrders.length === 0 ? (
                   <tr>
-                      <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
-                          Chưa có đơn hàng nào
-                      </td>
+                    <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
+                      Chưa có đơn hàng nào
+                    </td>
                   </tr>
                 ) : (
                   filteredOrders.map((item) => (
-                    <OrderRow 
-                      key={item.order_id} 
-                      item={item} 
-                      onUpdateStatus={handleUpdateStatus} 
+                    <OrderRow
+                      key={item.order_id}
+                      item={item}
+                      onUpdateStatus={handleUpdateStatus}
                       onViewDetails={handleViewDetails}
                     />
                   ))
