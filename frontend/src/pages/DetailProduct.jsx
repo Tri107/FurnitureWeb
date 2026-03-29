@@ -47,29 +47,28 @@ const COLORS = {
 };
 
 const dimStr = (v) =>
-  `${v?.specs?.dimensions?.length || 0}x${v?.specs?.dimensions?.width || 0}x${
-    v?.specs?.dimensions?.height || 0
+  `${v?.specs?.dimensions?.length || 0}x${v?.specs?.dimensions?.width || 0}x${v?.specs?.dimensions?.height || 0
   }`;
 
 const avgRating = (list) =>
   list.length
     ? Number(
-        (
-          list.reduce((s, i) => s + Number(i.rating || 0), 0) / list.length
-        ).toFixed(1)
-      )
+      (
+        list.reduce((s, i) => s + Number(i.rating || 0), 0) / list.length
+      ).toFixed(1)
+    )
     : 0;
 
 const formatDateTime = (date) =>
   date
     ? new Date(date).toLocaleString("vi-VN", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      })
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
     : "";
 
 export default function ProductPage() {
@@ -259,11 +258,9 @@ export default function ProductPage() {
   const specs = [
     {
       title: "Kích thước & chi tiết",
-      content: `Dài: ${activeVariant?.specs?.dimensions?.length || "N/A"}cm • Rộng: ${
-        activeVariant?.specs?.dimensions?.width || "N/A"
-      }cm • Cao: ${activeVariant?.specs?.dimensions?.height || "N/A"}cm • Nặng: ${
-        activeVariant?.specs?.weight || "N/A"
-      }kg`,
+      content: `Dài: ${activeVariant?.specs?.dimensions?.length || "N/A"}cm • Rộng: ${activeVariant?.specs?.dimensions?.width || "N/A"
+        }cm • Cao: ${activeVariant?.specs?.dimensions?.height || "N/A"}cm • Nặng: ${activeVariant?.specs?.weight || "N/A"
+        }kg`,
     },
     {
       title: "Mô tả",
@@ -271,9 +268,8 @@ export default function ProductPage() {
     },
     {
       title: "Vật liệu",
-      content: `Chất liệu: ${activeVariant?.specs?.material || "N/A"} • Màu sắc: ${
-        activeVariant?.specs?.color || "N/A"
-      } • Tồn kho: ${activeVariant?.stock ?? "N/A"}`,
+      content: `Chất liệu: ${activeVariant?.specs?.material || "N/A"} • Màu sắc: ${activeVariant?.specs?.color || "N/A"
+        } • Tồn kho: ${activeVariant?.stock ?? "N/A"}`,
     },
   ];
 
@@ -326,9 +322,8 @@ export default function ProductPage() {
       <div className="min-h-screen bg-white text-gray-900 font-sans">
         <Header />
         <div
-          className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center text-lg font-medium ${
-            error || !product ? "text-red-600" : "text-gray-500"
-          }`}
+          className={`max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center text-lg font-medium ${error || !product ? "text-red-600" : "text-gray-500"
+            }`}
         >
           {error || (!product && !loading)
             ? error || "Không tìm thấy sản phẩm"
@@ -399,11 +394,10 @@ export default function ProductPage() {
                       <button
                         key={i}
                         onClick={() => handleSizeClick(dim.dimStr)}
-                        className={`px-4 py-2 text-sm font-medium rounded-xl border-2 transition-all ${
-                          isActive
+                        className={`px-4 py-2 text-sm font-medium rounded-xl border-2 transition-all ${isActive
                             ? "bg-red-50 text-red-600 border-red-500"
                             : "bg-white text-gray-700 border-gray-200 hover:border-red-300"
-                        }`}
+                          }`}
                       >
                         {dim.length} x {dim.width} x {dim.height} cm
                       </button>
@@ -427,11 +421,10 @@ export default function ProductPage() {
                         key={i}
                         onClick={() => handleColorClick(c.colorName)}
                         title={c.colorName}
-                        className={`w-9 h-9 rounded-full transition-all duration-200 ${c.tailwind} ${
-                          isActive
+                        className={`w-9 h-9 rounded-full transition-all duration-200 ${c.tailwind} ${isActive
                             ? "ring-2 ring-offset-2 ring-red-500 scale-110"
                             : "hover:scale-110 border border-gray-200 shadow-sm"
-                        }`}
+                          }`}
                       />
                     );
                   })}
@@ -642,11 +635,10 @@ export default function ProductPage() {
                         <Star
                           size={24}
                           fill={s <= userRating ? "currentColor" : "none"}
-                          className={`transition-colors ${
-                            s <= userRating
+                          className={`transition-colors ${s <= userRating
                               ? "text-yellow-400"
                               : "text-gray-300 hover:text-yellow-400"
-                          }`}
+                            }`}
                         />
                       </button>
                     ))}
