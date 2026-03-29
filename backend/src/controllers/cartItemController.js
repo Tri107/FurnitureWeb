@@ -50,13 +50,17 @@ const cartItemController = {
         try {
             const { cartItemId } = req.params;
             const { color } = req.body;
+
             if (!color) {
                 return res.status(400).json({ message: 'Color is required' });
             }
+
             const affectedRows = await cartItemModel.updateColor(cartItemId, color.trim());
+
             if (affectedRows === 0) {
                 return res.status(404).json({ message: 'Cart item not found' });
             }
+
             res.json({ success: true });
         } catch (error) {
             console.error('Error updating cart item color:', error.message);

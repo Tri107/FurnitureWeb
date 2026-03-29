@@ -56,7 +56,10 @@ const CartItemModel = {
 
     updateColor: async (cartItemId, color) => {
         const [cartRows] = await db.query(
-            `SELECT ci.product_id, ci.quantity, p.variant_ref FROM ${table_name} ci JOIN products p ON p.product_id = ci.product_id WHERE ci.cart_item_id = ?`,
+            `SELECT ci.cart_item_id, ci.product_id, ci.sku, ci.snapshot, p.variant_ref
+             FROM ${table_name} ci
+             JOIN products p ON p.product_id = ci.product_id
+             WHERE ci.cart_item_id = ?`,
             [cartItemId]
         );
 
@@ -64,7 +67,7 @@ const CartItemModel = {
             throw new Error('Cart item not found');
         }
 
-        const { product_id, quantity, variant_ref } = cartRows[0];
+        const { variant_ref, snapshot, sku } = cartRows[0];
 
         if (!variant_ref || !isValidObjectId(variant_ref)) {
             throw new Error('Invalid variant reference');
@@ -75,17 +78,37 @@ const CartItemModel = {
             throw new Error('Variant not found');
         }
 
-        const selectedVariant = variantDoc.variants.find(v => v.specs?.color?.trim() === color.trim());
+        const selectedVariant = variantDoc.variants.find(
+            (v) => v.specs?.color?.trim().toLowerCase() === color.trim().toLowerCase()
+        );
+
         if (!selectedVariant) {
             throw new Error('Variant with specified color not found');
         }
 
-        const newPrice = selectedVariant.price;
+        let currentSnapshot = {};
+        if (snapshot) {
+            try {
+                currentSnapshot = typeof snapshot === 'string' ? JSON.parse(snapshot) : snapshot;
+            } catch {
+                currentSnapshot = {};
+            }
+        }
 
-        // Update color và unit price
+        const updatedSnapshot = {
+            ...currentSnapshot,
+            color: selectedVariant.specs?.color || color.trim(),
+            price: selectedVariant.price,
+        };
+
+        // nếu mỗi màu có sku riêng thì update luôn sku
+        const newSku = selectedVariant.sku || sku;
+
         const [result] = await db.query(
-            `UPDATE ${table_name} SET color = ?, price = ? WHERE cart_item_id = ?`,
-            [color, newPrice, cartItemId]
+            `UPDATE ${table_name}
+             SET snapshot = ?, sku = ?
+             WHERE cart_item_id = ?`,
+            [JSON.stringify(updatedSnapshot), newSku, cartItemId]
         );
 
         return result.affectedRows;

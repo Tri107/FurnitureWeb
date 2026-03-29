@@ -60,11 +60,6 @@ export default function Cart() {
                 shippingFee={cart.shippingFee}
                 assembly={cart.assembly}
                 setAssembly={cart.setAssembly}
-                couponInput={cart.couponInput}
-                setCouponInput={cart.setCouponInput}
-                applyCoupon={cart.applyCoupon}
-                couponMsg={cart.couponMsg}
-                coupon={cart.coupon}  
                 isEmpty={cart.items.length === 0}
                 onCheckout={() => navigate("/checkout")}
               />
