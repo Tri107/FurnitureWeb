@@ -47,48 +47,51 @@ const OrderModel = {
   },
 
   create: async (orderData) => {
-    const { account_id, total_price, items, address, note } = orderData;
-    // Use manual transaction over the connection
+    const { account_id, total_price, items, address, note, discount_id } = orderData;
     const connection = await db.getConnection();
+  
     try {
       await connection.beginTransaction();
-
-      // Insert Order
+    
       const [orderResult] = await connection.query(
-        `INSERT INTO orders (total_price, account_id, address, note) VALUES (?, ?, ?, ?)`,
-        [total_price, account_id, address || null, note || null]
+        `INSERT INTO orders (total_price, account_id, address, note, discount_id) 
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          total_price,
+          account_id,
+          address || null,
+          note || null,
+          discount_id || null
+        ]
       );
+    
       const orderId = orderResult.insertId;
-
-      // Insert Order Items
+    
       for (let item of items) {
-        // Find Variant in MongoDB to record snapshot
         const variantDoc = await Variant.findOne({ "variants.sku": item.sku }).lean();
-        if (!variantDoc) throw new Error(`Variant document not found for SKU: ${item.sku}`);
-
+        if (!variantDoc) throw new Error(`Variant not found: ${item.sku}`);
+      
         const specificVariant = variantDoc.variants.find(v => v.sku === item.sku);
-        if (!specificVariant) {
-          throw new Error(`Variant SKU ${item.sku} not found inside document`);
-        }
-
+        if (!specificVariant) throw new Error(`SKU not found: ${item.sku}`);
+      
         const { _id, ...variantData } = specificVariant;
         const variant_snapshot = JSON.stringify(variantData);
-
+      
         await connection.query(
-          `INSERT INTO order_items (quantity, product_id, variant_snapshot, order_id, discount_id) 
-           VALUES (?, ?, ?, ?, ?)`,
+          `INSERT INTO order_items (quantity, product_id, variant_snapshot, order_id) 
+           VALUES (?, ?, ?, ?)`,
           [
-            item.quantity, 
-            item.product_id, 
-            variant_snapshot, 
-            orderId, 
-            item.discount_id || null
+            item.quantity,
+            item.product_id,
+            variant_snapshot,
+            orderId
           ]
         );
       }
-
+    
       await connection.commit();
       return orderId;
+    
     } catch (error) {
       await connection.rollback();
       throw error;
