@@ -1,0 +1,575 @@
+[
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230001"
+    },
+    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "images": [
+      "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1554295405-abb8fd54f153?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BAN-MODERN-BR",
+        "price": 4500000,
+        "stock": 15,
+        "specs": {
+          "dimensions": {
+            "length": 120,
+            "width": 60,
+            "height": 75
+          },
+          "weight": 20,
+          "material": "Gỗ sồi",
+          "color": "Nâu"
+        },
+        "status": "available"
+      },
+      {
+        "sku": "BAN-MODERN-WH",
+        "price": 4600000,
+        "stock": 8,
+        "specs": {
+          "dimensions": {
+            "length": 120,
+            "width": 60,
+            "height": 75
+          },
+          "weight": 20,
+          "material": "Gỗ sồi sơn trắng",
+          "color": "Trắng"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230002"
+    },
+    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "images": [
+      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "SOFA-LUX-BK",
+        "price": 12500000,
+        "stock": 5,
+        "specs": {
+          "dimensions": {
+            "length": 220,
+            "width": 90,
+            "height": 85
+          },
+          "weight": 55,
+          "material": "Da thật",
+          "color": "Đen"
+        },
+        "status": "available"
+      },
+      {
+        "sku": "SOFA-LUX-GY",
+        "price": 12500000,
+        "stock": 3,
+        "specs": {
+          "dimensions": {
+            "length": 220,
+            "width": 90,
+            "height": 85
+          },
+          "weight": 55,
+          "material": "Da thật",
+          "color": "Xám"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230003"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "TU-MIN-3D-OAK",
+        "price": 3800000,
+        "stock": 20,
+        "specs": {
+          "dimensions": {
+            "length": 160,
+            "width": 60,
+            "height": 200
+          },
+          "weight": 85,
+          "material": "Gỗ MDF",
+          "color": "Vân sồi"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230004"
+    },
+    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "images": [
+      "https://images.unsplash.com/photo-1505693419148-de397e52b827?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BED-IKEA-WH",
+        "price": 7500000,
+        "stock": 10,
+        "specs": {
+          "dimensions": {
+            "length": 210,
+            "width": 170,
+            "height": 100
+          },
+          "weight": 45,
+          "material": "Gỗ thông",
+          "color": "Trắng"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230005"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "KE-ML-MOD-4",
+        "price": 1200000,
+        "stock": 50,
+        "specs": {
+          "dimensions": {
+            "length": 80,
+            "width": 30,
+            "height": 160
+          },
+          "weight": 15,
+          "material": "Gỗ công nghiệp",
+          "color": "Gỗ sáng"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230006"
+    },
+    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "images": [
+      "https://images.unsplash.com/photo-1577145745727-42b83d418965?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BAN-INDEX-LUX",
+        "price": 9800000,
+        "stock": 4,
+        "specs": {
+          "dimensions": {
+            "length": 140,
+            "width": 140,
+            "height": 75
+          },
+          "weight": 65,
+          "material": "Đá Cẩm Thạch",
+          "color": "Vân mây"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230007"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1505797149-43b0069ec26b?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "GHE-HP-CL-BK",
+        "price": 2500000,
+        "stock": 30,
+        "specs": {
+          "dimensions": {
+            "length": 65,
+            "width": 65,
+            "height": 120
+          },
+          "weight": 18,
+          "material": "Da PU",
+          "color": "Đen"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230008"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1595514535215-9988457885b5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "TU-AC-MIN-GY",
+        "price": 1800000,
+        "stock": 15,
+        "specs": {
+          "dimensions": {
+            "length": 80,
+            "width": 30,
+            "height": 110
+          },
+          "weight": 25,
+          "material": "MDF chống ẩm",
+          "color": "Xám"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230009"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BED-ROS-CL-V",
+        "price": 15000000,
+        "stock": 2,
+        "specs": {
+          "dimensions": {
+            "length": 220,
+            "width": 190,
+            "height": 140
+          },
+          "weight": 70,
+          "material": "Vải Nhung",
+          "color": "Kem"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230010"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1593085260707-5377ba35f42c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "KE-TV-IKEA",
+        "price": 950000,
+        "stock": 40,
+        "specs": {
+          "dimensions": {
+            "length": 150,
+            "width": 40,
+            "height": 45
+          },
+          "weight": 12,
+          "material": "Ván dăm",
+          "color": "Gỗ sáng"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230011"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BAN-TRA-JYSK",
+        "price": 1600000,
+        "stock": 25,
+        "specs": {
+          "dimensions": {
+            "length": 60,
+            "width": 60,
+            "height": 45
+          },
+          "weight": 8,
+          "material": "Gỗ Tự Nhiên",
+          "color": "Mộc"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230012"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "GHE-ML-MOD-GY",
+        "price": 850000,
+        "stock": 60,
+        "specs": {
+          "dimensions": {
+            "length": 45,
+            "width": 50,
+            "height": 85
+          },
+          "weight": 6,
+          "material": "Gỗ ASH",
+          "color": "Xám Gỗ"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230013"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "TU-BEP-HP-LUX",
+        "price": 25000000,
+        "stock": 5,
+        "specs": {
+          "dimensions": {
+            "length": 300,
+            "width": 60,
+            "height": 240
+          },
+          "weight": 120,
+          "material": "Acrylic/MDF",
+          "color": "Trắng Bóng"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230014"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1505691938895-1758d7eaa511?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BED-SINGLE-AC",
+        "price": 4200000,
+        "stock": 12,
+        "specs": {
+          "dimensions": {
+            "length": 200,
+            "width": 120,
+            "height": 45
+          },
+          "weight": 35,
+          "material": "MDF An Cường",
+          "color": "Vân Gỗ"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230015"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1507089947368-19c1da97753e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "KE-LUX-GD",
+        "price": 5500000,
+        "stock": 8,
+        "specs": {
+          "dimensions": {
+            "length": 100,
+            "width": 35,
+            "height": 180
+          },
+          "weight": 25,
+          "material": "Inox mạ PVD",
+          "color": "Vàng Gương"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230016"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1531973576160-7125cd663d86?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BAN-HOP-ID-MOD",
+        "price": 12000000,
+        "stock": 3,
+        "specs": {
+          "dimensions": {
+            "length": 240,
+            "width": 120,
+            "height": 75
+          },
+          "weight": 55,
+          "material": "Gỗ MFC cao cấp",
+          "color": "Nâu Đậm"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230017"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "GHE-BANH-IKEA-NV",
+        "price": 3500000,
+        "stock": 15,
+        "specs": {
+          "dimensions": {
+            "length": 82,
+            "width": 96,
+            "height": 101
+          },
+          "weight": 25,
+          "material": "Vải sợi",
+          "color": "Xanh Navy"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230018"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "TU-HS-HP-CL",
+        "price": 1500000,
+        "stock": 45,
+        "specs": {
+          "dimensions": {
+            "length": 91,
+            "width": 45,
+            "height": 183
+          },
+          "weight": 35,
+          "material": "Sắt sơn tĩnh điện",
+          "color": "Ghi Sáng"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230019"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1505691938895-1758d7eaa511?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "BED-TANG-JYSK",
+        "price": 6800000,
+        "stock": 10,
+        "specs": {
+          "dimensions": {
+            "length": 200,
+            "width": 100,
+            "height": 160
+          },
+          "weight": 65,
+          "material": "Gỗ Thông Tự Nhiên",
+          "color": "Gỗ Sáng"
+        },
+        "status": "available"
+      }
+    ]
+  },
+  {
+    "_id": {
+      "$oid": "65f1a123a123a123a1230020"
+    },
+    "model3d": null,
+    "images": [
+      "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=800&q=80"
+    ],
+    "variants": [
+      {
+        "sku": "KE-TREO-ID-MOD",
+        "price": 450000,
+        "stock": 100,
+        "specs": {
+          "dimensions": {
+            "length": 60,
+            "width": 20,
+            "height": 3
+          },
+          "weight": 2,
+          "material": "MDF Phủ Melamine",
+          "color": "Trắng"
+        },
+        "status": "available"
+      }
+    ]
+  }
+]
