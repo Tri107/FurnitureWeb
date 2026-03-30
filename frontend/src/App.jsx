@@ -7,6 +7,7 @@ import Otp from "./pages/auth/Otp";
 import Cart from "./pages/Cart";
 import Products from "./pages/Products";
 import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
 import UserProfile from "./pages/UserProfile";
 import DetailProduct from "./pages/DetailProduct";
 
@@ -36,6 +37,7 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/" element={<Home />} />
         <Route path="/userprofile" element={<UserProfile />} />
         <Route path="/login" element={<Login />} />
