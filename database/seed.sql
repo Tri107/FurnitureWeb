@@ -1,4 +1,4 @@
--- SQL Seed Data for Furniture Web Project
+
 USE furniture;
 
 -- Clear old data (Optional / Caution)
