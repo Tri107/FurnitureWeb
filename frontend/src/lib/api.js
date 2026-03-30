@@ -140,7 +140,7 @@ export const uploadProductImages = async (files) => {
   const headers = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_URL}/products/upload`, {
+  const res = await fetch(`${API_URL}/products/images`, {
     method: "POST",
     headers,
     credentials: "include",
@@ -154,6 +154,73 @@ export const uploadProductImages = async (files) => {
   return res.json();
 };
 
+export const uploadProductModel3d = async (file) => {
+  const formData = new FormData();
+  formData.append("model3d", file);
+
+  const token = localStorage.getItem("accessToken");
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}/products/model3d`, {
+    method: "POST",
+    headers,
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || "Upload 3D model thất bại");
+  }
+  return res.json();
+};
+
+// Upload/Update images (multipart/form-data)
+export const updateProductImages = async (variantRef, files) => {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+
+  const token = localStorage.getItem("accessToken");
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}/products/images/${variantRef}`, {
+    method: "PUT",
+    headers,
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || "Cập nhật ảnh thất bại");
+  }
+  return res.json();
+};
+
+// Upload/Update model 3D (multipart/form-data)
+export const updateProductModel3d = async (variantRef, file) => {
+  const formData = new FormData();
+  formData.append("model3d", file);
+
+  const token = localStorage.getItem("accessToken");
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}/products/model3d/${variantRef}`, {
+    method: "PUT",
+    headers,
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || "Cập nhật model 3D thất bại");
+  }
+  return res.json();
+};
 
 // ================= AUTH =================
 export const registerUser = (data) => apiFetch("/auth/register", "POST", data);
@@ -223,10 +290,30 @@ export const getHomeCollections = (params = "") => apiFetch(`/products/home-coll
 export const createProduct = (data) => apiFetch("/products/add-product", "POST", data);
 export const createVariant = (data) => apiFetch("/products/add-variant", "POST", data);
 export const updateProduct = (id, data) => apiFetch(`/products/${id}`, "PUT", data);
+export const updateVariant = (variantRef, data) => apiFetch(`/products/variant/${variantRef}`, "PUT", data);
 export const deleteProduct = (id) => apiFetch(`/products/${id}`, "DELETE");
+
 // ================= CHAT =================
 export const getChatConversations = () => apiFetch("/chat/conversations/list");
 export const getChatMessages = (conversationId) => apiFetch(`/chat/messages/${conversationId}`);
 export const createOrGetConversation = (data) => apiFetch("/chat/conversation", "POST", data);
 // ================= ORDER =================
 export const createOrder = (data) => apiFetch("/orders", "POST", data);
+export const getOrders = () => apiFetch("/orders");
+export const getOrdersByUserId = (userId) => apiFetch(`/orders/user/${userId}`);
+export const getOrderById = (id) => apiFetch(`/orders/${id}`);
+export const updateOrderStatus = (id, data) => apiFetch(`/orders/${id}`, "PUT", data);
+// ================= REVIEW =================
+export const getReviews = (productId) =>
+  apiFetch(`/reviews${productId ? `?productId=${productId}` : ""}`);
+
+export const getReviewPermission = (productId) =>
+  apiFetch(`/reviews/permission/${productId}`);
+
+export const createReview = (data) => apiFetch("/reviews", "POST", data);
+
+export const updateReview = (reviewId, data) =>
+  apiFetch(`/reviews/${reviewId}`, "PUT", data);
+
+export const deleteReview = (reviewId) =>
+  apiFetch(`/reviews/${reviewId}`, "DELETE");

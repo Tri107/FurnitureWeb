@@ -25,7 +25,7 @@ CREATE Table collections (
 
 CREATE Table products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
-    product_name VARCHAR(100) NOT NULL,
+    product_name VARCHAR(100) NOT NULL UNIQUE,
     product_description TEXT,
     product_status ENUM(
         'AVAILABLE',
@@ -82,7 +82,7 @@ CREATE Table orders (
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     order_status ENUM(
         'PENDING',
-        'SHIPPED',
+        'DELIVERING',
         'DELIVERED',
         'CANCELLED'
     ) DEFAULT 'PENDING',
@@ -92,6 +92,12 @@ CREATE Table orders (
     account_id INT NOT NULL,
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
+ALTER TABLE orders MODIFY COLUMN order_status ENUM(
+        'PENDING',
+        'DELIVERING',
+        'DELIVERED',
+        'CANCELLED'
+    ) DEFAULT 'PENDING'; 
 
 -- ALTER TABLE orders ADD COLUMN address VARCHAR(255), ADD COLUMN note TEXT;
 
@@ -122,13 +128,14 @@ CREATE Table reviews (
     ),
     review_comment TEXT,
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    review_update_date DATETIME,
     product_id INT NOT NULL,
     account_id INT NOT NULL,
-    UNIQUE (product_id, account_id),
+    order_id INT NOT NULL,
     FOREIGN KEY (product_id) REFERENCES products (product_id),
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
-
+-- alter table reviews add column review_update_date DATETIME;
 CREATE Table favorites (
     account_id INT NOT NULL,
     product_id INT NOT NULL,
@@ -573,17 +580,17 @@ BEGIN
         SET MESSAGE_TEXT = 'Variant_ref cannot be empty';
     END IF;
 
-    IF NOT is_valid_entity(p_category_id, 'category') OR p_category_id IS NOT NULL THEN
+    IF p_category_id IS NOT NULL AND NOT is_valid_entity(p_category_id, 'category') THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Invalid or disabled category';
     END IF;
 
-    IF NOT is_valid_entity(p_brand_id, 'brand') OR p_brand_id IS NOT NULL THEN
+    IF p_brand_id IS NOT NULL AND NOT is_valid_entity(p_brand_id, 'brand') THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Invalid or disabled brand';
     END IF;
 
-    IF NOT is_valid_entity(p_collection_id, 'collection') OR p_collection_id IS NOT NULL THEN
+    IF p_collection_id IS NOT NULL AND NOT is_valid_entity(p_collection_id, 'collection') THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Invalid or disabled collection';
     END IF;
@@ -598,7 +605,7 @@ BEGIN
         category_id         = COALESCE(p_category_id, category_id),
         brand_id            = COALESCE(p_brand_id, brand_id),
         collection_id       = COALESCE(p_collection_id, collection_id),
-        variant_ref         = COALESCE(p_variant_ref, variant_ref)
+        variant_ref         = p_variant_ref
     WHERE product_id = p_product_id;
 
 END

@@ -5,18 +5,18 @@ const assemblyFee = 200000;
 
 export default function useCartPage(cartItems = []) {
   const [assembly, setAssembly] = useState(true);
-  
+
   const items = useMemo(
     () =>
       cartItems.map((it) => {
         let snap = {};
         try {
           snap = typeof it.snapshot === 'string' ? JSON.parse(it.snapshot || '{}') : (it.snapshot || {});
-        } catch (e) {}
+        } catch (e) { }
 
         const imageArray = it.variants?.images;
-        const img = Array.isArray(imageArray) && imageArray.length > 0 
-          ? imageArray[0] 
+        const img = Array.isArray(imageArray) && imageArray.length > 0
+          ? imageArray[0]
           : (typeof imageArray === 'string' ? imageArray : "https://via.placeholder.com/300");
 
         const availableColors = Array.from(

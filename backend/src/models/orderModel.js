@@ -22,7 +22,7 @@ const OrderModel = {
       [orderId]
     );
     if (!orderRows.length) return null;
-    
+
     const [itemRows] = await db.query(
       `SELECT oi.quantity, oi.product_id, p.product_name, oi.variant_snapshot, oi.order_id, oi.discount_id
        FROM order_items oi 
@@ -30,7 +30,7 @@ const OrderModel = {
        WHERE oi.order_id = ?`,
       [orderId]
     );
-    
+
     return { ...orderRows[0], items: itemRows };
   },
 
@@ -68,12 +68,36 @@ const OrderModel = {
       const orderId = orderResult.insertId;
     
       for (let item of items) {
+
+        /*
         const variantDoc = await Variant.findOne({ "variants.sku": item.sku }).lean();
         if (!variantDoc) throw new Error(`Variant not found: ${item.sku}`);
       
         const specificVariant = variantDoc.variants.find(v => v.sku === item.sku);
         if (!specificVariant) throw new Error(`SKU not found: ${item.sku}`);
-      
+        */
+
+        // Bước 1: Lấy variant_ref từ MySQL theo product_id để xác định đúng document MongoDB
+        const [pRows] = await connection.query(
+          "SELECT variant_ref FROM products WHERE product_id = ?",
+          [item.product_id]
+        );
+        
+        if (pRows.length === 0 || !pRows[0].variant_ref) {
+          throw new Error(`Không tìm thấy variant_ref cho sản phẩm ID: ${item.product_id}`);
+        }
+        
+        const variantRef = pRows[0].variant_ref;
+
+        // Bước 2: Tìm variant trong MongoDB cực kỳ chính xác bằng variant_ref + sku
+        const variantDoc = await Variant.findById(variantRef).lean();
+        if (!variantDoc) throw new Error(`Document Variant không tồn tại: ${variantRef}`);
+
+        const specificVariant = variantDoc.variants.find(v => v.sku === item.sku);
+        if (!specificVariant) {
+          throw new Error(`Không tìm thấy SKU ${item.sku} trong sản phẩm ${item.product_id}`);
+        }
+
         const { _id, ...variantData } = specificVariant;
         const variant_snapshot = JSON.stringify(variantData);
       
