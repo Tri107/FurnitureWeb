@@ -4,7 +4,6 @@ CREATE DATABASE furniture;
 
 USE furniture;
 
-
 --  tables
 CREATE Table categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -91,7 +90,9 @@ CREATE Table orders (
     address VARCHAR(255),
     note TEXT,
     account_id INT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts (account_id)
+    discount_id INT,
+    FOREIGN KEY (account_id) REFERENCES accounts (account_id),
+    FOREIGN KEY (discount_id) REFERENCES discounts (discount_id)
 );
 
 
@@ -102,9 +103,7 @@ CREATE Table order_items (
     product_id INT NOT NULL,
     variant_snapshot JSON NOT NULL,
     order_id INT NOT NULL,
-    discount_id INT,
-    FOREIGN KEY (order_id) REFERENCES orders (order_id),
-    FOREIGN KEY (discount_id) REFERENCES discounts (discount_id)
+    FOREIGN KEY (order_id) REFERENCES orders (order_id)
 );
 
 CREATE Table payments (
@@ -278,17 +277,16 @@ VALUES (
     );
 
 INSERT INTO
-    orders (total_price, account_id)
-VALUES (2400000.000, 2),
-    (1800000.000, 3);
+    orders (total_price, account_id, discount_id)
+VALUES (2400000.000, 2, 1),
+    (1800000.000, 3, NULL);
 
 INSERT INTO
     order_items (
         quantity,
         product_id,
         variant_snapshot,
-        order_id,
-        discount_id
+        order_id
     )
 VALUES (
         2,
@@ -303,7 +301,6 @@ VALUES (
             'price',
             1200000
         ),
-        1,
         1
     ),
     (
@@ -319,8 +316,7 @@ VALUES (
             'price',
             1800000
         ),
-        2,
-        NULL
+        2
     );
 
 INSERT INTO
@@ -444,7 +440,7 @@ FROM
     JOIN products p ON oi.product_id = p.product_id
     JOIN orders o ON oi.order_id = o.order_id
     JOIN accounts a ON o.account_id = a.account_id
-    LEFT JOIN discounts d ON oi.discount_id = d.discount_id;
+    LEFT JOIN discounts d ON o.discount_id = d.discount_id;
 
 -- view all discounts for admin
 CREATE VIEW view_all_discounts AS SELECT * FROM discounts;

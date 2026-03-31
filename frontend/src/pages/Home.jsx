@@ -139,7 +139,7 @@ export default function Home() {
   }, []);
 
   const filtered = useMemo(() => {
-    if (tab === "best") return products.filter((p) => p.type === "best").slice(0, 10);
+    if (tab === "best") return products.filter((p) => p.type === "best").slice(0, 8);
     return products.filter((p) => p.type === "new").slice(0, 10);
   }, [tab, products]);
 
@@ -200,7 +200,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 bg-slate-50">
+        {/* <section className="py-16 bg-slate-50">
           <div className="mx-auto max-w-7xl px-4">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -248,9 +248,9 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
-        <section className="bg-slate-50">
+        <section className="bg-slate-50 mt-20">
           <div className="mx-auto max-w-7xl px-4">
             <div className="bg-yellow-50 border border-slate-100 rounded-xl shadow-lg grid md:grid-cols-2 items-center overflow-hidden">
               <div className="p-10">

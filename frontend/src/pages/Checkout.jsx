@@ -21,7 +21,7 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   // CART
-  const { cartItems, optimisticClear } = useCart();
+  const { cartItems, loading, optimisticClear } = useCart();
   const cart = useCartPage(cartItems);
   const items = cart.items;
 
@@ -49,9 +49,6 @@ export default function Checkout() {
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
 
-  useCheckoutProfile(setShippingData);
-  useCheckoutGuard(cartItems, navigate);
-
   const { handlePlaceOrder, isSubmitting } = useCheckoutSubmit({
     cartItems,
     cart,
@@ -60,6 +57,9 @@ export default function Checkout() {
     navigate,
     optimisticClear,
   });
+
+  useCheckoutProfile(setShippingData);
+  useCheckoutGuard(cartItems, loading, isSubmitting, navigate);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
