@@ -83,7 +83,8 @@ export default function Header() {
         : (typeof imageArray === "string" ? imageArray : "https://via.placeholder.com/400x300?text=No+Image");
 
       return {
-        id: it.cart_item_id,
+        cartItemId: it.cart_item_id,
+        id: it.product_id,
         name: it.product_name,
         price: snapshot.price || 0,
         sku: it.sku || "N/A",
@@ -469,37 +470,45 @@ export default function Header() {
                   </div>
 
                   <div className="max-h-[320px] overflow-auto p-3 space-y-2">
-                    {cartItems.map((it) => (
-                      <Link to={`/detailproduct/${it.id}`}
-                        onClick={closeRight}>
-                        <div
-                          key={it.id}
-                          className="flex items-center gap-3 rounded-xl p-2 bg-white/5 border border-white/10"
+                    {cartItems.length === 0 ? (
+                      <div className="py-2 flex flex-col items-center justify-center text-center">
+                        <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                          <ShoppingCart className="h-8 w-8 text-white/20" />
+                        </div>
+                        <p className="text-sm text-white/70 italic">Giỏ hàng đang trống</p>
+                      </div>
+                    ) : (
+                      cartItems.map((it) => (
+                        <Link
+                          key={it.cartItemId}
+                          to={`/detailproduct/${it.id}`}
+                          onClick={closeRight}
                         >
-                          <img
-                            src={it.img}
-                            alt={it.name}
-                            className="h-14 w-14 rounded-lg object-cover"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-white truncate">
-                              {it.name}
-                            </p>
-                            <p className="text-[10px] text-white/50 truncate">
-                              {it.sku}
-                            </p>
-                            <p className="text-xs text-white/70 mt-0.5">
-                              {formatVND(it.price)} • SL:{" "}
-                              <span className="text-white">{it.qty}</span>
+                          <div className="flex items-center gap-3 rounded-xl p-2 bg-white/5 border border-white/10">
+                            <img
+                              src={it.img}
+                              alt={it.name}
+                              className="h-14 w-14 rounded-lg object-cover"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-white truncate">
+                                {it.name}
+                              </p>
+                              <p className="text-[10px] text-white/50 truncate">
+                                {it.sku}
+                              </p>
+                              <p className="text-xs text-white/70 mt-0.5">
+                                {formatVND(it.price)} • SL:{" "}
+                                <span className="text-white">{it.qty}</span>
+                              </p>
+                            </div>
+                            <p className="text-sm font-semibold text-white">
+                              {formatVND(it.price * it.qty)}
                             </p>
                           </div>
-                          <p className="text-sm font-semibold text-white">
-                            {formatVND(it.price * it.qty)}
-                          </p>
-                        </div>
-                      </Link>
-
-                    ))}
+                        </Link>
+                      ))
+                    )}
                   </div>
 
                   <div className="p-4 border-t border-white/10">
@@ -510,21 +519,33 @@ export default function Header() {
                       </span>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <Link
-                        to="/cart"
-                        onClick={closeRight}
-                        className="text-center rounded-xl border border-white/15 bg-white/5 py-2 text-sm font-semibold hover:bg-white/10 transition"
-                      >
-                        Xem giỏ hàng
-                      </Link>
-                      <Link
-                        to="/checkout"
-                        onClick={closeRight}
-                        className="text-center rounded-xl bg-orange-500 py-2 text-sm font-semibold text-white hover:bg-orange-400 transition"
-                      >
-                        Thanh toán
-                      </Link>
+                    <div className="mt-4">
+                      {cartItems.length === 0 ? (
+                        <Link
+                          to="/products"
+                          onClick={closeRight}
+                          className="flex items-center justify-center w-full rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition"
+                        >
+                          Tiếp tục mua sắm
+                        </Link>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link
+                            to="/cart"
+                            onClick={closeRight}
+                            className="text-center rounded-xl border border-white/15 bg-white/5 py-2.5 text-sm font-semibold hover:bg-white/10 transition"
+                          >
+                            Xem giỏ hàng
+                          </Link>
+                          <Link
+                            to="/checkout"
+                            onClick={closeRight}
+                            className="text-center rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition"
+                          >
+                            Thanh toán
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

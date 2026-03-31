@@ -39,7 +39,7 @@ import {
   updateProductModel3d,
 } from "../../lib/api";
 
-import { Loader2, X, Upload, FileBox, ImagePlus } from "lucide-react";
+import { Loader2, X, Upload, FileBox, ImagePlus, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function EditProductModal({ open, onClose, productId, onProductUpdated }) {
@@ -171,6 +171,26 @@ export default function EditProductModal({ open, onClose, productId, onProductUp
         i === rowIndex ? { ...row, [field]: value } : row
       )
     );
+  };
+
+  const handleAddNewVariant = () => {
+    setVariantRows((prev) => [
+      ...prev,
+      {
+        sku: "",
+        price: 0,
+        stock: 0,
+        dimensions: "",
+        weight: 0,
+        material: "",
+        color: "",
+        status: "available",
+      },
+    ]);
+  };
+
+  const handleRemoveVariant = (rowIndex) => {
+    setVariantRows((prev) => prev.filter((_, i) => i !== rowIndex));
   };
 
   // Parse dimensions back to object
@@ -484,9 +504,20 @@ export default function EditProductModal({ open, onClose, productId, onProductUp
               {/* ========== SECTION 2: Bảng biến thể (Editable) ========== */}
               {variantRows.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
-                    Biến thể sản phẩm ({variantRows.length})
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
+                      Biến thể sản phẩm ({variantRows.length})
+                    </h3>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 gap-1.5 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                      onClick={handleAddNewVariant}
+                    >
+                      <Plus size={14} />
+                      Thêm biến thể
+                    </Button>
+                  </div>
                   <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs text-left">
@@ -500,6 +531,7 @@ export default function EditProductModal({ open, onClose, productId, onProductUp
                             <th className="p-3 min-w-[100px]">Chất liệu</th>
                             <th className="p-3 min-w-[90px]">Màu sắc</th>
                             <th className="p-3 min-w-[110px]">Trạng thái</th>
+                            <th className="p-3 w-10 text-center"></th>
                           </tr>
                         </thead>
                         <tbody className="divide-y">
@@ -572,6 +604,18 @@ export default function EditProductModal({ open, onClose, productId, onProductUp
                                     <SelectItem value="hidden">Hidden</SelectItem>
                                   </SelectContent>
                                 </Select>
+                              </td>
+                              <td className="p-2 text-center">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                                  onClick={() => handleRemoveVariant(i)}
+                                  title="Xóa biến thể"
+                                  type="button"
+                                >
+                                  <Trash2 size={14} />
+                                </Button>
                               </td>
                             </tr>
                           ))}

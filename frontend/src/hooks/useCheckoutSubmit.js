@@ -89,7 +89,6 @@ export default function useCheckoutSubmit({
       });
     } catch (error) {
       toast.error(error.message || "Lỗi khi đặt hàng");
-    } finally {
       setIsSubmitting(false);
     }
   };
