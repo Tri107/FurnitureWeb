@@ -7,7 +7,7 @@ import Footer from "@/components/ui/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { getProducts } from "@/lib/api";
+import { getProducts, getReviews } from "@/lib/api";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -60,23 +60,60 @@ export default function Products() {
         setLoadingProducts(true);
         setProductError("");
 
-        const res = await getProducts();
+        const [productRes, reviewRes] = await Promise.all([
+          getProducts(),
+          getReviews(),
+        ]);
 
-        const mappedProducts = (res?.data || []).map((item, index) => ({
-          id: item.product_id,
-          name: item.product_name,
-          price: Number(item?.variants?.price) || 0,
-          oldPrice: null,
-          categoryName: item.category_name || "",
-          brandName: item.brand_name || "",
-          collectionName: item.collection_name || "",
-          tag: index % 3 === 0 ? "Mới" : index % 3 === 1 ? "Hot" : null,
-          rating: 5,
-          reviews: 0,
-          img:
-            item?.variants?.url?.[0] ||
-            "https://via.placeholder.com/600x400?text=No+Image",
-        }));
+        const rawProducts = productRes?.data || [];
+        const rawReviews = reviewRes?.data || [];
+
+        const reviewMap = rawReviews.reduce((acc, review) => {
+          const productId = review.product_id;
+
+          if (!acc[productId]) {
+            acc[productId] = {
+              totalRating: 0,
+              totalReviews: 0,
+            };
+          }
+
+          acc[productId].totalRating += Number(review.rating) || 0;
+          acc[productId].totalReviews += 1;
+
+          return acc;
+        }, {});
+
+        const mappedProducts = rawProducts.map((item, index) => {
+          const reviewData = reviewMap[item.product_id] || {
+            totalRating: 0,
+            totalReviews: 0,
+          };
+
+          const avgRating =
+            reviewData.totalReviews > 0
+              ? reviewData.totalRating / reviewData.totalReviews
+              : 0;
+
+          return {
+            id: item.product_id,
+            name: item.product_name,
+            price:
+              Number(item?.variants?.variants?.[0]?.price) ||
+              Number(item?.variants?.price) ||
+              0,
+            oldPrice: null,
+            categoryName: item.category_name || "",
+            brandName: item.brand_name || "",
+            collectionName: item.collection_name || "",
+            tag: index % 3 === 0 ? "Mới" : index % 3 === 1 ? "Hot" : null,
+            rating: avgRating,
+            reviews: reviewData.totalReviews,
+            img:
+              item?.variants?.images?.[0] ||
+              "https://via.placeholder.com/600x400?text=No+Image",
+          };
+        });
 
         setProducts(mappedProducts);
       } catch (error) {
@@ -321,55 +358,55 @@ export default function Products() {
                   </div>
 
                   {/* PRICE */}
-                <div>
-  <h3 className="font-semibold mb-3">Khoảng giá</h3>
+                  <div>
+                    <h3 className="font-semibold mb-3">Khoảng giá</h3>
 
-  <Slider
-    min={0}
-    max={20000000}
-    step={500000}
-    value={priceRange}
-    onValueChange={(v) => setPriceRange(v)}
-  />
+                    <Slider
+                      min={0}
+                      max={20000000}
+                      step={500000}
+                      value={priceRange}
+                      onValueChange={(v) => setPriceRange(v)}
+                    />
 
-  <p className="text-xs text-slate-500 mt-2">
-    {formatVND(priceRange[0])} - {formatVND(priceRange[1])}
-  </p>
+                    <p className="text-xs text-slate-500 mt-2">
+                      {formatVND(priceRange[0])} - {formatVND(priceRange[1])}
+                    </p>
 
-  <div className="grid grid-cols-2 gap-3 mt-4">
-    <div>
-      <label className="block text-xs text-slate-500 mb-1">Giá từ</label>
-      <input
-        type="number"
-        min={0}
-        max={priceRange[1]}
-        step={500000}
-        value={priceRange[0]}
-        onChange={(e) => {
-          const value = Number(e.target.value) || 0;
-          setPriceRange([Math.min(value, priceRange[1]), priceRange[1]]);
-        }}
-        className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-      />
-    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Giá từ</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={priceRange[1]}
+                          step={500000}
+                          value={priceRange[0]}
+                          onChange={(e) => {
+                            const value = Number(e.target.value) || 0;
+                            setPriceRange([Math.min(value, priceRange[1]), priceRange[1]]);
+                          }}
+                          className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                        />
+                      </div>
 
-    <div>
-      <label className="block text-xs text-slate-500 mb-1">Đến</label>
-      <input
-        type="number"
-        min={priceRange[0]}
-        max={20000000}
-        step={500000}
-        value={priceRange[1]}
-        onChange={(e) => {
-          const value = Number(e.target.value) || 0;
-          setPriceRange([priceRange[0], Math.max(value, priceRange[0])]);
-        }}
-        className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-      />
-    </div>
-  </div>
-</div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Đến</label>
+                        <input
+                          type="number"
+                          min={priceRange[0]}
+                          max={20000000}
+                          step={500000}
+                          value={priceRange[1]}
+                          onChange={(e) => {
+                            const value = Number(e.target.value) || 0;
+                            setPriceRange([priceRange[0], Math.max(value, priceRange[0])]);
+                          }}
+                          className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </aside>
@@ -424,6 +461,24 @@ export default function Products() {
                                 <p className="text-sm font-bold">
                                   {formatVND(p.price)}
                                 </p>
+                              </div>
+
+                              <div className="mt-2 flex items-center gap-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={
+                                      i < Math.round(p.rating ?? 0)
+                                        ? "text-yellow-400 text-[10px]"
+                                        : "text-slate-300 text-[10px]"
+                                    }
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                                <span className="text-[11px] text-slate-500 ml-1">
+                                  ({p.reviews ?? 0})
+                                </span>
                               </div>
 
                               <div className="mt-2 text-xs text-slate-500 space-y-1">
@@ -485,5 +540,5 @@ function formatVND(v) {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
-  }).format(v);
+  }).format(v || 0);
 }

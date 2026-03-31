@@ -87,6 +87,7 @@ export default function ProductPage() {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewPermission, setReviewPermission] = useState(REVIEW_DEFAULT);
+  const [zoomImage, setZoomImage] = useState(null);
 
   const mongo = product?.variants || {};
   const variantList = mongo.variants || [];
@@ -395,8 +396,8 @@ export default function ProductPage() {
                         key={i}
                         onClick={() => handleSizeClick(dim.dimStr)}
                         className={`px-4 py-2 text-sm font-medium rounded-xl border-2 transition-all ${isActive
-                            ? "bg-red-50 text-red-600 border-red-500"
-                            : "bg-white text-gray-700 border-gray-200 hover:border-red-300"
+                          ? "bg-red-50 text-red-600 border-red-500"
+                          : "bg-white text-gray-700 border-gray-200 hover:border-red-300"
                           }`}
                       >
                         {dim.length} x {dim.width} x {dim.height} cm
@@ -422,8 +423,8 @@ export default function ProductPage() {
                         onClick={() => handleColorClick(c.colorName)}
                         title={c.colorName}
                         className={`w-9 h-9 rounded-full transition-all duration-200 ${c.tailwind} ${isActive
-                            ? "ring-2 ring-offset-2 ring-red-500 scale-110"
-                            : "hover:scale-110 border border-gray-200 shadow-sm"
+                          ? "ring-2 ring-offset-2 ring-red-500 scale-110"
+                          : "hover:scale-110 border border-gray-200 shadow-sm"
                           }`}
                       />
                     );
@@ -517,9 +518,9 @@ export default function ProductPage() {
                 <img
                   src={productImages[0]}
                   alt={product.product_name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
+                  onClick={() => setZoomImage(productImages[0])}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105 cursor-zoom-in"
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </div>
 
               <div className="md:col-span-1 md:row-span-1 h-[250px] md:h-full group overflow-hidden rounded-xl relative bg-gray-100">
@@ -527,7 +528,8 @@ export default function ProductPage() {
                   <img
                     src={productImages[1]}
                     alt={product.product_name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                    onClick={() => setZoomImage(productImages[1])}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 cursor-zoom-in"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-gray-400">
@@ -546,7 +548,8 @@ export default function ProductPage() {
                       <img
                         src={productImages[i]}
                         alt={product.product_name}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                        onClick={() => setZoomImage(productImages[i])}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 cursor-zoom-in"
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
@@ -563,6 +566,28 @@ export default function ProductPage() {
             </div>
           )}
         </div>
+
+        {zoomImage && (
+          <div
+            className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-4"
+            onClick={() => setZoomImage(null)}
+          >
+            <button
+              type="button"
+              onClick={() => setZoomImage(null)}
+              className="absolute top-4 right-4 text-white text-3xl font-bold leading-none hover:opacity-80"
+            >
+              ×
+            </button>
+
+            <img
+              src={zoomImage}
+              alt="Zoom ảnh sản phẩm"
+              className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        )}
       </div>
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-2">
@@ -636,8 +661,8 @@ export default function ProductPage() {
                           size={24}
                           fill={s <= userRating ? "currentColor" : "none"}
                           className={`transition-colors ${s <= userRating
-                              ? "text-yellow-400"
-                              : "text-gray-300 hover:text-yellow-400"
+                            ? "text-yellow-400"
+                            : "text-gray-300 hover:text-yellow-400"
                             }`}
                         />
                       </button>
