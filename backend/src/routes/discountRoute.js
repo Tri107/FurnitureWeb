@@ -4,7 +4,7 @@ import { verifyToken, verifyAdmin } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', verifyToken, verifyAdmin, discountController.getDiscounts);
+router.get('/', verifyToken, discountController.getDiscounts);
 router.post('/', verifyToken, verifyAdmin, discountController.createDiscount);
 router.put('/:discountId', verifyToken, verifyAdmin, discountController.updateDiscount);
 router.delete('/:discountId', verifyToken, verifyAdmin, discountController.deleteDiscount);
