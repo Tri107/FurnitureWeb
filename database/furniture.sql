@@ -87,20 +87,14 @@ CREATE Table orders (
         'DELIVERED',
         'CANCELLED'
     ) DEFAULT 'PENDING',
-    total_price DECIMAL(10, 3) NOT NULL,
+    total_price DECIMAL(12, 3) NOT NULL,
     address VARCHAR(255),
     note TEXT,
     account_id INT NOT NULL,
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
-ALTER TABLE orders MODIFY COLUMN order_status ENUM(
-        'PENDING',
-        'DELIVERING',
-        'DELIVERED',
-        'CANCELLED'
-    ) DEFAULT 'PENDING'; 
 
---  ALTER TABLE orders ADD COLUMN address VARCHAR(255), ADD COLUMN note TEXT;
+
 
 CREATE Table order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
