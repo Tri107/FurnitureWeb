@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { getProducts, getReviews } from "@/lib/api";
+import { useCart } from "@/hooks/useCart";
+import { useCartActions } from "@/hooks/useCartActions";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -34,9 +36,15 @@ export default function Products() {
 
   const [priceRange, setPriceRange] = useState([0, 20000000]);
 
-  // PHÂN TRANG
   const ITEMS_PER_PAGE = 9;
   const [currentPage, setCurrentPage] = useState(pageFromUrl > 0 ? pageFromUrl : 1);
+
+  const { refetch } = useCart();
+  const { handleAddToCart } = useCartActions(refetch);
+
+  const addToCart = (product) => {
+    handleAddToCart(product.id, "FAST-BUY-SKU", product.price, "Mặc định");
+  };
 
   useEffect(() => {
     if (selectedCategoryFromUrl) {
@@ -98,6 +106,7 @@ export default function Products() {
           return {
             id: item.product_id,
             name: item.product_name,
+            description: item.product_description || "",
             price:
               Number(item?.variants?.variants?.[0]?.price) ||
               Number(item?.variants?.price) ||
@@ -201,7 +210,6 @@ export default function Products() {
     sort,
   ]);
 
-  // Reset về trang 1 khi filter/sort thay đổi
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategories, selectedBrands, selectedCollections, priceRange, sort]);
@@ -214,7 +222,6 @@ export default function Products() {
     return filteredProducts.slice(startIndex, endIndex);
   }, [filteredProducts, currentPage]);
 
-  // Chống currentPage vượt quá số trang hiện có
   useEffect(() => {
     if (totalPages === 0) {
       setCurrentPage(1);
@@ -283,7 +290,6 @@ export default function Products() {
 
       <main className="flex-1 bg-slate-50 py-10">
         <div className="max-w-7xl mx-auto px-4">
-          {/* TITLE */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-xl font-semibold">Tất Cả Sản Phẩm</h1>
@@ -302,11 +308,9 @@ export default function Products() {
           </div>
 
           <div className="grid grid-cols-12 gap-8">
-            {/* FILTER */}
             <aside className="col-span-3">
               <Card>
                 <CardContent className="p-6 space-y-6">
-                  {/* CATEGORY */}
                   <div>
                     <h3 className="font-semibold mb-3">Danh mục</h3>
 
@@ -323,7 +327,6 @@ export default function Products() {
                     </div>
                   </div>
 
-                  {/* BRAND */}
                   <div>
                     <h3 className="font-semibold mb-3">Thương hiệu</h3>
 
@@ -340,7 +343,6 @@ export default function Products() {
                     </div>
                   </div>
 
-                  {/* COLLECTION */}
                   <div>
                     <h3 className="font-semibold mb-3">Collection</h3>
 
@@ -357,7 +359,6 @@ export default function Products() {
                     </div>
                   </div>
 
-                  {/* PRICE */}
                   <div>
                     <h3 className="font-semibold mb-3">Khoảng giá</h3>
 
@@ -411,7 +412,6 @@ export default function Products() {
               </Card>
             </aside>
 
-            {/* PRODUCT GRID */}
             <section className="col-span-9">
               {loadingProducts ? (
                 <div className="bg-white border rounded-xl p-10 text-center text-slate-500">
@@ -431,37 +431,38 @@ export default function Products() {
                     <>
                       <div className="grid grid-cols-3 gap-6">
                         {paginatedProducts.map((p) => (
-                          <Link
+                          <div
                             key={p.id}
-                            to={`/detailproduct/${p.id}`}
                             className="block rounded-xl bg-white border border-slate-200 overflow-hidden hover:shadow-lg transition"
                           >
-                            <div className="relative">
-                              <div className="aspect-[4/3] bg-slate-100">
-                                <img
-                                  src={p.img}
-                                  alt={p.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
+                            <Link to={`/detailproduct/${p.id}`} className="block">
+                              <div className="relative">
+                                <div className="aspect-[4/3] bg-slate-100">
+                                  <img
+                                    src={p.img}
+                                    alt={p.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
 
-                              {p.tag && (
-                                <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
-                                  {p.tag}
-                                </span>
-                              )}
-                            </div>
+                                {p.tag && (
+                                  <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                                    {p.tag}
+                                  </span>
+                                )}
+                              </div>
+                            </Link>
 
                             <div className="p-3">
-                              <p className="text-sm font-semibold line-clamp-2">
-                                {p.name}
-                              </p>
-
-                              <div className="mt-2">
-                                <p className="text-sm font-bold">
-                                  {formatVND(p.price)}
+                              <Link to={`/detailproduct/${p.id}`}>
+                                <p className="text-sm font-semibold line-clamp-2 min-h-[40px]">
+                                  {p.name}
                                 </p>
-                              </div>
+                              </Link>
+
+                              <p className="mt-2 text-xs text-slate-500 line-clamp-2 min-h-[36px]">
+                                {p.description || "Chưa có mô tả sản phẩm"}
+                              </p>
 
                               <div className="mt-2 flex items-center gap-1">
                                 {Array.from({ length: 5 }).map((_, i) => (
@@ -480,20 +481,11 @@ export default function Products() {
                                   ({p.reviews ?? 0})
                                 </span>
                               </div>
-
-                              <div className="mt-2 text-xs text-slate-500 space-y-1">
-                                {p.categoryName && <p>Danh mục: {p.categoryName}</p>}
-                                {p.brandName && <p>Thương hiệu: {p.brandName}</p>}
-                                {p.collectionName && (
-                                  <p>Collection: {p.collectionName}</p>
-                                )}
-                              </div>
                             </div>
-                          </Link>
+                          </div>
                         ))}
                       </div>
 
-                      {/* PAGINATION */}
                       {totalPages > 1 && (
                         <div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
                           <button
