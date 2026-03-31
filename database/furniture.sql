@@ -26,7 +26,7 @@ CREATE Table collections (
 
 CREATE Table products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
-    product_name VARCHAR(100) NOT NULL,
+    product_name VARCHAR(100) NOT NULL UNIQUE,
     product_description TEXT,
     product_status ENUM(
         'AVAILABLE',
@@ -581,17 +581,17 @@ BEGIN
         SET MESSAGE_TEXT = 'Variant_ref cannot be empty';
     END IF;
 
-    IF NOT is_valid_entity(p_category_id, 'category') OR p_category_id IS NOT NULL THEN
+    IF p_category_id IS NOT NULL AND NOT is_valid_entity(p_category_id, 'category') THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Invalid or disabled category';
     END IF;
 
-    IF NOT is_valid_entity(p_brand_id, 'brand') OR p_brand_id IS NOT NULL THEN
+    IF p_brand_id IS NOT NULL AND NOT is_valid_entity(p_brand_id, 'brand') THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Invalid or disabled brand';
     END IF;
 
-    IF NOT is_valid_entity(p_collection_id, 'collection') OR p_collection_id IS NOT NULL THEN
+    IF p_collection_id IS NOT NULL AND NOT is_valid_entity(p_collection_id, 'collection') THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Invalid or disabled collection';
     END IF;
@@ -606,7 +606,7 @@ BEGIN
         category_id         = COALESCE(p_category_id, category_id),
         brand_id            = COALESCE(p_brand_id, brand_id),
         collection_id       = COALESCE(p_collection_id, collection_id),
-        variant_ref         = COALESCE(p_variant_ref, variant_ref)
+        variant_ref         = p_variant_ref
     WHERE product_id = p_product_id;
 
 END //

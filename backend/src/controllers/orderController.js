@@ -1,4 +1,5 @@
 import OrderModel from '../models/orderModel.js';
+import ProductModel from '../models/productModel.js';
 
 const OrderController = {
   getAllOrders: async (req, res) => {
@@ -37,12 +38,12 @@ const OrderController = {
 
   createOrder: async (req, res) => {
     try {
-      const { account_id, total_price, items, address, note } = req.body;
+      const { account_id, total_price, items, address, note, discount_id } = req.body;
       if (!account_id || !total_price || !items || !items.length) {
         return res.status(400).json({ message: "Missing required fields" });
       }
       
-      const orderId = await OrderModel.create({ account_id, total_price, items, address, note });
+      const orderId = await OrderModel.create({ account_id, total_price, items, address, note, discount_id });
       return res.status(201).json({ message: "Order created successfully", orderId });
     } catch (error) {
       console.error(error);
