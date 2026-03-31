@@ -1,12 +1,9 @@
 [
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230001"
-    },
-    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1554295405-abb8fd54f153?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/desk.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/desk1.png"
     ],
     "variants": [
       {
@@ -20,8 +17,8 @@
             "height": 75
           },
           "weight": 20,
-          "material": "Gỗ sồi",
-          "color": "Nâu"
+          "material": "Gỗ MDF",
+          "color": "Nâu Đậm"
         },
         "status": "available"
       },
@@ -44,12 +41,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230002"
-    },
-    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/sofa.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/sofa1.png"
     ],
     "variants": [
       {
@@ -87,12 +82,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230003"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/wardrobe.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/wardrobe1.png"
     ],
     "variants": [
       {
@@ -114,12 +107,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230004"
-    },
     "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
     "images": [
-      "https://images.unsplash.com/photo-1505693419148-de397e52b827?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bed.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bed1.png"
     ],
     "variants": [
       {
@@ -141,12 +132,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230005"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bookshelf.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bookshelf1.png"
     ],
     "variants": [
       {
@@ -168,12 +157,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230006"
-    },
     "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
     "images": [
-      "https://images.unsplash.com/photo-1577145745727-42b83d418965?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/dining_table.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/dining_table1.png"
     ],
     "variants": [
       {
@@ -195,12 +182,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230007"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1505797149-43b0069ec26b?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/walnut_chair.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/walnut_chair1.png"
     ],
     "variants": [
       {
@@ -222,12 +207,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230008"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1595514535215-9988457885b5?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/shoe_cabinet.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/shoe_cabinet1.png"
     ],
     "variants": [
       {
@@ -249,12 +232,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230009"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/velvet_bed.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/velvet_bed1.png"
     ],
     "variants": [
       {
@@ -276,12 +257,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230010"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1593085260707-5377ba35f42c?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/tvshelf.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/tvshelf1.png"
     ],
     "variants": [
       {
@@ -303,12 +282,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230011"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/tea_table.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/tea_table1.png"
     ],
     "variants": [
       {
@@ -330,12 +307,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230012"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/dining_chair.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/dining_chair1.png"
     ],
     "variants": [
       {
@@ -357,12 +332,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230013"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/kitchen_cabinet.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/kitchen_cabinet1.png"
     ],
     "variants": [
       {
@@ -384,12 +357,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230014"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1505691938895-1758d7eaa511?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/single_bed.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/single_bed1.png"
     ],
     "variants": [
       {
@@ -411,16 +382,14 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230015"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1507089947368-19c1da97753e?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/decorative_shelf.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/decorative_shelf1.png"
     ],
     "variants": [
       {
-        "sku": "KE-LUX-GD",
+        "sku": "KE-MO-BR",
         "price": 5500000,
         "stock": 8,
         "specs": {
@@ -430,20 +399,18 @@
             "height": 180
           },
           "weight": 25,
-          "material": "Inox mạ PVD",
-          "color": "Vàng Gương"
+          "material": "Gỗ Óc Chó",
+          "color": "Nâu Đậm"
         },
         "status": "available"
       }
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230016"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1531973576160-7125cd663d86?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/meeting_table.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/meeting_table1.png"
     ],
     "variants": [
       {
@@ -465,12 +432,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230017"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/armchair.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/armchair1.png"
     ],
     "variants": [
       {
@@ -492,12 +457,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230018"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1594620302200-9a762244a156?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/filing_cabinet.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/filing_cabinet1.png"
     ],
     "variants": [
       {
@@ -519,12 +482,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230019"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1505691938895-1758d7eaa511?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bunk_bed.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bunk_bed1.png"
     ],
     "variants": [
       {
@@ -546,12 +507,10 @@
     ]
   },
   {
-    "_id": {
-      "$oid": "65f1a123a123a123a1230020"
-    },
     "model3d": null,
     "images": [
-      "https://images.unsplash.com/photo-1594026112284-02bb6f3352fe?auto=format&fit=crop&w=800&q=80"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/hanging_shelves.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/hanging_shelves1.png"
     ],
     "variants": [
       {
