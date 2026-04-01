@@ -140,18 +140,15 @@ export default function ChatBox() {
       {!isOpen && (
         <div className="flex flex-col items-end gap-3 z-50 group cursor-pointer" onClick={() => setIsOpen(true)}>
           {/* Tooltip bubble */}
-          <div className="bg-white p-4 rounded-2xl shadow-2xl w-[260px] relative border border-gray-100 transition-all duration-300">
+          <div className="absolute right-full mr-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 bg-white p-4 rounded-2xl shadow-2xl w-[260px] border border-gray-100 transition-all duration-300">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                <span className="font-bold text-xs">AI</span>
-              </div>
-              <span className="font-semibold text-gray-800 text-sm">Trợ lý B2VT</span>
+              <span className="font-semibold text-blue-600 text-sm">Trợ lý B2VT</span>
             </div>
             <p className="text-sm text-gray-600 leading-relaxed font-medium">
               Xin chào Anh/Chị! Em là trợ lý của B2VT. Cần hỗ trợ gì Anh/Chị cứ nhắn nhé!
             </p>
-            {/* Mũi tên trỏ xuống */}
-            <div className="absolute -bottom-2 right-5 w-4 h-4 bg-white border-b border-r border-gray-100 transform rotate-45"></div>
+            {/* Mũi tên trỏ sang phải thay vì trỏ xuống do đã chuyển popup sang bên trái icon */}
+            <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 w-4 h-4 bg-white border-t border-r border-gray-100 rotate-45"></div>
           </div>
 
           <button
