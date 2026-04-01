@@ -396,8 +396,8 @@ export default function ProductPage() {
                         key={i}
                         onClick={() => handleSizeClick(dim.dimStr)}
                         className={`px-4 py-2 text-sm font-medium rounded-xl border-2 transition-all ${isActive
-                          ? "bg-red-50 text-red-600 border-red-500"
-                          : "bg-white text-gray-700 border-gray-200 hover:border-red-300"
+                          ? "bg-orange-50 text-orange-600 border-orange-500"
+                          : "bg-white text-gray-700 border-gray-200 hover:border-orange-300"
                           }`}
                       >
                         {dim.length} x {dim.width} x {dim.height} cm
@@ -423,7 +423,7 @@ export default function ProductPage() {
                         onClick={() => handleColorClick(c.colorName)}
                         title={c.colorName}
                         className={`w-9 h-9 rounded-full transition-all duration-200 ${c.tailwind} ${isActive
-                          ? "ring-2 ring-offset-2 ring-red-500 scale-110"
+                          ? "ring-2 ring-offset-2 ring-orange-500 scale-110"
                           : "hover:scale-110 border border-gray-200 shadow-sm"
                           }`}
                       />
@@ -436,13 +436,13 @@ export default function ProductPage() {
             <div className="mt-auto pt-6 border-t border-gray-100">
               <div className="flex gap-4 mb-4">
                 <button
-                  onClick={onAddToCart}
-                  disabled={!activeVariant || activeVariant.stock <= 0}
-                  className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full py-3.5 px-4 font-bold flex items-center justify-center gap-2 transition-colors"
-                >
-                  <ShoppingCart size={20} />
-                  {activeVariant?.stock > 0 ? "Thêm vào giỏ hàng" : "Hết hàng"}
-                </button>
+  onClick={onAddToCart}
+  disabled={!activeVariant || activeVariant.stock <= 0}
+  className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full py-3.5 px-4 text-sm font-semibold tracking-wide flex items-center justify-center gap-2 transition-colors"
+>
+  <ShoppingCart size={19} />
+  {activeVariant?.stock > 0 ? "Thêm vào giỏ hàng" : "Hết hàng"}
+</button>
 
                 <button className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-900 rounded-full py-3.5 px-6 font-bold flex items-center justify-center gap-2 transition-colors">
                   <Heart size={20} className="text-gray-400" />
@@ -511,61 +511,79 @@ export default function ProductPage() {
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 h-auto md:h-[600px]">
-          {productImages.length ? (
-            <>
-              <div className="md:col-span-2 md:row-span-2 h-[400px] md:h-full group overflow-hidden rounded-xl relative bg-gray-100">
+        <div className="h-auto">
+  {productImages.length ? (
+    (() => {
+      const detailImages = productImages.slice(0, 3);
+
+      if (detailImages.length === 1) {
+        return (
+          <div className="h-[400px] md:h-[600px] group overflow-hidden rounded-xl relative bg-gray-100">
+            <img
+              src={detailImages[0]}
+              alt={product.product_name}
+              onClick={() => setZoomImage(detailImages[0])}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105 cursor-zoom-in"
+            />
+          </div>
+        );
+      }
+
+      if (detailImages.length === 2) {
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-auto md:h-[600px]">
+            {detailImages.map((img, i) => (
+              <div
+                key={i}
+                className="h-[280px] md:h-full group overflow-hidden rounded-xl relative bg-gray-100"
+              >
                 <img
-                  src={productImages[0]}
-                  alt={product.product_name}
-                  onClick={() => setZoomImage(productImages[0])}
+                  src={img}
+                  alt={`${product.product_name} ${i + 1}`}
+                  onClick={() => setZoomImage(img)}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105 cursor-zoom-in"
                 />
               </div>
+            ))}
+          </div>
+        );
+      }
 
-              <div className="md:col-span-1 md:row-span-1 h-[250px] md:h-full group overflow-hidden rounded-xl relative bg-gray-100">
-                {productImages[1] ? (
-                  <img
-                    src={productImages[1]}
-                    alt={product.product_name}
-                    onClick={() => setZoomImage(productImages[1])}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 cursor-zoom-in"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-                    Không có ảnh
-                  </div>
-                )}
-              </div>
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-auto md:h-[600px]">
+          <div className="md:col-span-2 h-[400px] md:h-full group overflow-hidden rounded-xl relative bg-gray-100">
+            <img
+              src={detailImages[0]}
+              alt={product.product_name}
+              onClick={() => setZoomImage(detailImages[0])}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105 cursor-zoom-in"
+            />
+          </div>
 
-              <div className="md:col-span-1 md:row-span-1 grid grid-cols-2 gap-4 h-[200px] md:h-full">
-                {[2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="group overflow-hidden rounded-xl relative bg-gray-100"
-                  >
-                    {productImages[i] ? (
-                      <img
-                        src={productImages[i]}
-                        alt={product.product_name}
-                        onClick={() => setZoomImage(productImages[i])}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 cursor-zoom-in"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-                        Trống
-                      </div>
-                    )}
-                  </div>
-                ))}
+          <div className="grid grid-cols-1 gap-4 h-auto md:h-full">
+            {detailImages.slice(1).map((img, i) => (
+              <div
+                key={i}
+                className="h-[220px] md:h-full group overflow-hidden rounded-xl relative bg-gray-100"
+              >
+                <img
+                  src={img}
+                  alt={`${product.product_name} ${i + 2}`}
+                  onClick={() => setZoomImage(img)}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 cursor-zoom-in"
+                />
               </div>
-            </>
-          ) : (
-            <div className="md:col-span-3 h-[400px] flex items-center justify-center text-gray-400 bg-gray-100 rounded-xl">
-              Không có ảnh chi tiết
-            </div>
-          )}
+            ))}
+          </div>
         </div>
+      );
+    })()
+  ) : (
+    <div className="h-[400px] flex items-center justify-center text-gray-400 bg-gray-100 rounded-xl">
+      Không có ảnh chi tiết
+    </div>
+  )}
+</div>
 
         {zoomImage && (
           <div

@@ -4,20 +4,26 @@ import { getFavorites } from "@/lib/api";
 
 export default function FavoriteButton({ productId }) {
   const user = JSON.parse(localStorage.getItem("user"));
-
   const { toggleFavorite } = useFavoriteActions();
 
   const [liked, setLiked] = useState(false);
 
-  // load trạng thái favorite ban đầu
   useEffect(() => {
     const fetchFavorites = async () => {
       if (!user) return;
 
       try {
-        const data = await getFavorites(user.id);
+        const res = await getFavorites(user.id);
 
-        const isFavorite = data.some((p) => p.product_id === productId);
+        const favoriteList = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+
+        const isFavorite = favoriteList.some(
+          (p) => Number(p.product_id) === Number(productId)
+        );
 
         setLiked(isFavorite);
       } catch (err) {
@@ -36,7 +42,6 @@ export default function FavoriteButton({ productId }) {
 
     try {
       await toggleFavorite(productId, user.id, liked);
-
       setLiked((prev) => !prev);
     } catch (err) {
       console.error("Favorite error", err);

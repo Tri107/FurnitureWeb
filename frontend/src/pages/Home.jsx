@@ -92,6 +92,7 @@ export default function Home() {
           return {
             id: item.product_id,
             name: item.product_name,
+            description: item.product_description || "",
             price:
               Number(item?.variants?.variants?.[0]?.price) ||
               Number(item?.variants?.price) ||
@@ -329,7 +330,7 @@ export default function Home() {
                 {filtered.map((p) => (
                   <div
                     key={p.id}
-                    className="rounded-xl bg-white border border-slate-200 overflow-hidden"
+                    className="rounded-xl bg-white border border-slate-200 overflow-hidden hover:shadow-md transition"
                   >
                     <div className="relative">
                       <FavoriteButton productId={p.id} />
@@ -351,36 +352,32 @@ export default function Home() {
                     </div>
 
                     <div className="p-3">
-                      <Link to={`/detailproduct/${p.id}`} className="hover:underline">
+                      <Link to={`/detailproduct/${p.id}`} className="block hover:underline">
                         <p className="text-[12px] font-semibold text-slate-900 line-clamp-2 min-h-[32px]">
                           {p.name}
                         </p>
                       </Link>
 
-                      <div className="mt-2">
-                        <p className="text-sm font-bold text-slate-900">
-                          {formatVND(p.price)}
-                        </p>
-                      </div>
+                      <p className="mt-2 text-[11px] text-slate-500 line-clamp-2 min-h-[34px]">
+                        {p.description || "Chưa có mô tả sản phẩm"}
+                      </p>
 
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <span
-                              key={i}
-                              className={
-                                i < Math.round(p.rating ?? 0)
-                                  ? "text-yellow-400 text-[10px]"
-                                  : "text-slate-300 text-[10px]"
-                              }
-                            >
-                              ★
-                            </span>
-                          ))}
-                          <span className="text-[11px] text-slate-500 ml-1">
-                            ({p.reviews ?? 0})
+                      <div className="mt-2 flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={
+                              i < Math.round(p.rating ?? 0)
+                                ? "text-yellow-400 text-[10px]"
+                                : "text-slate-300 text-[10px]"
+                            }
+                          >
+                            ★
                           </span>
-                        </div>
+                        ))}
+                        <span className="ml-1 text-[11px] text-slate-500">
+                          {Number(p.rating ?? 0).toFixed(1)} ({p.reviews ?? 0} đánh giá)
+                        </span>
                       </div>
                     </div>
                   </div>
