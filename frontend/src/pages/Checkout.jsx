@@ -15,14 +15,26 @@ import useCartPage from "@/hooks/useCartPage";
 import useCheckoutProfile from "@/hooks/useCheckoutProfile";
 import useCheckoutGuard from "@/hooks/useCheckoutGuard";
 import useCheckoutSubmit from "@/hooks/useCheckoutSubmit";
+import useCheckoutDiscount from "@/hooks/useCheckoutDiscount";
 
 export default function Checkout() {
   const navigate = useNavigate();
 
   // CART
-  const { cartItems, optimisticClear } = useCart();
+  const { cartItems, loading, optimisticClear } = useCart();
   const cart = useCartPage(cartItems);
   const items = cart.items;
+
+  const {
+    discountCode,
+    setDiscountCode,
+    discountId,
+    discountValue,
+    discountMessage,
+    handleApplyDiscount,
+  } = useCheckoutDiscount(cart.total);
+
+  const finalTotal = Math.max(0, cart.total - discountValue);
 
   const [shippingData, setShippingData] = useState({
     fullName: "",
@@ -32,13 +44,10 @@ export default function Checkout() {
     city: "",
     district: "",
     ward: "",
-    note: ""
+    note: "",
   });
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
-
-  useCheckoutProfile(setShippingData);
-  useCheckoutGuard(cartItems, navigate);
 
   const { handlePlaceOrder, isSubmitting } = useCheckoutSubmit({
     cartItems,
@@ -46,8 +55,11 @@ export default function Checkout() {
     shippingData,
     paymentMethod,
     navigate,
-    optimisticClear
+    optimisticClear,
   });
+
+  useCheckoutProfile(setShippingData);
+  useCheckoutGuard(cartItems, loading, isSubmitting, navigate);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -85,10 +97,14 @@ export default function Checkout() {
                 items={items}
                 subtotal={cart.subtotal}
                 shippingFee={cart.shippingFee}
-                discount={cart.discount}
-                total={cart.total}
+                discount={discountValue}
+                total={finalTotal}
                 onPlaceOrder={handlePlaceOrder}
                 isSubmitting={isSubmitting}
+                discountCode={discountCode}
+                setDiscountCode={setDiscountCode}
+                onApplyDiscount={handleApplyDiscount}
+                discountMessage={discountMessage}
               />
             </div>
           </div>

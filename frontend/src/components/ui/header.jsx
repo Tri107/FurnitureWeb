@@ -116,7 +116,8 @@ export default function Header() {
           : "https://via.placeholder.com/400x300?text=No+Image";
 
       return {
-        id: it.cart_item_id,
+        cartItemId: it.cart_item_id,
+        id: it.product_id,
         name: it.product_name,
         price: snapshot.price || 0,
         sku: it.sku || "N/A",
@@ -542,21 +543,33 @@ export default function Header() {
                       </span>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <Link
-                        to="/cart"
-                        onClick={closeRight}
-                        className="text-center rounded-xl border border-white/15 bg-white/5 py-2 text-sm font-semibold hover:bg-white/10 transition"
-                      >
-                        Xem giỏ hàng
-                      </Link>
-                      <Link
-                        to="/checkout"
-                        onClick={closeRight}
-                        className="text-center rounded-xl bg-orange-500 py-2 text-sm font-semibold text-white hover:bg-orange-400 transition"
-                      >
-                        Thanh toán
-                      </Link>
+                    <div className="mt-4">
+                      {cartItems.length === 0 ? (
+                        <Link
+                          to="/products"
+                          onClick={closeRight}
+                          className="flex items-center justify-center w-full rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition"
+                        >
+                          Tiếp tục mua sắm
+                        </Link>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link
+                            to="/cart"
+                            onClick={closeRight}
+                            className="text-center rounded-xl border border-white/15 bg-white/5 py-2.5 text-sm font-semibold hover:bg-white/10 transition"
+                          >
+                            Xem giỏ hàng
+                          </Link>
+                          <Link
+                            to="/checkout"
+                            onClick={closeRight}
+                            className="text-center rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition"
+                          >
+                            Thanh toán
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
