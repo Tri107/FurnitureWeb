@@ -10,6 +10,8 @@ export default function useCheckoutSubmit({
   paymentMethod,
   navigate,
   optimisticClear,
+  discountId,
+  finalTotal,
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -66,10 +68,10 @@ export default function useCheckoutSubmit({
 
       const payload = {
         account_id: user.id,
-        total_price: cart.total,
+        total_price: finalTotal,
         address: fullAddress,
         note: orderNote,
-        discount_id: null,
+        discount_id: discountId || null,
         items: mappedItems,
       };
 
@@ -82,7 +84,7 @@ export default function useCheckoutSubmit({
 
       navigate("/order-success", {
         state: {
-          total: cart.total,
+          total: finalTotal,
           address: fullAddress,
           paymentMethod: "cod",
         },

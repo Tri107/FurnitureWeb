@@ -59,6 +59,8 @@ export default function Checkout() {
     paymentMethod,
     navigate,
     optimisticClear,
+    discountId,
+    finalTotal,
   });
 
   return (
