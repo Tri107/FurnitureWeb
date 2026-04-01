@@ -1,5 +1,4 @@
 import OrderModel from '../models/orderModel.js';
-import ProductModel from '../models/productModel.js';
 
 const OrderController = {
   getAllOrders: async (req, res) => {
@@ -35,6 +34,8 @@ const OrderController = {
       return res.status(500).json({ message: "Server Error" });
     }
   },
+
+
 
   createOrder: async (req, res) => {
     try {

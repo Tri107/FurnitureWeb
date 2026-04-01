@@ -298,22 +298,21 @@ export const getChatConversations = () => apiFetch("/chat/conversations/list");
 export const getChatMessages = (conversationId) => apiFetch(`/chat/messages/${conversationId}`);
 export const createOrGetConversation = (data) => apiFetch("/chat/conversation", "POST", data);
 // ================= ORDER =================
-export const createOrder = (data) => apiFetch("/orders", "POST", data);
 export const getOrders = () => apiFetch("/orders");
 export const getOrdersByUserId = (userId) => apiFetch(`/orders/user/${userId}`);
 export const getOrderById = (id) => apiFetch(`/orders/${id}`);
+export const createOrder = (data) => apiFetch("/orders", "POST", data);
 export const updateOrderStatus = (id, data) => apiFetch(`/orders/${id}`, "PUT", data);
 // ================= REVIEW =================
 export const getReviews = (productId) =>
   apiFetch(`/reviews${productId ? `?productId=${productId}` : ""}`);
-
 export const getReviewPermission = (productId) =>
   apiFetch(`/reviews/permission/${productId}`);
-
 export const createReview = (data) => apiFetch("/reviews", "POST", data);
-
 export const updateReview = (reviewId, data) =>
   apiFetch(`/reviews/${reviewId}`, "PUT", data);
-
 export const deleteReview = (reviewId) =>
   apiFetch(`/reviews/${reviewId}`, "DELETE");
+
+// ================= DASHBOARD =================
+export const getWeeklyStats = () => apiFetch("/dashboard/weekly-stats");

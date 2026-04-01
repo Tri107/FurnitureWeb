@@ -460,6 +460,26 @@ FROM favorites f
 WHERE
     p.is_disabled = FALSE;
 
+
+-- view get stats
+CREATE VIEW view_weekly_stats AS
+SELECT weekly_stats.revenue, weekly_stats.order_count, weekly_stats.product_sold,new_users_stat.new_users
+FROM (
+SELECT 
+    SUM(o.total_price) AS revenue,
+    COUNT(DISTINCT o.order_id) AS order_count,
+    SUM(oi.quantity) AS product_sold
+FROM orders o
+JOIN order_items oi ON o.order_id = oi.order_id
+WHERE o.order_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND order_status <> 'CANCELLED'
+) AS weekly_stats
+JOIN(
+SELECT COUNT(*) AS new_users
+FROM accounts
+WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND is_disabled = FALSE
+) AS new_users_stat;
+
+
 DELIMITER //
 --  functions
 -- funcition validate reference constraint
@@ -705,7 +725,6 @@ BEGIN
     DEALLOCATE PREPARE stmt;
 END //
 
-
 -- procedure to delete category, brand, collection
 CREATE PROCEDURE delete_entity (
     IN p_table_name     VARCHAR(64),
@@ -846,5 +865,4 @@ END //
 
 
 DELIMITER //
-
 
