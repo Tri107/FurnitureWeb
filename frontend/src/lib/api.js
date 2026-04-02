@@ -1,5 +1,4 @@
 const API_URL = "http://localhost:9999/api";
-// Đã xóa FAV_API_URL vì chúng ta có thể dùng chung API_URL + "/favorites"
 
 // Cập nhật hàm getAuthHeaders để nhận biết khi nào đang gửi file (FormData)
 const getAuthHeaders = (isFormData = false) => {
@@ -160,6 +159,7 @@ export const getPayments = () => apiFetch("/payments");
 export const createPayment = (data) => apiFetch("/payments", "POST", data);
 export const updatePayment = (paymentId, data) => apiFetch(`/payments/${paymentId}`, "PUT", data);
 export const deletePayment = (paymentId) => apiFetch(`/payments/${paymentId}`, "DELETE");
+export const createVnpayPaymentUrl = (data) => apiFetch("/payments/vnpay-url", "POST", data);
 
 // ================= CATEGORY =================
 export const getCategories = () => apiFetch("/categories");
