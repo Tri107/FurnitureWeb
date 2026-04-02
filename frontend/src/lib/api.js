@@ -317,3 +317,6 @@ export const updateReview = (reviewId, data) =>
 
 export const deleteReview = (reviewId) =>
   apiFetch(`/reviews/${reviewId}`, "DELETE");
+
+export const createVnpayPaymentUrl = (data) =>
+  apiFetch("/vnpay/create-payment-url", "POST", data);

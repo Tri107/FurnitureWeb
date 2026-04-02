@@ -1,6 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { createOrder } from "@/lib/api";
+import { createOrder, createVnpayPaymentUrl } from "@/lib/api";
 import { clearCart } from "@/lib/cartApi";
 
 export default function useCheckoutSubmit({
@@ -41,7 +41,33 @@ export default function useCheckoutSubmit({
     if (!validate()) return;
 
     if (paymentMethod === "vnpay") {
-      toast("Thanh toán VNPay đang được phát triển.");
+      try {
+        const data = await createVnpayPaymentUrl({
+          amount: finalTotal,
+        });
+
+        if (data.paymentUrl) {
+          sessionStorage.setItem(
+            "pendingOrder",
+            JSON.stringify({
+              cartItems,
+              shippingData,
+              discountId,
+              finalTotal,
+            }),
+          );
+
+          window.location.href = data.paymentUrl;
+          return;
+        }
+
+        throw new Error("Không nhận được link thanh toán VNPay.");
+      } catch (error) {
+        sessionStorage.removeItem("pendingOrder");
+        toast.error(error.message || "Lỗi khi khởi tạo thanh toán VNPay.");
+        setIsSubmitting(false);
+      }
+
       return;
     }
 
