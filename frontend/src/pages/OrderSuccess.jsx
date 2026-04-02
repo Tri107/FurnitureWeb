@@ -29,6 +29,10 @@ export default function OrderSuccess() {
             Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đã được tạo thành công.
           </p>
 
+          <p className="text-blue-600 font-medium mb-6">
+            Vui lòng kiểm tra email của bạn để xem thông tin chi tiết đơn hàng.
+          </p>	
+
           <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-left space-y-3 mb-6">
             <div className="flex justify-between gap-4">
               <span className="text-slate-500">Phương thức thanh toán</span>

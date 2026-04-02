@@ -4,7 +4,19 @@ const shippingFee = 0;
 const assemblyFee = 200000;
 
 export default function useCartPage(cartItems = []) {
-  const [assembly, setAssembly] = useState(true);
+  const [assembly, setAssembly] = useState(() => {
+    try {
+      const saved = localStorage.getItem("cart_assembly");
+      if (saved !== null) {
+        return JSON.parse(saved);
+      }
+    } catch (e) { }
+    return true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("cart_assembly", JSON.stringify(assembly));
+  }, [assembly]);
 
   const items = useMemo(
     () =>
