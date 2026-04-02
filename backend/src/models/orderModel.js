@@ -24,14 +24,24 @@ const OrderModel = {
     if (!orderRows.length) return null;
 
     const [itemRows] = await db.query(
-      `SELECT oi.quantity, oi.product_id, p.product_name, oi.variant_snapshot, oi.order_id
+      `SELECT oi.quantity, oi.product_id, p.product_name, p.variant_ref, oi.variant_snapshot, oi.order_id
        FROM order_items oi 
        JOIN products p ON oi.product_id = p.product_id 
        WHERE oi.order_id = ?`,
       [orderId]
     );
 
-    return { ...orderRows[0], items: itemRows };
+    const items = await Promise.all(itemRows.map(async (item) => {
+      if (item.variant_ref) {
+        const variantDoc = await Variant.findById(item.variant_ref).lean();
+        if (variantDoc && variantDoc.images && variantDoc.images.length > 0) {
+          item.image = variantDoc.images[0];
+        }
+      }
+      return item;
+    }));
+
+    return { ...orderRows[0], items };
   },
 
   getByAccountId: async (accountId) => {

@@ -30,6 +30,7 @@ export default function Checkout() {
     setDiscountCode,
     discountId,
     discountValue,
+    discountPercentage,
     discountMessage,
     handleApplyDiscount,
   } = useCheckoutDiscount(cart.total);
@@ -56,6 +57,10 @@ export default function Checkout() {
     paymentMethod,
     navigate,
     optimisticClear,
+    discountId,
+    discountValue,
+    discountPercentage,
+    finalTotal,
   });
 
   useCheckoutProfile(setShippingData);
@@ -105,6 +110,7 @@ export default function Checkout() {
                 setDiscountCode={setDiscountCode}
                 onApplyDiscount={handleApplyDiscount}
                 discountMessage={discountMessage}
+                discountPercentage={discountPercentage}
               />
             </div>
           </div>

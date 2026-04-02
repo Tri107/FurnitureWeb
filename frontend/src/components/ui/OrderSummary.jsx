@@ -12,6 +12,7 @@ export default function OrderSummary({
   setDiscountCode,
   onApplyDiscount,
   discountMessage,
+  discountPercentage,
 }) {
   return (
     <div className="border border-slate-200 rounded-2xl p-6 bg-white">
@@ -35,8 +36,8 @@ export default function OrderSummary({
 
         {discount > 0 && (
           <div className="flex justify-between items-center text-slate-600 text-sm">
-            <span>Giảm giá</span>
-            <span className="font-medium text-green-600">
+            <span>Giảm giá {discountPercentage ? `(${discountPercentage}%)` : ""}</span>
+            <span className="font-medium text-slate-900">
               -{discount.toLocaleString("vi-VN")}VNĐ
             </span>
           </div>

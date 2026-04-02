@@ -1,5 +1,6 @@
 import OrderModel from '../models/orderModel.js';
 import ProductModel from '../models/productModel.js';
+import { sendOrderConfirmationEmail } from '../utils/sendEmail.js'; 
 
 const OrderController = {
   getAllOrders: async (req, res) => {
@@ -38,12 +39,23 @@ const OrderController = {
 
   createOrder: async (req, res) => {
     try {
-      const { account_id, total_price, items, address, note, discount_id } = req.body;
-      if (!account_id || !total_price || !items || !items.length) {
+      const { account_id, total_price, items, address, note, discount_id, extra_info } = req.body;
+      if (!account_id || total_price === undefined || !items || !items.length) {
         return res.status(400).json({ message: "Missing required fields" });
       }
       
       const orderId = await OrderModel.create({ account_id, total_price, items, address, note, discount_id });
+      
+      try {
+        const fullOrder = await OrderModel.getById(orderId);
+        if (fullOrder && fullOrder.email) {
+          fullOrder.extra_info = extra_info;
+          sendOrderConfirmationEmail(fullOrder.email, fullOrder);
+        }
+      } catch (emailError) {
+        console.error("Error sending order confirmation email:", emailError);
+      }
+
       return res.status(201).json({ message: "Order created successfully", orderId });
     } catch (error) {
       console.error(error);
@@ -71,5 +83,7 @@ const OrderController = {
     }
   }
 };
+
+
 
 export default OrderController;
