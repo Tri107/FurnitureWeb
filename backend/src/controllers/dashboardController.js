@@ -24,6 +24,16 @@ const DashboardController = {
             return res.status(500).json({ message: "Server Error" });
         }
     },
+
+    getDashboardSummary: async (req, res) => {
+        try {
+            const data = await DashboardModel.getDashboardSummary();
+            return res.status(200).json({ message: "Success", data });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Server Error" });
+        }
+    },
 }
 
 export default DashboardController;
