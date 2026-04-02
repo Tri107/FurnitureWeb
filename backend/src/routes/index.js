@@ -13,7 +13,8 @@ import reviewRoute from "./reviewRoute.js";
 import productRoute from "./productRoute.js";
 import cartItemRoute from "./cartItemRoute.js";
 import orderRoute from "./orderRoute.js";
-import chatRoute from './chatRoute.js'
+import chatRoute from './chatRoute.js';
+import dashboardRoute from './dashboardRoute.js';
 import vnpayRoute from "./vnpayRoute.js";
 
 const router = express.Router();
@@ -31,7 +32,8 @@ router.use("/reviews", reviewRoute);
 router.use("/products", productRoute);
 router.use("/cart-items", cartItemRoute);
 router.use("/orders", orderRoute);
-router.use('/chat', chatRoute)
+router.use('/chat', chatRoute);
+router.use('/dashboard', dashboardRoute);
 router.use("/vnpay", vnpayRoute);
 
 

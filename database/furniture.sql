@@ -5,25 +5,25 @@ CREATE DATABASE furniture;
 USE furniture;
 
 --  tables
-CREATE Table categories (
+CREATE TABLE categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
     category_name VARCHAR(100) NOT NULL UNIQUE,
     is_disabled BOOLEAN DEFAULT FALSE
 );
 
-CREATE Table brands (
+CREATE TABLE brands (
     brand_id INT PRIMARY KEY AUTO_INCREMENT,
     brand_name VARCHAR(100) NOT NULL UNIQUE,
     is_disabled BOOLEAN DEFAULT FALSE
 );
 
-CREATE Table collections (
+CREATE TABLE collections (
     collection_id INT PRIMARY KEY AUTO_INCREMENT,
     collection_name VARCHAR(100) NOT NULL UNIQUE,
     is_disabled BOOLEAN DEFAULT FALSE
 );
 
-CREATE Table products (
+CREATE TABLE products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
     product_name VARCHAR(100) NOT NULL UNIQUE,
     product_description TEXT,
@@ -43,7 +43,7 @@ CREATE Table products (
     FOREIGN KEY (collection_id) REFERENCES collections (collection_id)
 );
 
-CREATE Table accounts (
+CREATE TABLE accounts (
     account_id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
@@ -53,7 +53,7 @@ CREATE Table accounts (
     refresh_token TEXT
 );
 
-CREATE Table user_profiles (
+CREATE TABLE user_profiles (
     profile_id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) UNIQUE NOT NULL,
     phone_number VARCHAR(15),
@@ -62,7 +62,7 @@ CREATE Table user_profiles (
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
 
-CREATE Table discounts (
+CREATE TABLE discounts (
     discount_id INT PRIMARY KEY AUTO_INCREMENT,
     discount_code VARCHAR(50) NOT NULL UNIQUE,
     discount_percentage INT NOT NULL,
@@ -77,7 +77,7 @@ CREATE Table discounts (
     CHECK (valid_to > valid_from)
 );
 
-CREATE Table orders (
+CREATE TABLE orders (
     order_id INT PRIMARY KEY AUTO_INCREMENT,
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     order_status ENUM(
@@ -95,9 +95,7 @@ CREATE Table orders (
     FOREIGN KEY (discount_id) REFERENCES discounts (discount_id)
 );
 
-
-
-CREATE Table order_items (
+CREATE TABLE order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
     quantity INT NOT NULL CHECK (quantity > 0),
     product_id INT NOT NULL,
@@ -106,7 +104,7 @@ CREATE Table order_items (
     FOREIGN KEY (order_id) REFERENCES orders (order_id)
 );
 
-CREATE Table payments (
+CREATE TABLE payments (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
     payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     payment_method ENUM('COD', 'BANK TRANSFER') NOT NULL,
@@ -114,7 +112,7 @@ CREATE Table payments (
     FOREIGN KEY (order_id) REFERENCES orders (order_id)
 );
 
-CREATE Table reviews (
+CREATE TABLE reviews (
     review_id INT PRIMARY KEY AUTO_INCREMENT,
     rating TINYINT CHECK (
         rating >= 1
@@ -129,8 +127,8 @@ CREATE Table reviews (
     FOREIGN KEY (product_id) REFERENCES products (product_id),
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
---  alter table reviews add column review_update_date DATETIME;
-CREATE Table favorites (
+--  alter TABLE reviews add column review_update_date DATETIME;
+CREATE TABLE favorites (
     account_id INT NOT NULL,
     product_id INT NOT NULL,
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -151,204 +149,6 @@ CREATE TABLE cart_items (
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   UNIQUE KEY unique_cart_item (account_id, product_id, sku)
 );
-
---  data insertion
-INSERT INTO
-    categories (category_name)
-VALUES ('Bàn'),
-    ('Ghế'),
-    ('Tủ');
-
-INSERT INTO
-    brands (brand_name)
-VALUES ('Nội Thất Hòa Phát'),
-    ('Nội Thất An Cường'),
-    ('Nội Thất Minh Long');
-
-INSERT INTO
-    collections (collection_name)
-VALUES ('Modern'),
-    ('Classic'),
-    ('Minimal');
-
-INSERT INTO
-    products (
-        product_name,
-        product_description,
-        category_id,
-        brand_id,
-        collection_id,
-        variant_ref
-    )
-VALUES (
-        'Bàn gỗ ABC',
-        'Bàn gỗ tự nhiên, phù hợp phòng khách và phòng làm việc',
-        1,
-        1,
-        1,
-        'VAR-TABLE-ABC'
-    ),
-    (
-        'Ghế sofa XYZ',
-        'Ghế sofa bọc nỉ cao cấp, êm ái',
-        2,
-        2,
-        2,
-        'VAR-SOFA-XYZ'
-    ),
-    (
-        'Tủ quần áo MNO',
-        'Tủ quần áo gỗ MDF chống ẩm',
-        3,
-        3,
-        3,
-        'VAR-CABINET-MNO'
-    );
-
-INSERT INTO
-    accounts (
-        email,
-        password_hash,
-        is_admin
-    )
-VALUES (
-        'admin@shop.com',
-        '$2a$10$adminhash',
-        TRUE
-    ),
-    (
-        'user1@gmail.com',
-        '$2a$10$user1hash',
-        FALSE
-    ),
-    (
-        'user2@gmail.com',
-        '$2a$10$user2hash',
-        FALSE
-    );
-
-INSERT INTO
-    user_profiles (
-        username,
-        phone_number,
-        user_address,
-        account_id
-    )
-VALUES (
-        'admin',
-        '0900000000',
-        'Hà Nội',
-        1
-    ),
-    (
-        'user_one',
-        '0911111111',
-        'TP.HCM',
-        2
-    ),
-    (
-        'user_two',
-        '0922222222',
-        'Đà Nẵng',
-        3
-    );
-
-INSERT INTO
-    discounts (
-        discount_code,
-        discount_percentage,
-        valid_from,
-        valid_to,
-        discount_description
-    )
-VALUES (
-        'SALE10',
-        10,
-        '2025-01-01',
-        '2025-12-31',
-        'Giảm giá 10% toàn bộ sản phẩm'
-    ),
-    (
-        'SALE20',
-        20,
-        '2025-06-01',
-        '2025-06-30',
-        'Khuyến mãi tháng 6'
-    );
-
-INSERT INTO
-    orders (total_price, account_id, discount_id)
-VALUES (2400000.000, 2, 1),
-    (1800000.000, 3, NULL);
-
-INSERT INTO
-    order_items (
-        quantity,
-        product_id,
-        variant_snapshot,
-        order_id
-    )
-VALUES (
-        2,
-        1,
-        JSON_OBJECT(
-            'option_id',
-            'OPT-TABLE-RED-L',
-            'color',
-            'Red',
-            'size',
-            'L',
-            'price',
-            1200000
-        ),
-        1
-    ),
-    (
-        1,
-        2,
-        JSON_OBJECT(
-            'option_id',
-            'OPT-SOFA-GRAY-M',
-            'color',
-            'Gray',
-            'size',
-            'M',
-            'price',
-            1800000
-        ),
-        2
-    );
-
-INSERT INTO
-    payments (payment_method, order_id)
-VALUES ('COD', 1),
-    ('Bank Transfer', 2);
-
-INSERT INTO
-    reviews (
-        rating,
-        review_comment,
-        product_id,
-        account_id, order_id
-    )
-VALUES (
-        5,
-        'Bàn rất chắc chắn, đúng mô tả',
-        1,
-        2, 1
-    ),
-    (
-        4,
-        'Ghế ngồi êm, giao hàng nhanh',
-        2,
-        3, 2
-    );
-
-INSERT INTO
-    favorites (account_id, product_id)
-VALUES (2, 1),
-    (2, 2),
-    (3, 3);
 
 --  views
 --  view all products for admin
@@ -459,6 +259,39 @@ FROM favorites f
     JOIN products p ON f.product_id = p.product_id
 WHERE
     p.is_disabled = FALSE;
+
+
+-- view get stats
+CREATE VIEW view_weekly_stats AS
+SELECT weekly_stats.revenue, weekly_stats.order_count, weekly_stats.product_sold, new_users_stat.new_users
+FROM (
+SELECT 
+    SUM(o.total_price) AS revenue,
+    COUNT(DISTINCT o.order_id) AS order_count,
+    SUM(oi.quantity) AS product_sold
+FROM orders o
+JOIN order_items oi ON o.order_id = oi.order_id
+WHERE o.order_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND order_status <> 'CANCELLED'
+) AS weekly_stats
+JOIN(
+SELECT COUNT(*) AS new_users
+FROM accounts
+WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND is_disabled = FALSE
+) AS new_users_stat;
+
+-- view get chart data
+CREATE VIEW view_get_chart_data AS
+SELECT 
+    DATE(order_date) AS stats_date,
+    SUM(total_price) AS total_revenue,
+    SUM(CASE WHEN order_status = 'PENDING' THEN 1 ELSE 0 END) AS PENDING,
+    SUM(CASE WHEN order_status = 'DELIVERING' THEN 1 ELSE 0 END) AS DELIVERING,
+    SUM(CASE WHEN order_status = 'DELIVERED' THEN 1 ELSE 0 END) AS DELIVERED,
+    SUM(CASE WHEN order_status = 'CANCELLED' THEN 1 ELSE 0 END) AS CANCELLED
+FROM orders
+GROUP BY stats_date
+ORDER BY stats_date DESC;
+
 
 DELIMITER //
 --  functions
@@ -705,7 +538,6 @@ BEGIN
     DEALLOCATE PREPARE stmt;
 END //
 
-
 -- procedure to delete category, brand, collection
 CREATE PROCEDURE delete_entity (
     IN p_table_name     VARCHAR(64),
@@ -846,5 +678,4 @@ END //
 
 
 DELIMITER //
-
 
