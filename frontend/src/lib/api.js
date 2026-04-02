@@ -316,3 +316,4 @@ export const deleteReview = (reviewId) =>
 
 // ================= DASHBOARD =================
 export const getWeeklyStats = () => apiFetch("/dashboard/weekly-stats");
+export const getChartData = (data) => apiFetch("/dashboard/chartdata", "POST", data);

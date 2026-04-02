@@ -132,13 +132,6 @@ export default function ViewOrderModal({ open, onClose, orderId }) {
                           <tr key={idx} className="hover:bg-muted/30 transition-colors">
                             <td className="px-4 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded bg-muted flex-shrink-0 overflow-hidden border">
-                                  <img 
-                                    src={snapshot.url?.[0] || "/placeholder.png"} 
-                                    alt={item.product_name} 
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
                                 <div>
                                   <p className="font-bold text-sm leading-tight">{item.product_name}</p>
                                   <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-tighter">SKU: {snapshot.sku || "N/A"}</p>
