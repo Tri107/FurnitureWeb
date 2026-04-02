@@ -24,14 +24,24 @@ const OrderModel = {
     if (!orderRows.length) return null;
 
     const [itemRows] = await db.query(
-      `SELECT oi.quantity, oi.product_id, p.product_name, oi.variant_snapshot, oi.order_id, oi.discount_id
+      `SELECT oi.quantity, oi.product_id, p.product_name, p.variant_ref, oi.variant_snapshot, oi.order_id
        FROM order_items oi 
        JOIN products p ON oi.product_id = p.product_id 
        WHERE oi.order_id = ?`,
       [orderId]
     );
 
-    return { ...orderRows[0], items: itemRows };
+    const items = await Promise.all(itemRows.map(async (item) => {
+      if (item.variant_ref) {
+        const variantDoc = await Variant.findById(item.variant_ref).lean();
+        if (variantDoc && variantDoc.images && variantDoc.images.length > 0) {
+          item.image = variantDoc.images[0];
+        }
+      }
+      return item;
+    }));
+
+    return { ...orderRows[0], items };
   },
 
   getByAccountId: async (accountId) => {
@@ -96,6 +106,25 @@ const OrderModel = {
         const specificVariant = variantDoc.variants.find(v => v.sku === item.sku);
         if (!specificVariant) {
           throw new Error(`Không tìm thấy SKU ${item.sku} trong sản phẩm ${item.product_id}`);
+        }
+
+        // Kiểm tra tồn kho trước khi thực hiện mua hàng
+        if (specificVariant.stock < item.quantity) {
+          throw new Error(`Sản phẩm (SKU: ${item.sku}) không đủ tồn kho. Hiện có: ${specificVariant.stock}, yêu cầu: ${item.quantity}`);
+        }
+
+        // Cập nhật tồn kho trong MongoDB một cách nguyên tử (Atomic Update)
+        const updateResult = await Variant.updateOne(
+          { 
+            _id: variantRef, 
+            "variants.sku": item.sku,
+            "variants.stock": { $gte: item.quantity } // Đảm bảo stock vẫn đủ tại thời điểm update
+          },
+          { $inc: { "variants.$.stock": -item.quantity } }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+          throw new Error(`Cập nhật tồn kho thất bại cho SKU: ${item.sku}. Có thể do thay đổi tồn kho đột xuất.`);
         }
 
         const { _id, ...variantData } = specificVariant;

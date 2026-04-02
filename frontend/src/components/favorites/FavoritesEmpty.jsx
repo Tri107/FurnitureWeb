@@ -12,7 +12,9 @@ export default function FavoritesEmpty() {
         Bạn chưa có sản phẩm yêu thích
       </p>
 
-      <button className="bg-slate-900 text-white px-5 py-2 rounded-md text-sm hover:bg-slate-800">
+      <button
+        onClick={() => window.location.href = "/products"}
+        className="bg-slate-900 text-white px-5 py-2 rounded-md text-sm hover:bg-slate-800">
         Khám phá sản phẩm
       </button>
 

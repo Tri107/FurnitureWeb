@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/ui/header";
 import Footer from "@/components/ui/footer";
-import { getProducts } from "@/lib/api";
+import { getProducts, getReviews } from "@/lib/api";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { useCart } from "@/hooks/useCart";
 import { useCartActions } from "@/hooks/useCartActions";
@@ -18,7 +18,7 @@ export default function Home() {
 
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
-  const [tab, setTab] = useState("all");
+  const [tab, setTab] = useState("best");
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [productError, setProductError] = useState("");
 
@@ -54,23 +54,60 @@ export default function Home() {
         setLoadingProducts(true);
         setProductError("");
 
-        const res = await getProducts();
-        const rawProducts = res?.data || [];
+        const [productRes, reviewRes] = await Promise.all([
+          getProducts(),
+          getReviews(),
+        ]);
 
-        const mappedProducts = rawProducts.map((item, index) => ({
-          id: item.product_id,
-          name: item.product_name,
-          price: item?.variants?.price || 0,
-          oldPrice: null,
-          tag: index % 3 === 0 ? "Mới" : index % 3 === 1 ? "Hot" : null,
-          type: index % 2 === 0 ? "best" : "new",
-          rating: 5,
-          reviews: 0,
-          img:
-            item?.variants?.url?.[0] ||
-            "https://via.placeholder.com/600x400?text=No+Image",
-          categoryName: item.category_name || "",
-        }));
+        const rawProducts = productRes?.data || [];
+        const rawReviews = reviewRes?.data || [];
+
+        const reviewMap = rawReviews.reduce((acc, review) => {
+          const productId = review.product_id;
+
+          if (!acc[productId]) {
+            acc[productId] = {
+              totalRating: 0,
+              totalReviews: 0,
+            };
+          }
+
+          acc[productId].totalRating += Number(review.rating) || 0;
+          acc[productId].totalReviews += 1;
+
+          return acc;
+        }, {});
+
+        const mappedProducts = rawProducts.map((item, index) => {
+          const reviewData = reviewMap[item.product_id] || {
+            totalRating: 0,
+            totalReviews: 0,
+          };
+
+          const avgRating =
+            reviewData.totalReviews > 0
+              ? reviewData.totalRating / reviewData.totalReviews
+              : 0;
+
+          return {
+            id: item.product_id,
+            name: item.product_name,
+            description: item.product_description || "",
+            price:
+              Number(item?.variants?.variants?.[0]?.price) ||
+              Number(item?.variants?.price) ||
+              0,
+            oldPrice: null,
+            tag: index % 3 === 0 ? "Mới" : index % 3 === 1 ? "Hot" : null,
+            type: index % 2 === 0 ? "best" : "new",
+            rating: avgRating,
+            reviews: reviewData.totalReviews,
+            img:
+              item?.variants?.images?.[0] ||
+              "https://via.placeholder.com/600x400?text=No+Image",
+            categoryName: item.category_name || "",
+          };
+        });
 
         setProducts(mappedProducts);
 
@@ -103,9 +140,8 @@ export default function Home() {
   }, []);
 
   const filtered = useMemo(() => {
-    if (tab === "all") return products;
-    if (tab === "best") return products.filter((p) => p.type === "best");
-    return products.filter((p) => p.type === "new");
+    if (tab === "best") return products.filter((p) => p.type === "best").slice(0, 8);
+    return products.filter((p) => p.type === "new").slice(0, 10);
   }, [tab, products]);
 
   const goToProducts = () => {
@@ -115,6 +151,7 @@ export default function Home() {
   const goToCollections = () => {
     navigate("/products");
   };
+
   const goToCategoryProducts = (categoryName) => {
     navigate(`/products?category=${encodeURIComponent(categoryName)}`);
   };
@@ -129,8 +166,9 @@ export default function Home() {
             {heroImages.map((img, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${index === heroIndex ? "opacity-100" : "opacity-0"
-                  }`}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
+                  index === heroIndex ? "opacity-100" : "opacity-0"
+                }`}
                 style={{ backgroundImage: `url(${img})` }}
               />
             ))}
@@ -163,7 +201,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 bg-slate-50">
+        {/* <section className="py-16 bg-slate-50">
           <div className="mx-auto max-w-7xl px-4">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -211,9 +249,9 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
 
-        <section className="bg-slate-50">
+        <section className="bg-slate-50 mt-20">
           <div className="mx-auto max-w-7xl px-4">
             <div className="bg-yellow-50 border border-slate-100 rounded-xl shadow-lg grid md:grid-cols-2 items-center overflow-hidden">
               <div className="p-10">
@@ -258,16 +296,6 @@ export default function Home() {
               <div className="mt-3 flex justify-center">
                 <div className="inline-flex rounded-full border border-slate-200 bg-white p-1">
                   <button
-                    onClick={() => setTab("all")}
-                    className={
-                      tab === "all"
-                        ? "px-4 py-2 text-xs rounded-full bg-slate-900 text-white"
-                        : "px-4 py-2 text-xs rounded-full text-slate-500 hover:text-slate-900"
-                    }
-                  >
-                    Tất cả
-                  </button>
-                  <button
                     onClick={() => setTab("best")}
                     className={
                       tab === "best"
@@ -302,7 +330,7 @@ export default function Home() {
                 {filtered.map((p) => (
                   <div
                     key={p.id}
-                    className="rounded-xl bg-white border border-slate-200 overflow-hidden"
+                    className="rounded-xl bg-white border border-slate-200 overflow-hidden hover:shadow-md transition"
                   >
                     <div className="relative">
                       <FavoriteButton productId={p.id} />
@@ -324,30 +352,32 @@ export default function Home() {
                     </div>
 
                     <div className="p-3">
-                      <Link to={`/detailproduct/${p.id}`} className="hover:underline">
+                      <Link to={`/detailproduct/${p.id}`} className="block hover:underline">
                         <p className="text-[12px] font-semibold text-slate-900 line-clamp-2 min-h-[32px]">
                           {p.name}
                         </p>
                       </Link>
 
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <span
-                              key={i}
-                              className={
-                                i < (p.rating ?? 0)
-                                  ? "text-yellow-400 text-[10px]"
-                                  : "text-slate-300 text-[10px]"
-                              }
-                            >
-                              ★
-                            </span>
-                          ))}
-                          <span className="text-[11px] text-slate-500 ml-1">
-                            ({p.reviews ?? 0})
+                      <p className="mt-2 text-[11px] text-slate-500 line-clamp-2 min-h-[34px]">
+                        {p.description || "Chưa có mô tả sản phẩm"}
+                      </p>
+
+                      <div className="mt-2 flex items-center gap-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={
+                              i < Math.round(p.rating ?? 0)
+                                ? "text-yellow-400 text-[10px]"
+                                : "text-slate-300 text-[10px]"
+                            }
+                          >
+                            ★
                           </span>
-                        </div>
+                        ))}
+                        <span className="ml-1 text-[11px] text-slate-500">
+                          {Number(p.rating ?? 0).toFixed(1)} ({p.reviews ?? 0} đánh giá)
+                        </span>
                       </div>
                     </div>
                   </div>

@@ -11,8 +11,6 @@ export default function AdminLayout() {
       {/* Main content */}
       <div className="flex flex-col flex-1 min-w-0">
 
-        {/* Không có Header nữa */}
-
         <main className="flex-1 p-6 w-full">
           <Outlet />
         </main>

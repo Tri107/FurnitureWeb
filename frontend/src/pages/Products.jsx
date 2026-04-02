@@ -7,7 +7,9 @@ import Footer from "@/components/ui/footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { getProducts } from "@/lib/api";
+import { getProducts, getReviews } from "@/lib/api";
+import { useCart } from "@/hooks/useCart";
+import { useCartActions } from "@/hooks/useCartActions";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -34,9 +36,15 @@ export default function Products() {
 
   const [priceRange, setPriceRange] = useState([0, 20000000]);
 
-  // PHÂN TRANG
   const ITEMS_PER_PAGE = 9;
   const [currentPage, setCurrentPage] = useState(pageFromUrl > 0 ? pageFromUrl : 1);
+
+  const { refetch } = useCart();
+  const { handleAddToCart } = useCartActions(refetch);
+
+  const addToCart = (product) => {
+    handleAddToCart(product.id, "FAST-BUY-SKU", product.price, "Mặc định");
+  };
 
   useEffect(() => {
     if (selectedCategoryFromUrl) {
@@ -60,23 +68,61 @@ export default function Products() {
         setLoadingProducts(true);
         setProductError("");
 
-        const res = await getProducts();
+        const [productRes, reviewRes] = await Promise.all([
+          getProducts(),
+          getReviews(),
+        ]);
 
-        const mappedProducts = (res?.data || []).map((item, index) => ({
-          id: item.product_id,
-          name: item.product_name,
-          price: Number(item?.variants?.price) || 0,
-          oldPrice: null,
-          categoryName: item.category_name || "",
-          brandName: item.brand_name || "",
-          collectionName: item.collection_name || "",
-          tag: index % 3 === 0 ? "Mới" : index % 3 === 1 ? "Hot" : null,
-          rating: 5,
-          reviews: 0,
-          img:
-            item?.variants?.url?.[0] ||
-            "https://via.placeholder.com/600x400?text=No+Image",
-        }));
+        const rawProducts = productRes?.data || [];
+        const rawReviews = reviewRes?.data || [];
+
+        const reviewMap = rawReviews.reduce((acc, review) => {
+          const productId = review.product_id;
+
+          if (!acc[productId]) {
+            acc[productId] = {
+              totalRating: 0,
+              totalReviews: 0,
+            };
+          }
+
+          acc[productId].totalRating += Number(review.rating) || 0;
+          acc[productId].totalReviews += 1;
+
+          return acc;
+        }, {});
+
+        const mappedProducts = rawProducts.map((item, index) => {
+          const reviewData = reviewMap[item.product_id] || {
+            totalRating: 0,
+            totalReviews: 0,
+          };
+
+          const avgRating =
+            reviewData.totalReviews > 0
+              ? reviewData.totalRating / reviewData.totalReviews
+              : 0;
+
+          return {
+            id: item.product_id,
+            name: item.product_name,
+            description: item.product_description || "",
+            price:
+              Number(item?.variants?.variants?.[0]?.price) ||
+              Number(item?.variants?.price) ||
+              0,
+            oldPrice: null,
+            categoryName: item.category_name || "",
+            brandName: item.brand_name || "",
+            collectionName: item.collection_name || "",
+            tag: index % 3 === 0 ? "Mới" : index % 3 === 1 ? "Hot" : null,
+            rating: avgRating,
+            reviews: reviewData.totalReviews,
+            img:
+              item?.variants?.images?.[0] ||
+              "https://via.placeholder.com/600x400?text=No+Image",
+          };
+        });
 
         setProducts(mappedProducts);
       } catch (error) {
@@ -164,7 +210,6 @@ export default function Products() {
     sort,
   ]);
 
-  // Reset về trang 1 khi filter/sort thay đổi
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategories, selectedBrands, selectedCollections, priceRange, sort]);
@@ -177,7 +222,6 @@ export default function Products() {
     return filteredProducts.slice(startIndex, endIndex);
   }, [filteredProducts, currentPage]);
 
-  // Chống currentPage vượt quá số trang hiện có
   useEffect(() => {
     if (totalPages === 0) {
       setCurrentPage(1);
@@ -246,7 +290,6 @@ export default function Products() {
 
       <main className="flex-1 bg-slate-50 py-10">
         <div className="max-w-7xl mx-auto px-4">
-          {/* TITLE */}
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1 className="text-xl font-semibold">Tất Cả Sản Phẩm</h1>
@@ -265,11 +308,9 @@ export default function Products() {
           </div>
 
           <div className="grid grid-cols-12 gap-8">
-            {/* FILTER */}
             <aside className="col-span-3">
               <Card>
                 <CardContent className="p-6 space-y-6">
-                  {/* CATEGORY */}
                   <div>
                     <h3 className="font-semibold mb-3">Danh mục</h3>
 
@@ -286,7 +327,6 @@ export default function Products() {
                     </div>
                   </div>
 
-                  {/* BRAND */}
                   <div>
                     <h3 className="font-semibold mb-3">Thương hiệu</h3>
 
@@ -303,7 +343,6 @@ export default function Products() {
                     </div>
                   </div>
 
-                  {/* COLLECTION */}
                   <div>
                     <h3 className="font-semibold mb-3">Collection</h3>
 
@@ -320,61 +359,59 @@ export default function Products() {
                     </div>
                   </div>
 
-                  {/* PRICE */}
-                <div>
-  <h3 className="font-semibold mb-3">Khoảng giá</h3>
+                  <div>
+                    <h3 className="font-semibold mb-3">Khoảng giá</h3>
 
-  <Slider
-    min={0}
-    max={20000000}
-    step={500000}
-    value={priceRange}
-    onValueChange={(v) => setPriceRange(v)}
-  />
+                    <Slider
+                      min={0}
+                      max={20000000}
+                      step={500000}
+                      value={priceRange}
+                      onValueChange={(v) => setPriceRange(v)}
+                    />
 
-  <p className="text-xs text-slate-500 mt-2">
-    {formatVND(priceRange[0])} - {formatVND(priceRange[1])}
-  </p>
+                    <p className="text-xs text-slate-500 mt-2">
+                      {formatVND(priceRange[0])} - {formatVND(priceRange[1])}
+                    </p>
 
-  <div className="grid grid-cols-2 gap-3 mt-4">
-    <div>
-      <label className="block text-xs text-slate-500 mb-1">Giá từ</label>
-      <input
-        type="number"
-        min={0}
-        max={priceRange[1]}
-        step={500000}
-        value={priceRange[0]}
-        onChange={(e) => {
-          const value = Number(e.target.value) || 0;
-          setPriceRange([Math.min(value, priceRange[1]), priceRange[1]]);
-        }}
-        className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-      />
-    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Giá từ</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={priceRange[1]}
+                          step={500000}
+                          value={priceRange[0]}
+                          onChange={(e) => {
+                            const value = Number(e.target.value) || 0;
+                            setPriceRange([Math.min(value, priceRange[1]), priceRange[1]]);
+                          }}
+                          className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                        />
+                      </div>
 
-    <div>
-      <label className="block text-xs text-slate-500 mb-1">Đến</label>
-      <input
-        type="number"
-        min={priceRange[0]}
-        max={20000000}
-        step={500000}
-        value={priceRange[1]}
-        onChange={(e) => {
-          const value = Number(e.target.value) || 0;
-          setPriceRange([priceRange[0], Math.max(value, priceRange[0])]);
-        }}
-        className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
-      />
-    </div>
-  </div>
-</div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">Đến</label>
+                        <input
+                          type="number"
+                          min={priceRange[0]}
+                          max={20000000}
+                          step={500000}
+                          value={priceRange[1]}
+                          onChange={(e) => {
+                            const value = Number(e.target.value) || 0;
+                            setPriceRange([priceRange[0], Math.max(value, priceRange[0])]);
+                          }}
+                          className="w-full border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-slate-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </aside>
 
-            {/* PRODUCT GRID */}
             <section className="col-span-9">
               {loadingProducts ? (
                 <div className="bg-white border rounded-xl p-10 text-center text-slate-500">
@@ -394,51 +431,61 @@ export default function Products() {
                     <>
                       <div className="grid grid-cols-3 gap-6">
                         {paginatedProducts.map((p) => (
-                          <Link
+                          <div
                             key={p.id}
-                            to={`/detailproduct/${p.id}`}
                             className="block rounded-xl bg-white border border-slate-200 overflow-hidden hover:shadow-lg transition"
                           >
-                            <div className="relative">
-                              <div className="aspect-[4/3] bg-slate-100">
-                                <img
-                                  src={p.img}
-                                  alt={p.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
+                            <Link to={`/detailproduct/${p.id}`} className="block">
+                              <div className="relative">
+                                <div className="aspect-[4/3] bg-slate-100">
+                                  <img
+                                    src={p.img}
+                                    alt={p.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
 
-                              {p.tag && (
-                                <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
-                                  {p.tag}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="p-3">
-                              <p className="text-sm font-semibold line-clamp-2">
-                                {p.name}
-                              </p>
-
-                              <div className="mt-2">
-                                <p className="text-sm font-bold">
-                                  {formatVND(p.price)}
-                                </p>
-                              </div>
-
-                              <div className="mt-2 text-xs text-slate-500 space-y-1">
-                                {p.categoryName && <p>Danh mục: {p.categoryName}</p>}
-                                {p.brandName && <p>Thương hiệu: {p.brandName}</p>}
-                                {p.collectionName && (
-                                  <p>Collection: {p.collectionName}</p>
+                                {p.tag && (
+                                  <span className="absolute top-2 left-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                                    {p.tag}
+                                  </span>
                                 )}
                               </div>
+                            </Link>
+
+                            <div className="p-3">
+                              <Link to={`/detailproduct/${p.id}`}>
+                                <p className="text-sm font-semibold line-clamp-2 min-h-[40px]">
+                                  {p.name}
+                                </p>
+                              </Link>
+
+                              <p className="mt-2 text-xs text-slate-500 line-clamp-2 min-h-[36px]">
+                                {p.description || "Chưa có mô tả sản phẩm"}
+                              </p>
+
+                              <div className="mt-2 flex items-center gap-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={
+                                      i < Math.round(p.rating ?? 0)
+                                        ? "text-yellow-400 text-[10px]"
+                                        : "text-slate-300 text-[10px]"
+                                    }
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                                <span className="text-[11px] text-slate-500 ml-1">
+                                  ({p.reviews ?? 0})
+                                </span>
+                              </div>
                             </div>
-                          </Link>
+                          </div>
                         ))}
                       </div>
 
-                      {/* PAGINATION */}
                       {totalPages > 1 && (
                         <div className="mt-8 flex items-center justify-center gap-2 flex-wrap">
                           <button
@@ -485,5 +532,5 @@ function formatVND(v) {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
-  }).format(v);
+  }).format(v || 0);
 }

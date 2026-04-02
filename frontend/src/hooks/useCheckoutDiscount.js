@@ -7,12 +7,15 @@ export default function useCheckoutDiscount(cartTotal) {
   const [discountValue, setDiscountValue] = useState(0);
   const [discountMessage, setDiscountMessage] = useState("");
 
+  const [discountPercentage, setDiscountPercentage] = useState(null);
+
   const handleApplyDiscount = async () => {
     const code = discountCode.trim().toUpperCase();
 
     if (!code) {
       setDiscountId(null);
       setDiscountValue(0);
+      setDiscountPercentage(null);
       setDiscountMessage("Vui lòng nhập mã giảm giá.");
       return;
     }
@@ -28,6 +31,7 @@ export default function useCheckoutDiscount(cartTotal) {
       if (!found) {
         setDiscountId(null);
         setDiscountValue(0);
+        setDiscountPercentage(null);
         setDiscountMessage("Mã không tồn tại.");
         return;
       }
@@ -35,6 +39,7 @@ export default function useCheckoutDiscount(cartTotal) {
       if (Number(found.is_disabled) === 1) {
         setDiscountId(null);
         setDiscountValue(0);
+        setDiscountPercentage(null);
         setDiscountMessage("Mã hiện không khả dụng.");
         return;
       }
@@ -46,6 +51,7 @@ export default function useCheckoutDiscount(cartTotal) {
       if (validFrom && now < validFrom) {
         setDiscountId(null);
         setDiscountValue(0);
+        setDiscountPercentage(null);
         setDiscountMessage("Mã chưa đến thời gian áp dụng.");
         return;
       }
@@ -53,26 +59,29 @@ export default function useCheckoutDiscount(cartTotal) {
       if (validTo && now > validTo) {
         setDiscountId(null);
         setDiscountValue(0);
+        setDiscountPercentage(null);
         setDiscountMessage("Mã đã hết hạn.");
         return;
       }
 
       let appliedDiscount = 0;
+      let percent = null;
 
       if (found.discount_percentage != null) {
-        appliedDiscount = Math.round(
-          (cartTotal * Number(found.discount_percentage)) / 100,
-        );
+        percent = Number(found.discount_percentage);
+        appliedDiscount = Math.round((cartTotal * percent) / 100);
       } else if (found.discount_amount != null) {
         appliedDiscount = Number(found.discount_amount) || 0;
       }
 
       setDiscountId(found.discount_id);
       setDiscountValue(appliedDiscount);
+      setDiscountPercentage(percent);
       setDiscountMessage(`Áp dụng mã ${found.discount_code} thành công.`);
     } catch (error) {
       setDiscountId(null);
       setDiscountValue(0);
+      setDiscountPercentage(null);
       setDiscountMessage("Không thể kiểm tra mã giảm giá.");
     }
   };
@@ -82,6 +91,7 @@ export default function useCheckoutDiscount(cartTotal) {
     setDiscountCode,
     discountId,
     discountValue,
+    discountPercentage,
     discountMessage,
     handleApplyDiscount,
   };

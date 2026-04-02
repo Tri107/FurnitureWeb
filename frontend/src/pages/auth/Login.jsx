@@ -55,8 +55,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      // SỬA LỖI 2: Lấy thông báo lỗi thực tế từ server ném ra
-      toast.error(err.message || "Có lỗi xảy ra khi đăng nhập"); 
+      toast.error(err.message || "Tài khoản hoặc mật khẩu không đúng"); 
     } finally {
       setLoading(false);
     }

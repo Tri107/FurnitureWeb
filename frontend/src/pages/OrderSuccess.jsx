@@ -156,8 +156,24 @@ export default function OrderSuccess() {
           <h1 className="text-2xl font-bold text-slate-900 mb-3">
             {renderTitle()}
           </h1>
-
           <p className="text-slate-600 mb-6">{renderDescription()}</p>
+          <p className="text-slate-600 mb-6">
+            Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đã được tạo thành công.
+          </p>
+
+          <p className="text-blue-600 font-medium mb-6">
+            Vui lòng kiểm tra email của bạn để xem thông tin chi tiết đơn hàng.
+          </p>	
+
+          <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-left space-y-3 mb-6">
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-500">Phương thức thanh toán</span>
+              <span className="font-medium text-slate-900">
+                {paymentMethod === "cod"
+                  ? "Thanh toán khi nhận hàng"
+                  : paymentMethod}
+              </span>
+            </div>
 
           {!isFailed && (
             <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-left space-y-3 mb-6">

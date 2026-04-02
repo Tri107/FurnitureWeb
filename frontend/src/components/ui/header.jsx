@@ -12,6 +12,33 @@ function formatVND(v) {
   }).format(v || 0);
 }
 
+function getProductImage(product) {
+  return (
+    product?.variants?.images?.[0] ||
+    "https://via.placeholder.com/400x300?text=No+Image"
+  );
+}
+
+function getProductPrice(product) {
+  return (
+    Number(product?.variants?.variants?.[0]?.price) ||
+    Number(product?.variants?.price) ||
+    0
+  );
+}
+
+function getProductSoldCount(product) {
+  return (
+    Number(product?.sold) ||
+    Number(product?.sold_count) ||
+    Number(product?.total_sold) ||
+    Number(product?.purchase_count) ||
+    Number(product?.order_count) ||
+    Number(product?.quantity_sold) ||
+    0
+  );
+}
+
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -72,18 +99,25 @@ export default function Header() {
     return (rawCartItems || []).map((it) => {
       let snapshot = {};
       try {
-        snapshot = typeof it.snapshot === "string" ? JSON.parse(it.snapshot || "{}") : (it.snapshot || {});
+        snapshot =
+          typeof it.snapshot === "string"
+            ? JSON.parse(it.snapshot || "{}")
+            : it.snapshot || {};
       } catch (e) {
         console.error("Error parsing snapshot", e);
       }
 
       const imageArray = it.variants?.images;
-      const img = Array.isArray(imageArray) && imageArray.length > 0
-        ? imageArray[0]
-        : (typeof imageArray === "string" ? imageArray : "https://via.placeholder.com/400x300?text=No+Image");
+      const img =
+        Array.isArray(imageArray) && imageArray.length > 0
+          ? imageArray[0]
+          : typeof imageArray === "string"
+          ? imageArray
+          : "https://via.placeholder.com/400x300?text=No+Image";
 
       return {
-        id: it.cart_item_id,
+        cartItemId: it.cart_item_id,
+        id: it.product_id,
         name: it.product_name,
         price: snapshot.price || 0,
         sku: it.sku || "N/A",
@@ -120,7 +154,7 @@ export default function Header() {
     return grouped;
   }, [products]);
 
-  const [activeType, setActiveType] = useState(null); // category | collection
+  const [activeType, setActiveType] = useState(null);
   const [activeKey, setActiveKey] = useState(null);
   const [openMega, setOpenMega] = useState(false);
   const megaCloseTimer = useRef(null);
@@ -193,8 +227,14 @@ export default function Header() {
   const activeCollectionProducts =
     activeType === "collection" ? productByCollection[activeKey] || [] : [];
 
-  const megaProducts =
-    activeType === "category" ? activeCategoryProducts : activeCollectionProducts;
+  const megaProducts = useMemo(() => {
+    const list =
+      activeType === "category" ? activeCategoryProducts : activeCollectionProducts;
+
+    return [...list].sort(
+      (a, b) => getProductSoldCount(b) - getProductSoldCount(a)
+    );
+  }, [activeType, activeCategoryProducts, activeCollectionProducts]);
 
   const rightWrapRef = useRef(null);
   const [openRight, setOpenRight] = useState(null);
@@ -246,11 +286,9 @@ export default function Header() {
       .map((p) => ({
         id: p.product_id,
         name: p.product_name,
-        price: p?.variants?.price || 0,
+        price: getProductPrice(p),
         href: `/detailproduct/${p.product_id}`,
-        img:
-          p?.variants?.url?.[0] ||
-          "https://via.placeholder.com/400x300?text=No+Image",
+        img: getProductImage(p),
       }));
   }, [query, products]);
 
@@ -299,8 +337,8 @@ export default function Header() {
                 className={[
                   "relative hover:text-orange-400 transition",
                   activeType === "category" &&
-                    activeKey === category.category_name &&
-                    openMega
+                  activeKey === category.category_name &&
+                  openMega
                     ? "text-orange-400"
                     : "",
                 ].join(" ")}
@@ -310,8 +348,8 @@ export default function Header() {
                   className={[
                     "absolute -bottom-2 left-0 h-[2px] w-full bg-orange-500 transition-opacity",
                     activeType === "category" &&
-                      activeKey === category.category_name &&
-                      openMega
+                    activeKey === category.category_name &&
+                    openMega
                       ? "opacity-100"
                       : "opacity-0",
                   ].join(" ")}
@@ -470,12 +508,8 @@ export default function Header() {
 
                   <div className="max-h-[320px] overflow-auto p-3 space-y-2">
                     {cartItems.map((it) => (
-                      <Link to={`/detailproduct/${it.id}`}
-                        onClick={closeRight}>
-                        <div
-                          key={it.id}
-                          className="flex items-center gap-3 rounded-xl p-2 bg-white/5 border border-white/10"
-                        >
+                      <Link to={`/detailproduct/${it.id}`} onClick={closeRight} key={it.id}>
+                        <div className="flex items-center gap-3 rounded-xl p-2 bg-white/5 border border-white/10">
                           <img
                             src={it.img}
                             alt={it.name}
@@ -498,7 +532,6 @@ export default function Header() {
                           </p>
                         </div>
                       </Link>
-
                     ))}
                   </div>
 
@@ -510,21 +543,33 @@ export default function Header() {
                       </span>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <Link
-                        to="/cart"
-                        onClick={closeRight}
-                        className="text-center rounded-xl border border-white/15 bg-white/5 py-2 text-sm font-semibold hover:bg-white/10 transition"
-                      >
-                        Xem giỏ hàng
-                      </Link>
-                      <Link
-                        to="/checkout"
-                        onClick={closeRight}
-                        className="text-center rounded-xl bg-orange-500 py-2 text-sm font-semibold text-white hover:bg-orange-400 transition"
-                      >
-                        Thanh toán
-                      </Link>
+                    <div className="mt-4">
+                      {cartItems.length === 0 ? (
+                        <Link
+                          to="/products"
+                          onClick={closeRight}
+                          className="flex items-center justify-center w-full rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition"
+                        >
+                          Tiếp tục mua sắm
+                        </Link>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link
+                            to="/cart"
+                            onClick={closeRight}
+                            className="text-center rounded-xl border border-white/15 bg-white/5 py-2.5 text-sm font-semibold hover:bg-white/10 transition"
+                          >
+                            Xem giỏ hàng
+                          </Link>
+                          <Link
+                            to="/checkout"
+                            onClick={closeRight}
+                            className="text-center rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-white hover:bg-orange-400 transition"
+                          >
+                            Thanh toán
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -670,9 +715,7 @@ export default function Header() {
                         <button
                           key={collection.collection_id}
                           type="button"
-                          onMouseEnter={() =>
-                            setActiveKey(collection.collection_name)
-                          }
+                          onMouseEnter={() => setActiveKey(collection.collection_name)}
                           onClick={() =>
                             goToCollectionProducts(collection.collection_name)
                           }
@@ -695,9 +738,7 @@ export default function Header() {
                         <button
                           key={category.category_id}
                           type="button"
-                          onMouseEnter={() =>
-                            setActiveKey(category.category_name)
-                          }
+                          onMouseEnter={() => setActiveKey(category.category_name)}
                           onClick={() =>
                             goToCategoryProducts(category.category_name)
                           }
@@ -724,20 +765,9 @@ export default function Header() {
                         onClick={closeMega}
                         className="group flex items-center gap-3 rounded-xl p-3 bg-white/5 hover:bg-white/10 transition border border-white/10"
                       >
-                        <img
-                          src={
-                            product?.variants?.url?.[0] ||
-                            "https://via.placeholder.com/300x200?text=No+Image"
-                          }
-                          alt={product.product_name}
-                          className="h-14 w-14 rounded-lg object-cover"
-                        />
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-white truncate">
                             {product.product_name}
-                          </p>
-                          <p className="text-xs text-white/70">
-                            {formatVND(product?.variants?.price || 0)}
                           </p>
                         </div>
                         <span className="opacity-0 group-hover:opacity-100 transition text-white/60">
@@ -763,10 +793,7 @@ export default function Header() {
                       >
                         <div className="relative h-28">
                           <img
-                            src={
-                              product?.variants?.url?.[0] ||
-                              "https://via.placeholder.com/600x300?text=No+Image"
-                            }
+                            src={getProductImage(product)}
                             alt={product.product_name}
                             className="absolute inset-0 h-full w-full object-cover opacity-90 group-hover:opacity-100 transition"
                           />
@@ -777,7 +804,7 @@ export default function Header() {
                             {product.product_name}
                           </p>
                           <p className="text-xs text-white/70 mt-1">
-                            {formatVND(product?.variants?.price || 0)}
+                            {formatVND(getProductPrice(product))}
                           </p>
                         </div>
                       </Link>

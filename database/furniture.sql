@@ -1,10 +1,10 @@
+
+DROP IF EXISTS DATABASE furniture;
 CREATE DATABASE furniture;
 
 USE furniture;
 
-DROP DATABASE furniture;
-
--- tables
+--  tables
 CREATE Table categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
     category_name VARCHAR(100) NOT NULL UNIQUE,
@@ -86,20 +86,16 @@ CREATE Table orders (
         'DELIVERED',
         'CANCELLED'
     ) DEFAULT 'PENDING',
-    total_price DECIMAL(10, 3) NOT NULL,
+    total_price DECIMAL(12, 3) NOT NULL,
     address VARCHAR(255),
     note TEXT,
     account_id INT NOT NULL,
-    FOREIGN KEY (account_id) REFERENCES accounts (account_id)
+    discount_id INT,
+    FOREIGN KEY (account_id) REFERENCES accounts (account_id),
+    FOREIGN KEY (discount_id) REFERENCES discounts (discount_id)
 );
-ALTER TABLE orders MODIFY COLUMN order_status ENUM(
-        'PENDING',
-        'DELIVERING',
-        'DELIVERED',
-        'CANCELLED'
-    ) DEFAULT 'PENDING'; 
 
--- ALTER TABLE orders ADD COLUMN address VARCHAR(255), ADD COLUMN note TEXT;
+
 
 CREATE Table order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -107,9 +103,7 @@ CREATE Table order_items (
     product_id INT NOT NULL,
     variant_snapshot JSON NOT NULL,
     order_id INT NOT NULL,
-    discount_id INT,
-    FOREIGN KEY (order_id) REFERENCES orders (order_id),
-    FOREIGN KEY (discount_id) REFERENCES discounts (discount_id)
+    FOREIGN KEY (order_id) REFERENCES orders (order_id)
 );
 
 CREATE Table payments (
@@ -135,7 +129,7 @@ CREATE Table reviews (
     FOREIGN KEY (product_id) REFERENCES products (product_id),
     FOREIGN KEY (account_id) REFERENCES accounts (account_id)
 );
--- alter table reviews add column review_update_date DATETIME;
+--  alter table reviews add column review_update_date DATETIME;
 CREATE Table favorites (
     account_id INT NOT NULL,
     product_id INT NOT NULL,
@@ -158,7 +152,7 @@ CREATE TABLE cart_items (
   UNIQUE KEY unique_cart_item (account_id, product_id, sku)
 );
 
---data insertion
+--  data insertion
 INSERT INTO
     categories (category_name)
 VALUES ('Bàn'),
@@ -283,17 +277,16 @@ VALUES (
     );
 
 INSERT INTO
-    orders (total_price, account_id)
-VALUES (2400000.000, 2),
-    (1800000.000, 3);
+    orders (total_price, account_id, discount_id)
+VALUES (2400000.000, 2, 1),
+    (1800000.000, 3, NULL);
 
 INSERT INTO
     order_items (
         quantity,
         product_id,
         variant_snapshot,
-        order_id,
-        discount_id
+        order_id
     )
 VALUES (
         2,
@@ -308,7 +301,6 @@ VALUES (
             'price',
             1200000
         ),
-        1,
         1
     ),
     (
@@ -324,8 +316,7 @@ VALUES (
             'price',
             1800000
         ),
-        2,
-        NULL
+        2
     );
 
 INSERT INTO
@@ -338,19 +329,19 @@ INSERT INTO
         rating,
         review_comment,
         product_id,
-        account_id
+        account_id, order_id
     )
 VALUES (
         5,
         'Bàn rất chắc chắn, đúng mô tả',
         1,
-        2
+        2, 1
     ),
     (
         4,
         'Ghế ngồi êm, giao hàng nhanh',
         2,
-        3
+        3, 2
     );
 
 INSERT INTO
@@ -359,8 +350,8 @@ VALUES (2, 1),
     (2, 2),
     (3, 3);
 
--- views
---view all products for admin
+--  views
+--  view all products for admin
 CREATE VIEW view_all_products AS
 SELECT p.product_id, p.product_name, p.product_status, p.created_at, p.is_disabled, p.variant_ref, c.category_name, b.brand_name, col.collection_name
 FROM
@@ -369,7 +360,7 @@ FROM
     JOIN brands b ON p.brand_id = b.brand_id
     JOIN collections col ON p.collection_id = col.collection_id;
 
---view active products for customers
+-- view active products for customers
 CREATE VIEW view_active_products AS
 SELECT
     p.product_id,
@@ -400,13 +391,13 @@ GROUP BY
     b.brand_name,
     col.collection_name;
 
---view all accounts for admin
+--   view all accounts for admin
 CREATE VIEW view_all_accounts AS
 SELECT a.account_id, a.email, a.is_admin, a.is_disabled, a.created_at, up.username, up.phone_number, up.user_address
 FROM accounts a
     LEFT JOIN user_profiles up ON a.account_id = up.account_id;
 
---view product details from customer
+-- view product details from customer
 CREATE VIEW view_active_product_details AS
 SELECT p.product_id, p.product_name, p.product_description, p.product_status, c.category_name, b.brand_name, col.collection_name, p.variant_ref
 FROM
@@ -417,7 +408,7 @@ FROM
 WHERE
     p.is_disabled = FALSE;
 
--- view all comments for customer by product id
+--  view all comments for customer by product id
 CREATE VIEW view_product_comments AS
 SELECT r.rating, r.review_comment, r.review_date, up.username, p.product_id
 FROM
@@ -429,19 +420,19 @@ WHERE
     p.is_disabled = FALSE
     AND a.is_disabled = FALSE;
 
---view all orders for admin
+-- view all orders for admin
 CREATE VIEW view_all_orders AS
 SELECT o.order_id, o.order_date, o.order_status, o.total_price, a.email AS customer_email
 FROM orders o
     JOIN accounts a ON o.account_id = a.account_id;
 
---view customer orders by account id
+-- view customer orders by account id
 CREATE VIEW view_customer_orders AS
 SELECT o.order_id, o.order_date, o.order_status, o.total_price, a.account_id
 FROM orders o
     JOIN accounts a ON o.account_id = a.account_id;
 
--- view order items with product details for admin and customers
+--  view order items with product details for admin and customers
 CREATE VIEW view_order_items AS
 SELECT p.product_name, p.product_id, oi.quantity, oi.variant_snapshot, d.discount_code, oi.order_id, o.order_status, a.email, a.account_id
 FROM
@@ -449,19 +440,19 @@ FROM
     JOIN products p ON oi.product_id = p.product_id
     JOIN orders o ON oi.order_id = o.order_id
     JOIN accounts a ON o.account_id = a.account_id
-    LEFT JOIN discounts d ON oi.discount_id = d.discount_id;
+    LEFT JOIN discounts d ON o.discount_id = d.discount_id;
 
---view all discounts for admin
+-- view all discounts for admin
 CREATE VIEW view_all_discounts AS SELECT * FROM discounts;
 
---view active discounts for customers
+-- view active discounts for customers
 CREATE VIEW view_active_discounts AS
 SELECT *
 FROM discounts
 WHERE
     is_disabled = FALSE;
 
---view favorite products by customer id
+-- view favorite products by customer id
 CREATE VIEW view_favorite_products AS
 SELECT f.product_id, f.added_at, p.product_name, p.variant_ref
 FROM favorites f
@@ -470,8 +461,8 @@ WHERE
     p.is_disabled = FALSE;
 
 DELIMITER //
--- functions
---funcition validate reference constraint
+--  functions
+-- funcition validate reference constraint
 CREATE FUNCTION is_valid_entity (
     p_id INT,
     p_entity VARCHAR(20)
@@ -497,10 +488,10 @@ BEGIN
         )
         ELSE FALSE
     END;
-END 
+END //
 
--- stored procedures
---procedure to add a new product
+--  stored procedures
+-- procedure to add a new product
 CREATE PROCEDURE add_new_product (
     IN p_name VARCHAR(100),
     IN p_description TEXT,
@@ -550,10 +541,10 @@ VALUES
         p_variant_ref
     );
 
-END
+END //
 
 
--- procedure to update product
+--  procedure to update product
 CREATE PROCEDURE update_product (
     IN p_product_id INT,
     IN p_name VARCHAR(100),
@@ -595,7 +586,7 @@ BEGIN
         SET MESSAGE_TEXT = 'Invalid or disabled collection';
     END IF;
 
-    -- Update product
+    --  Update product
     UPDATE products
     SET
         product_name        = COALESCE(p_name, product_name),
@@ -608,10 +599,10 @@ BEGIN
         variant_ref         = p_variant_ref
     WHERE product_id = p_product_id;
 
-END
+END //
 
 
--- procedure to delete a product
+--  procedure to delete a product
 CREATE PROCEDURE delete_product (
     IN p_product_id INT
 )
@@ -629,10 +620,10 @@ BEGIN
     DELETE FROM products
     WHERE product_id = p_product_id;
 
-END
+END //
 
 
---procedure to add category, brand, collection
+-- procedure to add category, brand, collection
 CREATE PROCEDURE add_entity (
     IN p_table_name   VARCHAR(64),
     IN p_name_column  VARCHAR(64),
@@ -641,7 +632,7 @@ CREATE PROCEDURE add_entity (
 BEGIN
     DECLARE sql_stmt TEXT;
 
-    -- Validate name
+    --  Validate name
     IF p_name_value IS NULL OR p_name_value = '' THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Name cannot be empty';
@@ -656,10 +647,10 @@ BEGIN
     PREPARE stmt FROM @sql_stmt;
     EXECUTE stmt USING @p_name_value;
     DEALLOCATE PREPARE stmt;
-END
+END //
 
 
---procedure to update category, brand, collection
+-- procedure to update category, brand, collection
 CREATE PROCEDURE update_entity (
     IN p_table_name        VARCHAR(64),
     IN p_id_column         VARCHAR(64),
@@ -712,10 +703,10 @@ BEGIN
     END IF;
 
     DEALLOCATE PREPARE stmt;
-END
+END //
 
 
---procedure to delete category, brand, collection
+-- procedure to delete category, brand, collection
 CREATE PROCEDURE delete_entity (
     IN p_table_name     VARCHAR(64),
     IN p_id_column      VARCHAR(64),
@@ -755,7 +746,7 @@ BEGIN
     PREPARE stmt_delete FROM @sql_delete;
     EXECUTE stmt_delete USING @p_id_value;
     DEALLOCATE PREPARE stmt_delete;
-END
+END //
 
 
 CREATE PROCEDURE add_account (
@@ -765,7 +756,7 @@ CREATE PROCEDURE add_account (
 BEGIN
     INSERT INTO accounts (email, password_hash)
     VALUES (p_email, p_password_hash);
-END
+END //
 
 
 CREATE PROCEDURE update_account (
@@ -784,7 +775,7 @@ BEGIN
         is_disabled = COALESCE(p_is_disabled, is_disabled),
         refresh_token = COALESCE(p_refresh_token, refresh_token)
     WHERE account_id = p_account_id;
-END
+END //
 
 
 CREATE PROCEDURE add_user_profile (
@@ -806,7 +797,7 @@ BEGIN
 
     INSERT INTO user_profiles (username, phone_number, user_address, account_id)
     VALUES (p_username, p_phone_number, p_user_address, p_account_id);
-END
+END //
 
 
 CREATE PROCEDURE update_user_profile (
@@ -841,7 +832,7 @@ BEGIN
         phone_number = COALESCE(p_phone_number, phone_number),
         user_address = COALESCE(p_user_address, user_address)
     WHERE account_id = p_account_id;
-END
+END //
 
 
 CREATE PROCEDURE add_order (
@@ -851,9 +842,9 @@ CREATE PROCEDURE add_order (
 BEGIN
     INSERT INTO orders (account_id, total_price)
     VALUES (p_account_id, p_total_price);
-END
+END //
 
 
-DELIMITER;
+DELIMITER //
 
 
