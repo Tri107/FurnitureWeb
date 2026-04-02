@@ -23,7 +23,7 @@ const generateTokens = (user) => {
 };
 const AuthController = {
 
-  register: async (req, res) => {
+  register: async (req, res, next) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -60,12 +60,11 @@ const AuthController = {
       });
 
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Lỗi server' });
+      next(error);
     }
   },
 
-  verifyRegister: async (req, res) => {
+  verifyRegister: async (req, res, next) => {
     try {
       const { email, otp } = req.body;
 
@@ -97,12 +96,11 @@ const AuthController = {
       });
 
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Lỗi server khi lưu database' });
+      next(error);
     }
   },
 
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     try {
       const { email, password } = req.body;
       if (!email || !password) {
@@ -145,12 +143,11 @@ const AuthController = {
       });
 
     } catch (error) {
-      console.error('Login Error:', error);
-      return res.status(500).json({ message: 'Lỗi server' });
+      next(error);
     }
   },
 
-  googleLogin: async (req, res) => {
+  googleLogin: async (req, res, next) => {
     try {
       const { token } = req.body;
       if (!token) return res.status(400).json({ message: 'Thiếu Google Token' });
@@ -204,8 +201,7 @@ const AuthController = {
       });
 
     } catch (error) {
-      console.error('Google Login Error:', error);
-      return res.status(400).json({ message: 'Token Google không hợp lệ hoặc đã hết hạn' });
+      next(error);
     }
   },
   refreshToken: async (req, res) => {

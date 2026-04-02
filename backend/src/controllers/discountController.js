@@ -10,7 +10,7 @@ const discountController = {
         }
     },
 
-    createDiscount: async (req, res) => {
+    createDiscount: async (req, res, next) => {
         try {
             const { discountCode, discountPercentage, validFrom, validTo, discountDescription } = req.body;
             if (!discountCode || !discountPercentage || !validFrom || !validTo) {
@@ -19,11 +19,11 @@ const discountController = {
             const discountId = await discountModel.create({ discountCode, discountPercentage, validFrom, validTo, discountDescription });
             res.status(201).json({ success: true, discountId });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 
-    updateDiscount: async (req, res) => {
+    updateDiscount: async (req, res, next) => {
         try {
             const { discountId } = req.params;
             const { discountCode, discountPercentage, validFrom, validTo, discountDescription, isDisabled } = req.body;
@@ -36,7 +36,7 @@ const discountController = {
             }
             res.json({ success: true });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 

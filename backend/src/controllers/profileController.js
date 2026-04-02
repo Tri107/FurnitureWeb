@@ -24,7 +24,7 @@ const ProfileController = {
     }
   },
 
-  updateMyProfile: async (req, res) => {
+  updateMyProfile: async (req, res, next) => {
     try {
       const accountId = req.user.id; 
       const { username, phone_number, user_address } = req.body;
@@ -43,8 +43,7 @@ const ProfileController = {
         data: updatedProfile
       });
     } catch (error) {
-      console.error("Lỗi Update Controller:", error);
-      return res.status(500).json({ message: 'Lỗi server khi cập nhật profile' });
+      next(error);
     }
   }
 };

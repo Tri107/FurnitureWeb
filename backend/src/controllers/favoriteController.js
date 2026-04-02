@@ -10,7 +10,7 @@ const favoriteController = {
     }
   },
 
-  addFavorite: async (req, res) => {
+  addFavorite: async (req, res, next) => {
     try {
       const { accountId, productId } = req.body;
 
@@ -26,7 +26,7 @@ const favoriteController = {
 
       res.status(201).json({ success: true });
     } catch (error) {
-      return res.status(500).json({ message: 'Internal Server Error' });
+      next(error);
     }
   },
 

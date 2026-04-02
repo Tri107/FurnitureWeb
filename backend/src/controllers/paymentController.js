@@ -10,7 +10,7 @@ const paymentController = {
         }
     },
 
-    createPayment: async (req, res) => {
+    createPayment: async (req, res, next) => {
         try {
             const { paymentMethod, orderId } = req.body;
             if (!paymentMethod || !orderId) {
@@ -19,11 +19,11 @@ const paymentController = {
             const paymentId = await paymentModel.create({ paymentMethod, orderId });
             res.status(201).json({ success: true, paymentId });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 
-    updatePayment: async (req, res) => {
+    updatePayment: async (req, res, next) => {
         try {
             const { paymentId } = req.params;
             const { paymentMethod, orderId } = req.body;
@@ -36,7 +36,7 @@ const paymentController = {
             }
             res.json({ success: true });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 

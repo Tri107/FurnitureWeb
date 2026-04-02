@@ -9,9 +9,11 @@ import {
   getReviews,
   getReviewPermission,
   createReview,
+  getFavorites,
 } from "../lib/api";
 import { useCart } from "../hooks/useCart";
 import { useCartActions } from "../hooks/useCartActions";
+import useFavoriteActions from "../hooks/useFavoriteActions";
 import {
   Minus,
   Plus,
@@ -88,6 +90,51 @@ export default function ProductPage() {
   const [reviews, setReviews] = useState([]);
   const [reviewPermission, setReviewPermission] = useState(REVIEW_DEFAULT);
   const [zoomImage, setZoomImage] = useState(null);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const { toggleFavorite } = useFavoriteActions();
+  const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!user || !id) return;
+
+      try {
+        const res = await getFavorites(user.id);
+        const favoriteList = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+
+        const isFavorite = favoriteList.some(
+          (p) => Number(p.product_id) === Number(id)
+        );
+
+        setLiked(isFavorite);
+      } catch (err) {
+        console.error("Load favorite error", err);
+      }
+    };
+
+    fetchFavorites();
+  }, [id, user?.id]);
+
+  const handleFavoriteClick = async () => {
+    if (!user) {
+      toast.error("Bạn cần đăng nhập để thực hiện chức năng này");
+      return;
+    }
+
+    try {
+      await toggleFavorite(id, user.id, liked);
+      setLiked((prev) => !prev);
+      toast.success(liked ? "Đã bỏ lưu sản phẩm" : "Đã lưu sản phẩm");
+    } catch (err) {
+      console.error("Favorite error", err);
+      toast.error("Có lỗi xảy ra khi thực hiện chức năng này");
+    }
+  };
 
   const mongo = product?.variants || {};
   const variantList = mongo.variants || [];
@@ -444,9 +491,15 @@ export default function ProductPage() {
   {activeVariant?.stock > 0 ? "Thêm vào giỏ hàng" : "Hết hàng"}
 </button>
 
-                <button className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-900 rounded-full py-3.5 px-6 font-bold flex items-center justify-center gap-2 transition-colors">
-                  <Heart size={20} className="text-gray-400" />
-                  Lưu
+                <button
+                  onClick={handleFavoriteClick}
+                  className="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-900 rounded-full py-3.5 px-6 font-bold flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Heart
+                    size={20}
+                    className={liked ? "fill-red-500 text-red-500" : "text-gray-400"}
+                  />
+                  {liked ? "Đã lưu" : "Lưu"}
                 </button>
               </div>
 

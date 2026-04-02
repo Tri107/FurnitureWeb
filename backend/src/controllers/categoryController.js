@@ -10,7 +10,7 @@ const categoryController = {
         }
     },
 
-    createCategory: async (req, res) => {
+    createCategory: async (req, res, next) => {
         try {
             const { categoryName } = req.body;
             if (!categoryName) {
@@ -19,11 +19,11 @@ const categoryController = {
             const categoryId = await categoryModel.create(categoryName);
             res.status(201).json({ success: true, categoryId });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 
-    updateCategory: async (req, res) => {
+    updateCategory: async (req, res, next) => {
         try {
             const { categoryId } = req.params;
             const { categoryName, isDisabled } = req.body;
@@ -36,7 +36,7 @@ const categoryController = {
             }
             res.json({ success: true });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 

@@ -11,7 +11,7 @@ const cartItemController = {
         }
     },
 
-    addCartItem: async (req, res) => {
+    addCartItem: async (req, res, next) => {
         try {
             const { accountId, productId, quantity, sku, price, color } = req.body;
             if (!accountId || !productId || !quantity || !sku) {
@@ -24,12 +24,11 @@ const cartItemController = {
             }
             res.status(201).json({ success: true });
         } catch (error) {
-            console.error(error);
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 
-    updateCartItem: async (req, res) => {
+    updateCartItem: async (req, res, next) => {
         try {
             const { cartItemId } = req.params;
             const { quantity } = req.body;
@@ -42,11 +41,11 @@ const cartItemController = {
             }
             res.json({ success: true });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 
-    updateCartItemColor: async (req, res) => {
+    updateCartItemColor: async (req, res, next) => {
         try {
             const { cartItemId } = req.params;
             const { color } = req.body;
@@ -63,8 +62,7 @@ const cartItemController = {
 
             res.json({ success: true });
         } catch (error) {
-            console.error('Error updating cart item color:', error.message);
-            return res.status(400).json({ message: error.message });
+            next(error);
         }
     },
 

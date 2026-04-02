@@ -10,7 +10,7 @@ const collectionController = {
         }
     },
 
-    createCollection: async (req, res) => {
+    createCollection: async (req, res, next) => {
         try {
             const { collectionName } = req.body;
             if (!collectionName) {
@@ -19,11 +19,11 @@ const collectionController = {
             const collectionId = await collectionModel.create(collectionName);
             res.status(201).json({ success: true, collectionId });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 
-    updateCollection: async (req, res) => {
+    updateCollection: async (req, res, next) => {
         try {
             const { collectionId } = req.params;
             const { collectionName, isDisabled } = req.body;
@@ -36,7 +36,7 @@ const collectionController = {
             }
             res.json({ success: true });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 

@@ -46,7 +46,7 @@ const reviewController = {
     }
   },
 
-  createReview: async (req, res) => {
+  createReview: async (req, res, next) => {
   try {
     const accountId = getAccountIdFromReq(req);
     const { rating, reviewComment, productId } = req.body;
@@ -86,13 +86,12 @@ const reviewController = {
 
     return res.status(201).json({ success: true, reviewId });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal Server Error" });
+    next(error);
   }
 
   },
 
-  updateReview: async (req, res) => {
+  updateReview: async (req, res, next) => {
     try {
       const { reviewId } = req.params;
       const { rating, reviewComment } = req.body;
@@ -112,8 +111,7 @@ const reviewController = {
 
       return res.json({ success: true });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal Server Error" });
+      next(error);
     }
   },
 

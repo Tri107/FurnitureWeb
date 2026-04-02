@@ -159,7 +159,7 @@ export const getPayments = () => apiFetch("/payments");
 export const createPayment = (data) => apiFetch("/payments", "POST", data);
 export const updatePayment = (paymentId, data) => apiFetch(`/payments/${paymentId}`, "PUT", data);
 export const deletePayment = (paymentId) => apiFetch(`/payments/${paymentId}`, "DELETE");
-export const createVnpayPaymentUrl = (data) => apiFetch("/payments/vnpay-url", "POST", data);
+export const createVnpayPaymentUrl = (data) => apiFetch("/vnpay/create-payment-url", "POST", data);
 
 // ================= CATEGORY =================
 export const getCategories = () => apiFetch("/categories");
