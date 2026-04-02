@@ -34,7 +34,7 @@ const AccountController = {
       return res.status(500).json({ message: 'Lỗi server khi lấy thông tin tài khoản' });
     }
   },
-  create: async (req, res) => {
+  create: async (req, res, next) => {
     try {
       const { email, password, is_admin } = req.body;
       if (!email || !password) {
@@ -58,12 +58,11 @@ const AccountController = {
       });
 
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Lỗi server khi tạo tài khoản' });
+      next(error);
     }
   },
 
-  update: async (req, res) => {
+  update: async (req, res, next) => {
     try {
       const { id } = req.params;
       const { is_admin, is_disabled } = req.body;
@@ -84,12 +83,11 @@ const AccountController = {
       return res.status(200).json({ message: 'Cập nhật trạng thái tài khoản thành công' });
 
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Lỗi server' });
+      next(error);
     }
   },
 
-  updatePassword: async (req, res) => {
+  updatePassword: async (req, res, next) => {
     try {
       const { id } = req.params;
       const { old_password, new_password } = req.body; // Yêu cầu thêm mật khẩu cũ
@@ -117,8 +115,7 @@ const AccountController = {
       return res.status(200).json({ message: 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại.' });
 
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Lỗi server' });
+      next(error);
     }
   },
 

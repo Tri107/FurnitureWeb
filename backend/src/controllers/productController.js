@@ -38,7 +38,7 @@ const ProductController = {
     }
   },
 
-  create: async (req, res) => {
+  create: async (req, res, next) => {
     try {
       const {
         product_name,
@@ -67,14 +67,11 @@ const ProductController = {
         data: { product_id: productId },
       });
     } catch (error) {
-      console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Lỗi server khi tạo sản phẩm" });
+      next(error);
     }
   },
 
-  createVariant: async (req, res) => {
+  createVariant: async (req, res, next) => {
     try {
       // Body can be the full variantData object (with nested variants array)
       // or a simpler object for manual entry. 
@@ -86,10 +83,7 @@ const ProductController = {
         data: { variant_id: variantId },
       });
     } catch (error) {
-      console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Lỗi server khi tạo variant" });
+      next(error);
     }
   },
 
@@ -173,7 +167,7 @@ const ProductController = {
   // === UPDATE HANDLERS ===
 
   // Cập nhật thông tin cơ bản sản phẩm (MySQL)
-  updateProduct: async (req, res) => {
+  updateProduct: async (req, res, next) => {
     try {
       const { id } = req.params;
       const {
@@ -202,15 +196,12 @@ const ProductController = {
         message: "Cập nhật sản phẩm thành công",
       });
     } catch (error) {
-      console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Lỗi server khi cập nhật sản phẩm" });
+      next(error);
     }
   },
 
   // Cập nhật variant data (MongoDB)
-  updateVariant: async (req, res) => {
+  updateVariant: async (req, res, next) => {
     try {
       const { variantRef } = req.params;
       const { variants } = req.body;
@@ -226,10 +217,7 @@ const ProductController = {
         data: updated,
       });
     } catch (error) {
-      console.error(error);
-      return res
-        .status(500)
-        .json({ message: "Lỗi server khi cập nhật variant" });
+      next(error);
     }
   },
 

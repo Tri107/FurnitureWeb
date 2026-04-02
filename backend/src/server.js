@@ -12,6 +12,7 @@ import Conversation from "./models/conversationModel.js";
 import { connectMongoDB } from './config/mongodb.js';
 import { connectMySQL } from './config/mysql.js';
 import allRoutes from './routes/index.js';
+import dbErrorHandler from './middlewares/dbErrorHandler.js';
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use(cookieParser());
 
 const PORT = process.env.PORT || 9999;
 app.use('/api', allRoutes);
+app.use(dbErrorHandler); // Global error handler — must be after all routes
 
 //  Xử lý kết nối realtime
 io.on("connection", (socket) => {

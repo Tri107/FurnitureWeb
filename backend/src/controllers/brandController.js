@@ -10,7 +10,7 @@ const brandController = {
         }
     },
 
-    createBrand: async (req, res) => {
+    createBrand: async (req, res, next) => {
         try {
             const { brandName } = req.body;
             if (!brandName) {
@@ -19,11 +19,11 @@ const brandController = {
             const brandId = await brandModel.create(brandName);
             res.status(201).json({ success: true, brandId });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 
-    updateBrand: async (req, res) => {
+    updateBrand: async (req, res, next) => {
         try {
             const { brandId } = req.params;
             const { brandName, isDisabled } = req.body;
@@ -36,7 +36,7 @@ const brandController = {
             }
             res.json({ success: true });
         } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' });
+            next(error);
         }
     },
 

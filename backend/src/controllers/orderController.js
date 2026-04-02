@@ -39,7 +39,7 @@ const OrderController = {
 
 
 
-  createOrder: async (req, res) => {
+  createOrder: async (req, res, next) => {
     try {
       const { account_id, total_price, items, address, note, discount_id, extra_info } = req.body;
       if (!account_id || total_price === undefined || !items || !items.length) {
@@ -60,12 +60,11 @@ const OrderController = {
 
       return res.status(201).json({ message: "Order created successfully", orderId });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Server Error creating order", error: error.message });
+      next(error);
     }
   },
 
-  updateOrderStatus: async (req, res) => {
+  updateOrderStatus: async (req, res, next) => {
     try {
       const { id } = req.params;
       const { status } = req.body;
@@ -80,8 +79,7 @@ const OrderController = {
       
       return res.status(200).json({ message: "Order status updated successfully" });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Server Error" });
+      next(error);
     }
   }
 };
