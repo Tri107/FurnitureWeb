@@ -1,9 +1,9 @@
 import { VNPay, ignoreLogger, ProductCode, VnpLocale, dateFormat } from "vnpay";
 
 const vnpay = new VNPay({
-    tmnCode: "131RF10U",
-    secureSecret: "COYB5S8953FIO08O1MPBKLAVAZ79GBVY",
-    vnpayHost: "https://sandbox.vnpayment.vn",
+    tmnCode: process.env.VNPAY_TMN_CODE,
+    secureSecret: process.env.VNPAY_SECURE_SECRET,
+    vnpayHost: process.env.VNPAY_HOST,
     testMode: true,
     hashAlgorithm: "SHA512",
     loggerFn: ignoreLogger,
@@ -26,7 +26,7 @@ export const createPaymentUrl = async (req, res) => {
             vnp_OrderInfo: `Thanh toan don hang ${txnRef}`,
             vnp_OrderType: ProductCode.Other,
             vnp_Locale: VnpLocale.VN,
-            vnp_ReturnUrl: "http://localhost:9999/api/vnpay/return",
+            vnp_ReturnUrl: process.env.VNPAY_RETURN_URL,
             vnp_CreateDate: dateFormat(new Date()),
             vnp_ExpireDate: dateFormat(new Date(Date.now() + 60 * 60 * 1000)),
         });

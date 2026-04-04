@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, Eye, ShoppingBag } from "lucide-react";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { getOrders, updateOrderStatus } from "../../lib/api";
+import ViewOrderModal from "../../components/ui/ViewOrderModal";
+import ExportButton from "../../components/ui/ExportButton";
+import { getOrders, updateOrderStatus, exportOrders } from "../../lib/api";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
-import ViewOrderModal from "../../components/ui/ViewOrderModal";
 import {
   Select,
   SelectContent,
@@ -162,6 +163,7 @@ export default function Orders() {
               </div>
             </CardContent>
           </Card>
+          <ExportButton onExport={exportOrders} fileNamePrefix="Don_hang" />
         </div>
 
         <div className="relative w-72">

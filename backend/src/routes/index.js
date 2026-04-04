@@ -16,6 +16,7 @@ import orderRoute from "./orderRoute.js";
 import chatRoute from './chatRoute.js';
 import dashboardRoute from './dashboardRoute.js';
 import vnpayRoute from "./vnpayRoute.js";
+import exportRoute from "./exportRoute.js";
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.use("/orders", orderRoute);
 router.use('/chat', chatRoute);
 router.use('/dashboard', dashboardRoute);
 router.use("/vnpay", vnpayRoute);
+router.use("/export", exportRoute);
 
 
 export default router;
