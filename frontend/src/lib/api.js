@@ -207,3 +207,24 @@ export const deleteReview = (reviewId) => apiFetch(`/reviews/${reviewId}`, "DELE
 export const getWeeklyStats = () => apiFetch("/dashboard/weekly-stats");
 export const getDashboardSummary = () => apiFetch("/dashboard/summary");
 export const getChartData = (data) => apiFetch("/dashboard/chartdata", "POST", data);
+
+// ================= EXPORT =================
+export const exportProducts = async () => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_URL}/export/products`, {
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Export thất bại");
+  return res.blob();
+};
+
+export const exportOrders = async () => {
+  const token = localStorage.getItem("accessToken");
+  const res = await fetch(`${API_URL}/export/orders`, {
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Export thất bại");
+  return res.blob();
+};

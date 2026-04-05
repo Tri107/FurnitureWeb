@@ -7,8 +7,9 @@ import { useEffect, useState } from "react";
 import AddProductModal from "../../components/ui/AddProductModal";
 import ViewProductModal from "../../components/ui/ViewProductModal";
 import EditProductModal from "../../components/ui/EditProductModal";
+import ExportButton from "../../components/ui/ExportButton";
 
-import { getProducts } from "../../lib/api";
+import { getProducts, exportProducts } from "../../lib/api";
 
 export default function Product() {
   const [products, setProducts] = useState([]);
@@ -53,12 +54,15 @@ export default function Product() {
       <h1 className="text-3xl font-bold text-slate-800">Quản lý sản phẩm</h1>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button
-          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2 px-6 shadow-sm transition-all"
-          onClick={() => setIsModalOpen(true)}>
-          <Plus size={18} />
-          Thêm sản phẩm mới
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2 px-6 shadow-sm transition-all"
+            onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} />
+            Thêm sản phẩm mới
+          </Button>
+          <ExportButton onExport={exportProducts} fileNamePrefix="San_pham" />
+        </div>
 
         <div className="relative w-72">
           <Search

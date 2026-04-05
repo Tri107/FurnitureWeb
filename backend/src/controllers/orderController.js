@@ -28,6 +28,8 @@ const OrderController = {
   getOrdersByAccountId: async (req, res) => {
     try {
       const { id } = req.params; 
+      const currentId = req.user.id;
+      if (Number(id) !== currentId) return res.status(403).json({ message: "Forbidden" });
       const orders = await OrderModel.getByAccountId(id);
       if (!orders) return res.status(404).json({ message: "Orders not found" });
       return res.status(200).json({ message: "Success", data: orders });

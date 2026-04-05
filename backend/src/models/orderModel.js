@@ -4,9 +4,9 @@ import Variant from "./variantModel.js";
 const OrderModel = {
   getAll: async () => {
     const [rows] = await db.query(
-      `SELECT o.*, a.email 
+      `SELECT order_id, order_date, order_status, total_price, address, note, a.email
        FROM orders o 
-       JOIN accounts a ON o.account_id = a.account_id 
+       JOIN accounts a ON o.account_id = a.account_id
        ORDER BY o.order_date DESC`
     );
     return rows;
@@ -14,10 +14,11 @@ const OrderModel = {
 
   getById: async (orderId) => {
     const [orderRows] = await db.query(
-      `SELECT o.*, a.email, a.is_admin, up.username, up.phone_number, up.user_address 
+      `SELECT  order_id, order_date, order_status, total_price, address, note, a.email, a.is_admin, up.username, up.phone_number, up.user_address, d.discount_code, discount_percentage 
        FROM orders o 
        JOIN accounts a ON o.account_id = a.account_id 
        JOIN user_profiles up ON o.account_id = up.account_id
+       LEFT JOIN discounts d ON d.discount_id = o.discount_id
        WHERE o.order_id = ?`,
       [orderId]
     );
@@ -46,7 +47,7 @@ const OrderModel = {
 
   getByAccountId: async (accountId) => {
     const [rows] = await db.query(
-      `SELECT o.order_id, o.total_price, o.order_status, o.order_date, a.email 
+      `SELECT o.order_id, o.total_price, o.order_status, o.address, o.order_date, a.email 
        FROM orders o 
        JOIN accounts a ON o.account_id = a.account_id 
        WHERE o.account_id = ?
@@ -159,7 +160,27 @@ const OrderModel = {
       [newStatus, orderId]
     );
     return result.affectedRows > 0;
+  },
+
+  getAllForExport: async () => {
+    const [rows] = await db.query(
+      `SELECT 
+        o.order_id, 
+        o.order_date, 
+        o.order_status, 
+        o.total_price, 
+        o.address AS shipping_address, 
+        o.note, 
+        a.email, 
+        up.username, 
+        up.phone_number
+      FROM orders o
+      JOIN accounts a ON o.account_id = a.account_id
+      JOIN user_profiles up ON o.account_id = up.account_id
+      ORDER BY o.order_date DESC`
+    );
+    return rows;
   }
 };
 
-export default OrderModel;
+export default OrderModel;
