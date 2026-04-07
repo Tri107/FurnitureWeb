@@ -13,6 +13,7 @@ import History from "./pages/History";
 import DetailProduct from "./pages/DetailProduct";
 
 import AdminLayout from "./components/layout/AdminLayout";
+import AdminRoute from "./components/layout/AdminRoute";
 import Dashboard from "./pages/admin/Dashboard";
 import Product from "./pages/admin/Product";
 import Favorites from "./pages/Favorites";
@@ -49,7 +50,11 @@ function App() {
         <Route path="/detailproduct/:id" element={<DetailProduct />} />
 
         {/* Admin */}
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Product />} />
           <Route path="discounts" element={<Discount />} />
