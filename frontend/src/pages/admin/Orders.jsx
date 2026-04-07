@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, ShoppingBag } from "lucide-react";
+import { Search, Eye, ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import ViewOrderModal from "../../components/ui/ViewOrderModal";
 import ExportButton from "../../components/ui/ExportButton";
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 
 const statusColors = {
   PENDING: "bg-yellow-400",
@@ -97,52 +98,79 @@ const OrderRow = React.memo(({ item, onUpdateStatus, onViewDetails }) => {
 OrderRow.displayName = "OrderRow";
 
 export default function Orders() {
-  const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [viewOrderId, setViewOrderId] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const res = await getOrders();
-      setOrders(res.data);
-    } catch (err) {
-      console.error("Load orders failed", err);
-      toast.error("Không thể tải danh sách đơn hàng");
-    } finally {
-      setLoading(false);
+  // For Cursor Pagination
+  const [cursorHistory, setCursorHistory] = useState([null]);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  // Reset pagination on search change
+  useEffect(() => {
+    setCursorHistory([null]);
+    setPageIndex(0);
+  }, [search]);
+
+  const currentCursor = cursorHistory[pageIndex];
+
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching
+  } = useQuery({
+    queryKey: ['orders', search, currentCursor],
+    queryFn: async () => {
+      const res = await getOrders({ cursor: currentCursor, limit: 15, search });
+      return res; // { data: [...orders], nextCursor: ID }
+    },
+    placeholderData: keepPreviousData,
+  });
+
+  const orders = useMemo(() => data?.data || [], [data]);
+  const nextCursor = data?.nextCursor;
+
+  const handleNextPage = () => {
+    if (nextCursor) {
+      if (pageIndex === cursorHistory.length - 1) {
+        setCursorHistory((prev) => [...prev, nextCursor]);
+      }
+      setPageIndex((prev) => prev + 1);
     }
   };
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+  const handlePrevPage = () => {
+    if (pageIndex > 0) {
+      setPageIndex((prev) => prev - 1);
+    }
+  };
 
   const handleUpdateStatus = useCallback(async (orderId, newStatus) => {
     try {
       await updateOrderStatus(orderId, { status: newStatus });
       toast.success("Cập nhật trạng thái thành công");
-      // Cập nhật state local ngay lập tức để UI mượt hơn (Optimistic-like)
-      setOrders(prev => prev.map(o => o.order_id === orderId ? { ...o, order_status: newStatus } : o));
+      
+      queryClient.setQueryData(['orders', search, currentCursor], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          data: oldData.data.map((o) => 
+            o.order_id === orderId ? { ...o, order_status: newStatus } : o
+          ),
+        };
+      });
     } catch (err) {
       console.error("Update status failed", err);
       toast.error("Cập nhật trạng thái thất bại");
     }
-  }, []);
+  }, [queryClient, search, currentCursor]);
 
   const handleViewDetails = useCallback((id) => {
     setViewOrderId(id);
     setIsViewModalOpen(true);
   }, []);
-
-  const filteredOrders = useMemo(() => {
-    return orders.filter((order) =>
-      order.email.toLowerCase().includes(search.toLowerCase()) ||
-      order.order_id.toString().includes(search)
-    );
-  }, [orders, search]);
 
   return (
     <div className="space-y-6">
@@ -157,8 +185,10 @@ export default function Orders() {
               <ShoppingBag size={16} />
             </div>
             <div className="flex items-center gap-2 pr-1">
-              <p className="text-sm text-muted-foreground font-medium">Tổng đơn hàng:</p>
-              <p className="text-xl font-bold text-slate-900 leading-none">{orders.length}</p>
+              <p className="text-sm text-muted-foreground font-medium">Trạng thái:</p>
+              <p className="text-md font-medium text-slate-900 leading-none">
+                 {isFetching ? "Đang tải dữ liệu..." : "Hoàn tất"}
+              </p>
             </div>
           </div>
           <ExportButton onExport={exportOrders} fileNamePrefix="Don_hang" />
@@ -179,9 +209,14 @@ export default function Orders() {
       </div>
 
       {/* Table */}
-      <Card className="rounded-2xl overflow-hidden border-slate-200 shadow-sm">
+      <Card className="rounded-2xl overflow-hidden border-slate-200 shadow-sm relative">
+        {isFetching && (
+            <div className="absolute top-0 left-0 w-full h-1 bg-blue-100">
+              <div className="h-full bg-blue-600 animate-pulse w-1/3 rounded-r-md"></div>
+            </div>
+        )}
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto min-h-[400px]">
             <table className="w-full text-sm">
               <thead className="border-b bg-slate-50">
                 <tr className="text-left text-slate-500 uppercase text-[11px] tracking-wider">
@@ -195,23 +230,29 @@ export default function Orders() {
               </thead>
 
               <tbody className="divide-y divide-slate-100">
-                {loading ? (
+                {isLoading ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
                       <div className="flex flex-col items-center gap-2">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
-                        <span>Đang tải dữ liệu...</span>
+                        <span>Đang khởi tạo...</span>
                       </div>
                     </td>
                   </tr>
-                ) : filteredOrders.length === 0 ? (
+                ) : isError ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-12 text-center text-red-500">
+                      Lỗi tải dữ liệu. Vui lòng thử lại.
+                    </td>
+                  </tr>
+                ) : orders.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
-                      Chưa có đơn hàng nào
+                      Không tìm thấy đơn hàng nào
                     </td>
                   </tr>
                 ) : (
-                  filteredOrders.map((item) => (
+                  orders.map((item) => (
                     <OrderRow
                       key={item.order_id}
                       item={item}
@@ -222,6 +263,33 @@ export default function Orders() {
                 )}
               </tbody>
             </table>
+          </div>
+          
+          {/* Pagination Footer */}
+          <div className="p-4 flex items-center justify-between border-t border-slate-100 bg-slate-50/50">
+            <span className="text-sm text-slate-500">
+               Trang {pageIndex + 1}
+            </span>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handlePrevPage} 
+                disabled={pageIndex === 0 || isFetching}
+              >
+                <ChevronLeft size={16} className="mr-1" />
+                Trang trước
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleNextPage} 
+                disabled={!nextCursor || isFetching}
+              >
+                Trang sau
+                <ChevronRight size={16} className="ml-1" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -316,7 +316,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-[#0B1E3A] text-white shadow-sm sticky top-0 z-[80]">
+    <header className="w-full bg-[#0B1E3A] text-white shadow-sm top-0 z-[80]">
       <div className="mx-auto max-w-7xl px-3 lg:px-10 h-20 flex items-center">
         <Link to="/" className="font-bold text-2xl !text-orange-500 tracking-wide">
           B2VT

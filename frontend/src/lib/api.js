@@ -190,7 +190,15 @@ export const getChatMessages = (conversationId) => apiFetch(`/chat/messages/${co
 export const createOrGetConversation = (data) => apiFetch("/chat/conversation", "POST", data);
 
 // ================= ORDER =================
-export const getOrders = () => apiFetch("/orders");
+export const getOrders = (params = {}) => {
+  const queryList = [];
+  if (params.cursor) queryList.push(`cursor=${params.cursor}`);
+  if (params.limit) queryList.push(`limit=${params.limit}`);
+  if (params.search) queryList.push(`search=${params.search}`);
+  if (params.status) queryList.push(`status=${params.status}`);
+  const queryString = queryList.length > 0 ? `?${queryList.join("&")}` : "";
+  return apiFetch(`/orders${queryString}`);
+};
 export const getOrdersByUserId = (userId) => apiFetch(`/orders/user/${userId}`);
 export const getOrderById = (id) => apiFetch(`/orders/${id}`);
 export const createOrder = (data) => apiFetch("/orders", "POST", data);
