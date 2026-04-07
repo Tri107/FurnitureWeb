@@ -151,18 +151,16 @@ export default function Orders() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Card className="rounded-2xl shrink-0 border-slate-200">
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                <ShoppingBag size={20} />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">Tổng đơn hàng</p>
-                <p className="text-xl font-bold text-slate-900">{orders.length}</p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-4 ">
+          <div className="rounded-xl shrink-0 border border-slate-200 bg-white shadow-sm px-4 py-2 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+              <ShoppingBag size={16} />
+            </div>
+            <div className="flex items-center gap-2 pr-1">
+              <p className="text-sm text-muted-foreground font-medium">Tổng đơn hàng:</p>
+              <p className="text-xl font-bold text-slate-900 leading-none">{orders.length}</p>
+            </div>
+          </div>
           <ExportButton onExport={exportOrders} fileNamePrefix="Don_hang" />
         </div>
 
@@ -187,12 +185,12 @@ export default function Orders() {
             <table className="w-full text-sm">
               <thead className="border-b bg-slate-50">
                 <tr className="text-left text-slate-500 uppercase text-[11px] tracking-wider">
-                  <th className="px-6 py-4 font-semibold">ID</th>
-                  <th className="px-6 py-4 font-semibold">Khách hàng</th>
-                  <th className="px-6 py-4 font-semibold">Ngày đặt</th>
-                  <th className="px-6 py-4 font-semibold text-left">Tổng tiền</th>
-                  <th className="px-6 py-4 font-semibold text-center">Trạng thái</th>
-                  <th className="px-6 py-4 text-right font-semibold">Hành động</th>
+                  <th className="px-6 py-3 font-semibold">ID</th>
+                  <th className="px-6 py-3 font-semibold">Khách hàng</th>
+                  <th className="px-6 py-3 font-semibold">Ngày đặt</th>
+                  <th className="px-6 py-3 font-semibold text-left">Tổng tiền</th>
+                  <th className="px-6 py-3 font-semibold text-center">Trạng thái</th>
+                  <th className="px-6 py-3 text-right font-semibold">Hành động</th>
                 </tr>
               </thead>
 

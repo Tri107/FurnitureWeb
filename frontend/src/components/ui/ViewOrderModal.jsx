@@ -47,11 +47,32 @@ export default function ViewOrderModal({ open, onClose, orderId }) {
 
     fetchOrder();
   }, [open, orderId]);
+  // Helper calculations
+  let subTotal = 0;
+  let discountValue = 0;
+
+  if (order && order.items) {
+    subTotal = order.items.reduce((sum, item) => {
+      const snapshot = typeof item.variant_snapshot === 'string'
+        ? JSON.parse(item.variant_snapshot)
+        : (item.variant_snapshot || {});
+      return sum + (Number(snapshot.price || 0) * item.quantity);
+    }, 0);
+
+    // Tính tiền giảm dựa trên tổng đơn hàng (subTotal) và % giảm giá
+    if (order.discount_percentage) {
+      discountValue = Math.round((subTotal * Number(order.discount_percentage)) / 100);
+    } else if (order.discount_code && subTotal > order.total_price) {
+      // Fallback: Nếu không có % nhưng có code thì có thể đó là mã giảm tĩnh (amount)
+      // ta có thể tính ngược lại từ tổng giá
+      discountValue = subTotal - Number(order.total_price);
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="p-6 pb-0">
+      <DialogContent className="sm:max-w-7xl max-h-[90vh] overflow-hidden">
+        <DialogHeader className="border-b pb-4">
           <DialogTitle className="text-2xl font-bold flex items-center justify-between">
             <span>Chi tiết đơn hàng #{orderId}</span>
             {order && (
@@ -62,120 +83,141 @@ export default function ViewOrderModal({ open, onClose, orderId }) {
           </DialogTitle>
         </DialogHeader>
 
-        <Separator className="mt-4" />
-
-        <ScrollArea className="flex-1 p-6">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 space-y-4">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
-              <p className="text-sm text-muted-foreground">Đang tải thông tin đơn hàng...</p>
-            </div>
-          ) : order ? (
-            <div className="space-y-8">
-              {/* Order Info Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Khách hàng</Label>
-                    <p className="font-semibold text-lg">{order.username || "N/A"}</p>
-                    <p className="text-sm text-muted-foreground">{order.email}</p>
-                    <p className="text-sm text-muted-foreground">{order.phone_number || "N/A"}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Ngày đặt hàng</Label>
-                    <p className="font-medium">
-                      {order.order_date ? format(new Date(order.order_date), "HH:mm, dd/MM/yyyy") : "N/A"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Địa chỉ giao hàng</Label>
-                    <p className="text-sm bg-muted/50 p-3 rounded-lg border italic">
-                      {order.address || "Chưa cung cấp"}
-                    </p>
-                  </div>
-                  {order.note && (
+        <ScrollArea className="h-[75vh] pr-4 mt-4">
+          <div className="space-y-8">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600" />
+                <p className="text-sm text-muted-foreground">Đang tải thông tin đơn hàng...</p>
+              </div>
+            ) : order ? (
+              <>
+                {/* Order Info Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     <div>
-                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">Ghi chú</Label>
-                      <p className="text-sm bg-yellow-50 p-3 rounded-lg border border-yellow-100 italic">
-                        {order.note}
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">Khách hàng</Label>
+                      <p className="font-semibold text-lg">{order.username || "N/A"}</p>
+                      <p className="text-sm text-muted-foreground">{order.email}</p>
+                      <p className="text-sm text-muted-foreground">{order.phone_number || "N/A"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">Ngày đặt hàng</Label>
+                      <p className="font-medium">
+                        {order.order_date ? format(new Date(order.order_date), "HH:mm, dd/MM/yyyy") : "N/A"}
                       </p>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              {/* Items Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground uppercase tracking-wider">Địa chỉ giao hàng</Label>
+                      <p className="text-sm bg-muted/50 p-3 rounded-lg border italic">
+                        {order.address || "Chưa cung cấp"}
+                      </p>
+                    </div>
+                    {order.note && (
+                      <div>
+                        <Label className="text-xs text-muted-foreground uppercase tracking-wider">Ghi chú</Label>
+                        <p className="text-sm bg-yellow-50 p-3 rounded-lg border border-yellow-100 italic">
+                          {order.note}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator className="opacity-50" />
+
+                {/* Items Section */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                     Sản phẩm trong đơn hàng
                     <Badge variant="outline" className="ml-2">{order.items?.length || 0}</Badge>
-                </h3>
-                <div className="border rounded-xl overflow-hidden shadow-sm">
-                  <table className="w-full text-sm">
-                    <thead className="bg-muted/50 border-b text-left">
-                      <tr>
-                        <th className="px-4 py-3 font-medium">Sản phẩm</th>
-                        <th className="px-4 py-3 font-medium text-center">Số lượng</th>
-                        <th className="px-4 py-3 font-medium text-right">Đơn giá</th>
-                        <th className="px-4 py-3 font-medium text-right">Thành tiền</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {order.items?.map((item, idx) => {
-                        const snapshot = typeof item.variant_snapshot === 'string' 
-                          ? JSON.parse(item.variant_snapshot) 
-                          : (item.variant_snapshot || {});
-                        return (
-                          <tr key={idx} className="hover:bg-muted/30 transition-colors">
-                            <td className="px-4 py-4">
-                              <div className="flex items-center gap-3">
-                                <div>
-                                  <p className="font-bold text-sm leading-tight">{item.product_name}</p>
-                                  <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-tighter">SKU: {snapshot.sku || "N/A"}</p>
+                  </h3>
+                  <div className="border rounded-xl shadow-sm overflow-hidden bg-white">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/50 border-b text-left">
+                        <tr>
+                          <th className="px-4 py-3 font-medium">Sản phẩm</th>
+                          <th className="px-4 py-3 font-medium text-center">Số lượng</th>
+                          <th className="px-4 py-3 font-medium text-right">Đơn giá</th>
+                          <th className="px-4 py-3 font-medium text-right">Thành tiền</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {order.items?.map((item, idx) => {
+                          const snapshot = typeof item.variant_snapshot === 'string'
+                            ? JSON.parse(item.variant_snapshot)
+                            : (item.variant_snapshot || {});
+                          return (
+                            <tr key={idx} className="hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div>
+                                    <p className="font-bold text-sm leading-tight">{item.product_name}</p>
+                                    <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-tighter">SKU: {snapshot.sku || "N/A"}</p>
+                                  </div>
                                 </div>
+                              </td>
+                              <td className="px-4 py-4 text-center font-medium">x{item.quantity}</td>
+                              <td className="px-4 py-4 text-right font-medium">
+                                {Number(snapshot.price || 0).toLocaleString("vi-VN")}đ
+                              </td>
+                              <td className="px-4 py-4 text-right font-bold text-blue-600">
+                                {Number((snapshot.price || 0) * item.quantity).toLocaleString("vi-VN")}đ
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot className="bg-muted/5 font-bold border-t">
+                        <tr>
+                          <td colSpan="3" className="px-4 py-3 text-right text-muted-foreground font-medium">Tạm tính</td>
+                          <td className="px-4 py-3 text-right">
+                            {Number(subTotal).toLocaleString("vi-VN")}đ
+                          </td>
+                        </tr>
+                        {!!order.discount_code && (
+                          <tr>
+                            <td colSpan="3" className="px-4 py-3 text-right text-muted-foreground font-medium border-t border-dashed">
+                              <div className="flex items-center justify-end gap-2">
+                                Giảm giá <Badge variant="outline" className="text-[10px] bg-green-50 text-green-600 border-green-200">{order.discount_code}</Badge>
                               </div>
                             </td>
-                            <td className="px-4 py-4 text-center font-medium">x{item.quantity}</td>
-                            <td className="px-4 py-4 text-right font-medium">
-                              {Number(snapshot.price || 0).toLocaleString("vi-VN")}đ
-                            </td>
-                            <td className="px-4 py-4 text-right font-bold text-blue-600">
-                              {Number((snapshot.price || 0) * item.quantity).toLocaleString("vi-VN")}đ
+                            <td className="px-4 py-3 text-right text-red-500 border-t border-dashed">
+                              -{Number(discountValue).toLocaleString("vi-VN")}đ
                             </td>
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                    <tfoot className="bg-muted/30 font-bold border-t">
-                        <tr>
-                            <td colSpan="3" className="px-4 py-4 text-right">Tạm tính</td>
-                            <td className="px-4 py-4 text-right text-lg">
-                                {Number(order.total_price).toLocaleString("vi-VN")}đ
-                            </td>
+                        )}
+                        <tr className="border-t text-lg bg-muted/10">
+                          <td colSpan="3" className="px-4 py-4 text-right">Tổng cộng</td>
+                          <td className="px-4 py-4 text-right text-blue-600">
+                            {Number(order.total_price).toLocaleString("vi-VN")}đ
+                          </td>
                         </tr>
-                    </tfoot>
-                  </table>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
+              </>
+            ) : (
+              <div className="py-20 text-center text-muted-foreground">
+                Không tìm thấy thông tin chi tiết đơn hàng.
               </div>
+            )}
+
+            {/* Close Button */}
+            <div className="flex justify-end pt-4 border-t">
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium shadow-sm"
+              >
+                Đóng
+              </button>
             </div>
-          ) : (
-            <div className="py-20 text-center text-muted-foreground">
-              Không tìm thấy thông tin chi tiết đơn hàng.
-            </div>
-          )}
+          </div>
         </ScrollArea>
-        
-        <div className="p-6 border-t bg-muted/20 flex justify-end">
-          <button 
-            onClick={onClose}
-            className="px-6 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors font-medium shadow-sm"
-          >
-            Đóng
-          </button>
-        </div>
       </DialogContent>
     </Dialog>
   );
