@@ -13,6 +13,7 @@ import History from "./pages/History";
 import DetailProduct from "./pages/DetailProduct";
 
 import AdminLayout from "./components/layout/AdminLayout";
+import AdminRoute from "./components/layout/AdminRoute";
 import Dashboard from "./pages/admin/Dashboard";
 import Product from "./pages/admin/Product";
 import Favorites from "./pages/Favorites";
@@ -60,20 +61,24 @@ function App() {
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/detailproduct/:id" element={<DetailProduct />} />
 
-          {/* Admin */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="products" element={<Product />} />
-            <Route path="discounts" element={<Discount />} />
-            <Route path="accounts" element={<AccountPage />} />
-            <Route path="collections" element={<Collection />} />
-            <Route path="payment" element={<Payment />} />
-            <Route path="categories" element={<CategoryPage />} />
-            <Route path="brands" element={<Brands />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="chat" element={<AdminChat />} />
-          </Route>
-        </Routes>
+        {/* Admin */}
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminLayout />
+          </AdminRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="products" element={<Product />} />
+          <Route path="discounts" element={<Discount />} />
+          <Route path="accounts" element={<AccountPage />} />
+          <Route path="collections" element={<Collection />} />
+          <Route path="payment" element={<Payment />} />
+          <Route path="categories" element={<CategoryPage />} />
+          <Route path="brands" element={<Brands />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="chat" element={<AdminChat />} />
+        </Route>
+      </Routes>
 
         {/* CHATBOX GLOBAL (nổi góc phải) */}
         <div className="fixed bottom-5 right-5 z-50">

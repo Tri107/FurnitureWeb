@@ -38,7 +38,7 @@ const apiFetch = async (
     let res = await fetch(`${API_URL}${endpoint}`, options);
     
     // ================= XỬ LÝ HẾT HẠN TOKEN =================
-    if (res.status === 401 && !isRetry) {
+    if (res.status === 401 && !isRetry && !["/auth/login", "/auth/register", "/auth/register/verify", "/auth/google-login", "/auth/refresh-token"].includes(endpoint)) {
       try {
         // Gọi API lấy token mới
         const refreshRes = await fetch(`${API_URL}/auth/refresh-token`, {
