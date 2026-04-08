@@ -157,9 +157,6 @@ export default function OrderSuccess() {
             {renderTitle()}
           </h1>
           <p className="text-slate-600 mb-6">{renderDescription()}</p>
-          <p className="text-slate-600 mb-6">
-            Cảm ơn bạn đã mua sắm. Đơn hàng của bạn đã được tạo thành công.
-          </p>
 
           <p className="text-blue-600 font-medium mb-6">
             Vui lòng kiểm tra email của bạn để xem thông tin chi tiết đơn hàng.

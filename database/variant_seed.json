@@ -85,7 +85,8 @@
     "model3d": null,
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/wardrobe.png",
-      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/wardrobe1.png"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/wardrobe1.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/wardrobe2.png"
     ],
     "variants": [
       {
@@ -107,7 +108,7 @@
     ]
   },
   {
-    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/bed.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bed.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bed1.png"
@@ -132,7 +133,7 @@
     ]
   },
   {
-    "model3d": null,
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/bookshelf.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bookshelf.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/bookshelf1.png"
@@ -157,10 +158,10 @@
     ]
   },
   {
-    "model3d": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BoxTextured/glTF-Binary/BoxTextured.glb",
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/marble_dining_table.glb",
     "images": [
-      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/dining_table.png",
-      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/dining_table1.png"
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/marble_dining_table.png",
+      "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/marble_dining_table1.png"
     ],
     "variants": [
       {
@@ -207,7 +208,7 @@
     ]
   },
   {
-    "model3d": null,
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/shoe_cabinet.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/shoe_cabinet.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/shoe_cabinet1.png"
@@ -232,7 +233,7 @@
     ]
   },
   {
-    "model3d": null,
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/velvet_bed.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/velvet_bed.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/velvet_bed1.png"
@@ -282,7 +283,7 @@
     ]
   },
   {
-    "model3d": null,
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/tea_table.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/tea_table.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/tea_table1.png"
@@ -332,7 +333,7 @@
     ]
   },
   {
-    "model3d": null,
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/kitchen_cabinet.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/kitchen_cabinet.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/kitchen_cabinet1.png"
@@ -407,7 +408,7 @@
     ]
   },
   {
-    "model3d": null,
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/meeting_table.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/meeting_table.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/meeting_table1.png"
@@ -457,7 +458,7 @@
     ]
   },
   {
-    "model3d": null,
+    "model3d": "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/models/filling_cabinet.glb",
     "images": [
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/filing_cabinet.png",
       "https://pub-2f2f4517178a4b6cb6c47e591b79932b.r2.dev/images/filing_cabinet1.png"
