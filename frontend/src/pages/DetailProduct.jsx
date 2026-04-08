@@ -46,6 +46,10 @@ const COLORS = {
   "Xanh Navy": { hex: "#000080", tailwind: "bg-blue-900" },
   "Nâu da bò": { hex: "#A52A2A", tailwind: "bg-orange-800" },
   "Vân gỗ sáng": { hex: "#DEB887", tailwind: "bg-[#DEB887]" },
+  "Màu gỗ tự nhiên": { hex: "#D8B37E", tailwind: "bg-[#D8B37E]" },
+  "Gỗ mun": { hex: "#3B2F2F", tailwind: "bg-[#3B2F2F]" },
+  "Vàng": { hex: "#FFD700", tailwind: "bg-[#FFD700]" },
+  
 };
 
 const dimStr = (v) =>
