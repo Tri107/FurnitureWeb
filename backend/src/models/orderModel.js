@@ -2,13 +2,34 @@ import db from "../config/mysql.js";
 import Variant from "./variantModel.js";
 
 const OrderModel = {
-  getAll: async () => {
-    const [rows] = await db.query(
-      `SELECT order_id, order_date, order_status, total_price, address, note, a.email
-       FROM orders o 
-       JOIN accounts a ON o.account_id = a.account_id
-       ORDER BY o.order_date DESC`
-    );
+  getAll: async (cursor = null, limit = 50, search = null, status = null) => {
+    let query = `
+      SELECT o.order_id, o.order_date, o.order_status, o.total_price, o.address, o.note, a.email
+      FROM orders o 
+      JOIN accounts a ON o.account_id = a.account_id
+      WHERE 1=1
+    `;
+    const params = [];
+
+    if (search) {
+      query += ` AND (a.email LIKE ? OR o.order_id LIKE ?)`;
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    if (status && status !== 'ALL') {
+      query += ` AND o.order_status = ?`;
+      params.push(status);
+    }
+
+    if (cursor) {
+      query += ` AND o.order_id < ?`;
+      params.push(cursor);
+    }
+
+    query += ` ORDER BY o.order_id DESC LIMIT ?`;
+    params.push(Number(limit) || 50);
+
+    const [rows] = await db.query(query, params);
     return rows;
   },
 
@@ -32,15 +53,23 @@ const OrderModel = {
       [orderId]
     );
 
-    const items = await Promise.all(itemRows.map(async (item) => {
+    const variantRefs = [...new Set(itemRows.map(item => item.variant_ref).filter(Boolean))];
+    let variantDocs = [];
+    if (variantRefs.length > 0) {
+      variantDocs = await Variant.find({ _id: { $in: variantRefs } }).lean();
+    }
+    
+    const variantMap = variantDocs.reduce((acc, doc) => {
+      acc[doc._id.toString()] = doc;
+      return acc;
+    }, {});
+
+    const items = itemRows.map((item) => {
       if (item.variant_ref) {
-        const variantDoc = await Variant.findById(item.variant_ref).lean();
-        if (variantDoc && variantDoc.images && variantDoc.images.length > 0) {
-          item.image = variantDoc.images[0];
-        }
+        const variantDoc = variantMap[item.variant_ref.toString()];
       }
       return item;
-    }));
+    });
 
     return { ...orderRows[0], items };
   },
@@ -183,4 +212,4 @@ const OrderModel = {
   }
 };
 
-export default OrderModel;
+export default OrderModel;

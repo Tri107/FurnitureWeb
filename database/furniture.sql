@@ -1,5 +1,4 @@
 
-DROP IF EXISTS DATABASE furniture;
 CREATE DATABASE furniture;
 
 USE furniture;
@@ -149,6 +148,11 @@ CREATE TABLE cart_items (
   FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
   UNIQUE KEY unique_cart_item (account_id, product_id, sku)
 );
+
+--  indexes for performance
+CREATE INDEX idx_order_date ON orders(order_date);
+CREATE INDEX idx_order_status ON orders(order_status);
+CREATE INDEX idx_acc_id_order_id ON orders(account_id, order_id DESC);
 
 --  views
 --  view all products for admin

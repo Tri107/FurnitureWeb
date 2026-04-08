@@ -5,10 +5,21 @@ import { sendOrderConfirmationEmail } from '../utils/sendEmail.js';
 const OrderController = {
   getAllOrders: async (req, res) => {
     try {
-      const orders = await OrderModel.getAll();
-      return res.status(200).json({ message: "Success", data: orders });
+      const { cursor, limit, search, status } = req.query;
+      const orders = await OrderModel.getAll(cursor, limit, search, status);
+      
+      let nextCursor = null;
+      if (orders.length > 0) {
+        nextCursor = orders[orders.length - 1].order_id;
+      }
+      
+      return res.status(200).json({ 
+        message: "Success", 
+        data: orders, 
+        nextCursor: orders.length === Number(limit || 50) ? nextCursor : null 
+      });
     } catch (error) {
-      console.error(error);
+      console.error("Lỗi Controller getAllOrders:", error);
       return res.status(500).json({ message: "Server Error" });
     }
   },

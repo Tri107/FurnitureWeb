@@ -30,24 +30,36 @@ import Orders from "./pages/admin/Orders";
 import Chatbox from "./components/ui/Chatbox";
 
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
+
 function App() {
   return (
-    <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
 
-      <Routes>
-        {/* Public */}
-        <Route path="/products" element={<Products />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
-        <Route path="/" element={<Home />} />
-        <Route path="/userprofile" element={<UserProfile />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/otp" element={<Otp />} />
-        <Route path="/favorites" element={<Favorites />} />
-        <Route path="/detailproduct/:id" element={<DetailProduct />} />
+        <Routes>
+          {/* Public */}
+          <Route path="/products" element={<Products />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/userprofile" element={<UserProfile />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/otp" element={<Otp />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/detailproduct/:id" element={<DetailProduct />} />
 
         {/* Admin */}
         <Route path="/admin" element={
@@ -68,12 +80,13 @@ function App() {
         </Route>
       </Routes>
 
-      {/* CHATBOX GLOBAL (nổi góc phải) */}
-      <div className="fixed bottom-5 right-5 z-50">
-        <Chatbox />
-      </div>
+        {/* CHATBOX GLOBAL (nổi góc phải) */}
+        <div className="fixed bottom-5 right-5 z-50">
+          <Chatbox />
+        </div>
 
-    </BrowserRouter>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
