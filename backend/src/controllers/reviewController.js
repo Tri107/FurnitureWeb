@@ -47,47 +47,50 @@ const reviewController = {
   },
 
   createReview: async (req, res, next) => {
-  try {
-    const accountId = getAccountIdFromReq(req);
-    const { rating, reviewComment, productId } = req.body;
+    try {
+      const accountId = getAccountIdFromReq(req);
+      const { rating, reviewComment, productId } = req.body;
 
-    if (!accountId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+      if (!accountId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
 
-    if (!rating || !productId) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+      if (!rating || !productId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
 
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be from 1 to 5" });
-    }
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "Rating must be from 1 to 5" });
+      }
 
-    const canReviewResult = await reviewModel.canReviewProduct(productId, accountId);
+      const canReviewResult = await reviewModel.canReviewProduct(productId, accountId);
 
-    if (!canReviewResult.purchased) {
-      return res.status(403).json({
-        message: "Bạn chưa mua sản phẩm này",
+      if (!canReviewResult.purchased) {
+        return res.status(403).json({
+          message: "Bạn chưa mua sản phẩm này",
+        });
+      }
+
+      if (canReviewResult.alreadyReviewed) {
+        return res.status(409).json({
+          message: "Bạn đã đánh giá sản phẩm này rồi",
+        });
+      }
+
+      const reviewableOrder = canReviewResult.reviewableOrders[0];
+
+      const reviewId = await reviewModel.create({
+        rating,
+        reviewComment,
+        productId,
+        accountId,
+        orderId: reviewableOrder.order_id,
       });
+
+      return res.status(201).json({ success: true, reviewId });
+    } catch (error) {
+      next(error);
     }
-
-    if (canReviewResult.alreadyReviewed) {
-      return res.status(409).json({
-        message: "Bạn đã đánh giá sản phẩm này rồi",
-      });
-    }
-
-    const reviewId = await reviewModel.create({
-      rating,
-      reviewComment,
-      productId,
-      accountId,
-    });
-
-    return res.status(201).json({ success: true, reviewId });
-  } catch (error) {
-    next(error);
-  }
 
   },
 

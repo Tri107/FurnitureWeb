@@ -103,6 +103,22 @@
           "color": "Vân sồi"
         },
         "status": "available"
+      },
+      {
+        "sku": "TU-MIN-3D-WH",
+        "price": 4000000,
+        "stock": 10,
+        "specs": {
+          "dimensions": {
+            "length": 160,
+            "width": 60,
+            "height": 200
+          },
+          "weight": 85,
+          "material": "Gỗ MDF sơn trắng",
+          "color": "Trắng"
+        },
+        "status": "available"
       }
     ]
   },
@@ -126,6 +142,38 @@
           "weight": 45,
           "material": "Gỗ thông",
           "color": "Trắng"
+        },
+        "status": "available"
+      },
+      {
+        "sku": "BED-IKEA-PIN",
+        "price": 7500000,
+        "stock": 15,
+        "specs": {
+          "dimensions": {
+            "length": 210,
+            "width": 170,
+            "height": 100
+          },
+          "weight": 45,
+          "material": "Gỗ thông",
+          "color": "Màu gỗ tự nhiên"
+        },
+        "status": "available"
+      },
+      {
+        "sku": "BED-IKEA-ASH",
+        "price": 7500000,
+        "stock": 5,
+        "specs": {
+          "dimensions": {
+            "length": 210,
+            "width": 170,
+            "height": 100
+          },
+          "weight": 45,
+          "material": "Gỗ ASH",
+          "color": "Nâu da bò"
         },
         "status": "available"
       }
@@ -153,6 +201,22 @@
           "color": "Gỗ sáng"
         },
         "status": "available"
+      },
+      {
+        "sku": "KE-ML-MOD-5",
+        "price": 1500000,
+        "stock": 30,
+        "specs": {
+          "dimensions": {
+            "length": 100,
+            "width": 30,
+            "height": 160
+          },
+          "weight": 18,
+          "material": "Gỗ công nghiệp",
+          "color": "Gỗ mun"
+        },
+        "status": "available"
       }
     ]
   },
@@ -176,6 +240,38 @@
           "weight": 65,
           "material": "Đá Cẩm Thạch",
           "color": "Vân mây"
+        },
+        "status": "available"
+      },
+      {
+        "sku": "BAN-INDEX-MOD",
+        "price": 8500000,
+        "stock": 6,
+        "specs": {
+          "dimensions": {
+            "length": 140,
+            "width": 140,
+            "height": 75
+          },
+          "weight": 65,
+          "material": "Gỗ MDF phủ Melamine",
+          "color": "Gỗ sáng"
+        },
+        "status": "available"
+      },
+      {
+        "sku": "BAN-INDEX-BR",
+        "price": 8000000,
+        "stock": 10,
+        "specs": {
+          "dimensions": {
+            "length": 140,
+            "width": 140,
+            "height": 75
+          },
+          "weight": 65,
+          "material": "Gỗ MDF phủ Melamine",
+          "color": "Nâu Đậm"
         },
         "status": "available"
       }
