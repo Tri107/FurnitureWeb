@@ -2,8 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'; 
-
-// THÊM: tạo HTTP server + socket
 import http from 'http';
 import { Server } from 'socket.io';
 import Message from "./models/messageModel.js";

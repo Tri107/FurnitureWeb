@@ -6,7 +6,7 @@ import ProfileModel from '../models/profileModel.js';
 import { sendOTP } from '../utils/sendEmail.js';
 import { OAuth2Client } from 'google-auth-library';
 
-// Kho lưu trữ tạm thời
+//lưu trữ tạm thời
 const tempRegisterStore = new Map();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const generateTokens = (user) => {
@@ -39,14 +39,11 @@ const AuthController = {
       const passwordHash = await bcrypt.hash(password, salt);
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // Lưu vào bộ nhớ tạm 
       tempRegisterStore.set(email, {
         passwordHash: passwordHash,
         otp: otp,
         expireAt: Date.now() + 5 * 60 * 1000 
       });
-
-      // Gửi mail
       const isSent = await sendOTP(email, otp);
 
       if (!isSent) {
@@ -116,11 +113,7 @@ const AuthController = {
       if (!isMatch) {
         return res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác' });
       }
-
-      // Tạo 2 loại Token
       const { accessToken, refreshToken } = generateTokens(user);
-
-      // Lưu Refresh Token vào db
       await AccountModel.updateRefreshToken(user.account_id, refreshToken);
 
       //  Set Cookie chứa Refresh Token
@@ -128,10 +121,8 @@ const AuthController = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 ngày
+        maxAge: 7 * 24 * 60 * 60 * 1000
       });
-
-      // Chỉ trả về Access Token trong body
       return res.status(200).json({
         message: 'Đăng nhập thành công',
         accessToken, 
@@ -178,8 +169,6 @@ const AuthController = {
           is_admin: 0
         };
       }
-
-      // Áp dụng chung logic Token kép cho Google Login
       const { accessToken, refreshToken } = generateTokens(user);
       await AccountModel.updateRefreshToken(user.account_id, refreshToken);
 
@@ -211,13 +200,10 @@ const AuthController = {
 
       // Xác thực token
       const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-
-      // Kiểm tra xem token có trong DB không
       const user = await AccountModel.findByRefreshToken(refreshToken);
       if (!user || user.account_id !== decoded.id) {
         return res.status(403).json({ message: 'Refresh Token không hợp lệ' });
       }
-      // Ở đây tạm thời chỉ cấp Access Token mới cho đơn giản
       const payload = {
         id: user.account_id,
         email: user.email,

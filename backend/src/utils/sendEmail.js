@@ -1,4 +1,4 @@
-// src/services/email.service.js
+
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -7,8 +7,8 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Email của bạn
-    pass: process.env.EMAIL_PASS  // Mật khẩu ứng dụng (App Password)
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS 
   }
 });
 
@@ -58,8 +58,6 @@ export const sendOrderConfirmationEmail = async (email, orderData) => {
         
         const price = formatVND(snap.price || 0);
         const total = formatVND((snap.price || 0) * item.quantity);
-        
-        // Đảm bảo URL ảnh đầy đủ
         let imageUrl = item.image || 'https://via.placeholder.com/60?text=No+Image';
         if (imageUrl && !imageUrl.startsWith('http')) {
           imageUrl = `http://localhost:9999/${imageUrl.replace(/\\/g, '/')}`;

@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-/**
- * Middleware: Kiểm tra Access Token hợp lệ (Yêu cầu đăng nhập)
- */
+
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -28,9 +26,7 @@ export const verifyToken = (req, res, next) => {
   });
 };
 
-/**
- * Middleware: Phân quyền Admin 
- */
+
 export const verifyAdmin = (req, res, next) => {
   verifyToken(req, res, () => {
     if (req.user && req.user.role === 'admin') {

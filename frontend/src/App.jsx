@@ -80,7 +80,7 @@ function App() {
         </Route>
       </Routes>
 
-        {/* CHATBOX GLOBAL (nổi góc phải) */}
+        
         <div className="fixed bottom-5 right-5 z-50">
           <Chatbox />
         </div>
