@@ -162,18 +162,6 @@ export default function OrderSuccess() {
             Vui lòng kiểm tra email của bạn để xem thông tin chi tiết đơn hàng.
           </p>  
 
-          {/* Đã thêm thẻ đóng </div> cho khối này */}
-          <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-left space-y-3 mb-6">
-            <div className="flex justify-between gap-4">
-              <span className="text-slate-500">Phương thức thanh toán</span>
-              <span className="font-medium text-slate-900">
-                {paymentMethod === "cod"
-                  ? "Thanh toán khi nhận hàng"
-                  : paymentMethod}
-              </span>
-            </div>
-          </div> 
-
           {!isFailed && (
             <div className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-left space-y-3 mb-6">
               <div className="flex justify-between gap-4">
