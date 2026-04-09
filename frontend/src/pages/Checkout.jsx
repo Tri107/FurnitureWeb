@@ -102,6 +102,8 @@ export default function Checkout() {
                 items={items}
                 subtotal={cart.subtotal}
                 shippingFee={cart.shippingFee}
+                vat={cart.vat}
+                assemblyFee={cart.assembly ? 200000 : 0}
                 discount={discountValue}
                 total={finalTotal}
                 onPlaceOrder={handlePlaceOrder}

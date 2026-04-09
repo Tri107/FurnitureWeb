@@ -13,6 +13,8 @@ export default function OrderSummary({
   onApplyDiscount,
   discountMessage,
   discountPercentage,
+  vat = 0,
+  assemblyFee = 0,
 }) {
   return (
     <div className="border border-slate-200 rounded-2xl p-6 bg-white">
@@ -34,6 +36,33 @@ export default function OrderSummary({
           </span>
         </div>
 
+        <div className="flex justify-between items-center text-slate-600 text-sm">
+          <span>Phí vận chuyển</span>
+          <span className="font-medium text-slate-900">
+            {shippingFee === 0
+              ? "Miễn phí"
+              : `${shippingFee.toLocaleString("vi-VN")} VNĐ`}
+          </span>
+        </div>
+
+        {vat > 0 && (
+          <div className="flex justify-between items-center text-slate-600 text-sm">
+            <span>Thuế VAT (10%)</span>
+            <span className="font-medium text-slate-900">
+              {vat.toLocaleString("vi-VN")} VNĐ
+            </span>
+          </div>
+        )}
+
+        {assemblyFee > 0 && (
+          <div className="flex justify-between items-center text-slate-600 text-sm">
+            <span>Phí lắp ráp</span>
+            <span className="font-medium text-slate-900">
+              {assemblyFee.toLocaleString("vi-VN")} VNĐ
+            </span>
+          </div>
+        )}
+
         {discount > 0 && (
           <div className="flex justify-between items-center text-slate-600 text-sm">
             <span>Giảm giá {discountPercentage ? `(${discountPercentage}%)` : ""}</span>
@@ -42,15 +71,6 @@ export default function OrderSummary({
             </span>
           </div>
         )}
-
-        <div className="flex justify-between items-center text-slate-600 text-sm">
-          <span>Phí vận chuyển</span>
-          <span className="font-medium text-slate-900">
-            {shippingFee === 0
-              ? "Miễn phí"
-              : `${shippingFee.toLocaleString("vi-VN")}VNĐ`}
-          </span>
-        </div>
       </div>
 
       <div className="mb-6">
