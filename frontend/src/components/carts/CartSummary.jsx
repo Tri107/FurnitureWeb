@@ -3,15 +3,14 @@ import { Button } from "@/components/ui/button";
 import { RefreshCcw, ShieldCheck, CreditCard, Truck } from "lucide-react";
 
 export default function CartSummary({
-  subtotal, // Tổng tiền tạm tính (sản phẩm × số lượng)
-  discount, // Số tiền giảm giá từ coupon
-  vat, // Thuế VAT (10% của subtotal sau discount)
-  total, // Tổng tiền cuối cùng (sau tất cả tính toán)
-  shippingFee, // Phí vận chuyển (0 hoặc số tiền)
-  assembly, // Boolean: có chọn dịch vụ lắp ráp không
-  setAssembly, // Function: cập nhật trạng thái assembly
-  isEmpty, // Boolean: giỏ hàng rỗng không
-  onCheckout, // Function: xử lý thanh toán
+  subtotal, 
+  vat, 
+  total, 
+  shippingFee, 
+  assembly, 
+  setAssembly, 
+  isEmpty, 
+  onCheckout,
 }) {
   return (
     <Card className="rounded-md border-slate-200 shadow-sm">

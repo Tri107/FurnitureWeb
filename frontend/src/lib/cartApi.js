@@ -19,11 +19,6 @@ const handleResponse = async (res) => {
   return res.json();
 };
 
-//
-// ================= CART API =================
-//
-
-// GET cart
 export const getCart = async () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const res = await fetch(`${CART_API_URL}/${user.id}`, {
@@ -34,7 +29,7 @@ export const getCart = async () => {
   return handleResponse(res);
 };
 
-// ADD to cart
+
 export const addToCart = async (
   productId,
   quantity = 1,
@@ -61,7 +56,7 @@ export const addToCart = async (
   return handleResponse(res);
 };
 
-// UPDATE quantity
+
 export const updateCartItem = async (cartItemId, quantity) => {
   const res = await fetch(`${CART_API_URL}/${cartItemId}`, {
     method: "PUT",
@@ -74,7 +69,7 @@ export const updateCartItem = async (cartItemId, quantity) => {
   return handleResponse(res);
 };
 
-// DELETE item
+
 export const removeCartItem = async (productId) => {
   const res = await fetch(`${CART_API_URL}/${productId}`, {
     method: "DELETE",
@@ -93,7 +88,7 @@ export const updateCartItemColor = async (cartItemId, color) => {
   return handleResponse(res);
 };
 
-// CLEAR cart
+
 export const clearCart = async () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const res = await fetch(`${CART_API_URL}/clear`, {
