@@ -58,8 +58,9 @@ const OrderController = {
       if (!account_id || total_price === undefined || !items || !items.length) {
         return res.status(400).json({ message: "Missing required fields" });
       }
+      const encodedNote = `${note || ""}${extra_info ? ` ###FEES###${JSON.stringify(extra_info)}` : ""}`;
       
-      const orderId = await OrderModel.create({ account_id, total_price, items, address, note, discount_id });
+      const orderId = await OrderModel.create({ account_id, total_price, items, address, note: encodedNote, discount_id });
       
       try {
         const fullOrder = await OrderModel.getById(orderId);

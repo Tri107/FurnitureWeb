@@ -32,10 +32,9 @@ const OrderModel = {
     const [rows] = await db.query(query, params);
     return rows;
   },
-
   getById: async (orderId) => {
     const [orderRows] = await db.query(
-      `SELECT  order_id, order_date, order_status, total_price, address, note, a.email, a.is_admin, up.username, up.phone_number, up.user_address, d.discount_code, discount_percentage 
+      `SELECT  order_id, order_date, order_status, total_price, address, note, a.email, a.is_admin, up.username, up.phone_number, up.user_address, d.discount_code, discount_percentage
        FROM orders o 
        JOIN accounts a ON o.account_id = a.account_id 
        JOIN user_profiles up ON o.account_id = up.account_id
@@ -67,6 +66,9 @@ const OrderModel = {
     const items = itemRows.map((item) => {
       if (item.variant_ref) {
         const variantDoc = variantMap[item.variant_ref.toString()];
+        if (variantDoc && variantDoc.images && variantDoc.images.length > 0) {
+          item.image = variantDoc.images[0];
+        }
       }
       return item;
     });
@@ -85,7 +87,6 @@ const OrderModel = {
     );
     return rows;
   },
-
   create: async (orderData) => {
     const { account_id, total_price, items, address, note, discount_id } = orderData;
     const connection = await db.getConnection();

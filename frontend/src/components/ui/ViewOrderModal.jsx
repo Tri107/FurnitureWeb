@@ -50,22 +50,39 @@ export default function ViewOrderModal({ open, onClose, orderId }) {
   // Helper calculations
   let subTotal = 0;
   let discountValue = 0;
+  let extraInfo = {};
+  let displayNote = order ? order.note || "" : "";
+  
+  if (order) {
+    // Tách thông tin phí từ ghi chú nếu có
+    if (order.note && order.note.includes("###FEES###")) {
+      const parts = order.note.split(" ###FEES###");
+      displayNote = parts[0];
+      try {
+        extraInfo = JSON.parse(parts[1]);
+      } catch (e) {
+        console.error("Error parsing fees from note:", e);
+      }
+    }
 
-  if (order && order.items) {
-    subTotal = order.items.reduce((sum, item) => {
-      const snapshot = typeof item.variant_snapshot === 'string'
-        ? JSON.parse(item.variant_snapshot)
-        : (item.variant_snapshot || {});
-      return sum + (Number(snapshot.price || 0) * item.quantity);
-    }, 0);
+    if (order.items) {
+      subTotal = order.items.reduce((sum, item) => {
+        const snapshot = typeof item.variant_snapshot === 'string'
+          ? JSON.parse(item.variant_snapshot)
+          : (item.variant_snapshot || {});
+        return sum + (Number(snapshot.price || 0) * item.quantity);
+      }, 0);
+    }
 
-    // Tính tiền giảm dựa trên tổng đơn hàng (subTotal) và % giảm giá
+    // Tính tiền giảm dựa trên tổng đơn hàng (Tạm tính + Phí + Thuế) và % giảm giá
     if (order.discount_percentage) {
-      discountValue = Math.round((subTotal * Number(order.discount_percentage)) / 100);
+      const baseTotal = subTotal + (Number(extraInfo.vat) || 0) + (Number(extraInfo.assemblyFee) || 0) + (Number(extraInfo.shippingFee) || 0);
+      discountValue = Math.round((baseTotal * Number(order.discount_percentage)) / 100);
     } else if (order.discount_code && subTotal > order.total_price) {
       // Fallback: Nếu không có % nhưng có code thì có thể đó là mã giảm tĩnh (amount)
       // ta có thể tính ngược lại từ tổng giá
-      discountValue = subTotal - Number(order.total_price);
+      const baseTotal = subTotal + (Number(extraInfo.vat) || 0) + (Number(extraInfo.assemblyFee) || 0) + (Number(extraInfo.shippingFee) || 0);
+      discountValue = baseTotal - Number(order.total_price);
     }
   }
 
@@ -116,11 +133,11 @@ export default function ViewOrderModal({ open, onClose, orderId }) {
                         {order.address || "Chưa cung cấp"}
                       </p>
                     </div>
-                    {order.note && (
+                    {displayNote && (
                       <div>
                         <Label className="text-xs text-muted-foreground uppercase tracking-wider">Ghi chú</Label>
                         <p className="text-sm bg-yellow-50 p-3 rounded-lg border border-yellow-100 italic">
-                          {order.note}
+                          {displayNote}
                         </p>
                       </div>
                     )}
@@ -178,11 +195,35 @@ export default function ViewOrderModal({ open, onClose, orderId }) {
                             {Number(subTotal).toLocaleString("vi-VN")}đ
                           </td>
                         </tr>
+                        {extraInfo.vat > 0 && (
+                          <tr>
+                            <td colSpan="3" className="px-4 py-3 text-right text-muted-foreground font-medium border-t border-dashed">Thuế VAT (10%)</td>
+                            <td className="px-4 py-3 text-right text-slate-700 border-t border-dashed">
+                              {Number(extraInfo.vat).toLocaleString("vi-VN")}đ
+                            </td>
+                          </tr>
+                        )}
+                        {extraInfo.assemblyFee > 0 && (
+                          <tr>
+                            <td colSpan="3" className="px-4 py-3 text-right text-muted-foreground font-medium border-t border-dashed">Phí lắp ráp</td>
+                            <td className="px-4 py-3 text-right text-slate-700 border-t border-dashed">
+                              {Number(extraInfo.assemblyFee).toLocaleString("vi-VN")}đ
+                            </td>
+                          </tr>
+                        )}
+                        {extraInfo.shippingFee > 0 && (
+                          <tr>
+                            <td colSpan="3" className="px-4 py-3 text-right text-muted-foreground font-medium border-t border-dashed">Phí vận chuyển</td>
+                            <td className="px-4 py-3 text-right text-slate-700 border-t border-dashed">
+                              {Number(extraInfo.shippingFee).toLocaleString("vi-VN")}đ
+                            </td>
+                          </tr>
+                        )}
                         {!!order.discount_code && (
                           <tr>
                             <td colSpan="3" className="px-4 py-3 text-right text-muted-foreground font-medium border-t border-dashed">
                               <div className="flex items-center justify-end gap-2">
-                                Giảm giá <Badge variant="outline" className="text-[10px] bg-green-50 text-green-600 border-green-200">{order.discount_code}</Badge>
+                                Giảm giá
                               </div>
                             </td>
                             <td className="px-4 py-3 text-right text-red-500 border-t border-dashed">
