@@ -95,19 +95,15 @@ const ProductModel = {
       variant_ref,
     ]);
 
-    // Lấy ID sản phẩm vừa thêm
     const [[{ id }]] = await db.query(`SELECT LAST_INSERT_ID() AS id`);
     return id;
   },
 
   createVariant: async (variantData) => {
-    // variantData should now match ProductVariantSchema (with nested variants array)
     const variant = new Variant(variantData);
     const saved = await variant.save();
     return saved._id.toString();
   },
-
-  // === UPDATE METHODS ===
 
   update: async (productId, productData) => {
     const {

@@ -10,12 +10,11 @@
  */
 
 // Helper: extract the duplicated field info from MySQL ER_DUP_ENTRY message
-// Example message: "Duplicate entry 'test@mail.com' for key 'accounts.email'"
 const extractDupInfo = (message) => {
   const match = message.match(/Duplicate entry '(.+?)' for key '(.+?)'/);
   if (match) {
     const value = match[1];
-    const rawKey = match[2]; // e.g. "accounts.email" or "PRIMARY"
+    const rawKey = match[2];
     const field = rawKey.includes('.') ? rawKey.split('.').pop() : rawKey;
     return { value, field };
   }
@@ -32,14 +31,12 @@ const extractFKInfo = (message) => {
 };
 
 // Helper: extract the column name from ER_BAD_NULL_ERROR
-// Example: "Column 'email' cannot be null"
 const extractNullField = (message) => {
   const match = message.match(/Column '(.+?)' cannot be null/);
   return match ? match[1] : null;
 };
 
 // Helper: extract column from ER_DATA_TOO_LONG
-// Example: "Data too long for column 'username' at row 1"
 const extractTooLongField = (message) => {
   const match = message.match(/Data too long for column '(.+?)'/);
   return match ? match[1] : null;
@@ -51,9 +48,6 @@ const dbErrorHandler = (err, req, res, _next) => {
     return _next(err);
   }
 
-  // ──────────────────────────────────────────────
-  // 1. MySQL Errors (identified by err.code string + err.errno number)
-  // ──────────────────────────────────────────────
   if (err.errno && err.sqlState) {
     const logPrefix = `[DB Error] ${err.code} (${err.errno})`;
 
@@ -114,7 +108,7 @@ const dbErrorHandler = (err, req, res, _next) => {
         });
       }
 
-      // ── Truncated / wrong value (e.g. bad date format, wrong ENUM) ──
+      // ── Truncated / wrong value ──
       case 1265:
       case 1292: {
         console.warn(`${logPrefix}: ${err.message}`);
@@ -190,9 +184,6 @@ const dbErrorHandler = (err, req, res, _next) => {
     }
   }
 
-  // ──────────────────────────────────────────────
-  // 2. Mongoose Validation Errors
-  // ──────────────────────────────────────────────
   if (err.name === 'ValidationError') {
     const fields = Object.keys(err.errors);
     const details = fields.map((f) => ({
@@ -207,7 +198,7 @@ const dbErrorHandler = (err, req, res, _next) => {
     });
   }
 
-  // Mongoose CastError (e.g. invalid ObjectId)
+  // Mongoose CastError
   if (err.name === 'CastError') {
     console.warn(`[Mongoose CastError]: ${err.message}`);
     return res.status(400).json({
@@ -217,7 +208,7 @@ const dbErrorHandler = (err, req, res, _next) => {
     });
   }
 
-  // Mongoose duplicate key (code 11000)
+  // Mongoose duplicate key
   if (err.code === 11000) {
     const field = Object.keys(err.keyPattern || {}).join(', ');
     console.warn(`[Mongoose DupKey]: field=${field}`);
@@ -228,9 +219,6 @@ const dbErrorHandler = (err, req, res, _next) => {
     });
   }
 
-  // ──────────────────────────────────────────────
-  // 3. Fallback — Unknown / unhandled errors
-  // ──────────────────────────────────────────────
   console.error('[Unhandled Error]:', err.stack || err.message || err);
   return res.status(500).json({
     success: false,

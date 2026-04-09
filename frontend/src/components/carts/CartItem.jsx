@@ -70,7 +70,12 @@ export default function CartItem({ item, onUpdate, onUpdateColor, onRemove }) {
                               colorName === 'Xám' ? '#808080' :
                               colorName === 'Xanh Navy' ? '#000080' :
                               colorName === 'Nâu da bò' ? '#A52A2A' :
-                              colorName === 'Vân gỗ sáng' ? '#DEB887' : '#CCCCCC',
+                              colorName === 'Vân gỗ sáng' ? '#DEB887' :
+                              colorName === 'Đỏ' ? '#FF0000' :
+                              colorName === 'Hồng' ? '#ff00ccff' :
+                              colorName === 'Màu gỗ tự nhiên' ? '#D8B37E' :
+                              colorName === 'Gỗ mun' ? '#3B2F2F' :
+                              colorName === 'Vàng' ? '#FFD700' :'#CCCCCC',
                           }}
                           onClick={() => handleColorSelect(colorName)}
                           disabled={isUpdatingColor}

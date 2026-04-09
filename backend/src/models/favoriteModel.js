@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import Variant from '../models/variantModel.js';
 
 const table_name = 'favorites';
-
+// validate object id
 const isValidObjectId = (str) => /^[a-fA-F0-9]{24}$/.test(str);
 
 const FavoriteModel = {

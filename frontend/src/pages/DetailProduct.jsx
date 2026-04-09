@@ -48,8 +48,9 @@ const COLORS = {
   "Vân gỗ sáng": { hex: "#DEB887", tailwind: "bg-[#DEB887]" },
   "Màu gỗ tự nhiên": { hex: "#D8B37E", tailwind: "bg-[#D8B37E]" },
   "Gỗ mun": { hex: "#3B2F2F", tailwind: "bg-[#3B2F2F]" },
-  "Vàng": { hex: "#FFD700", tailwind: "bg-[#FFD700]" },
-  
+  Vàng: { hex: "#FFD700", tailwind: "bg-[#FFD700]" },
+  Đỏ: { hex: "#FF0000", tailwind: "bg-[#FF0000]" },
+  Hồng: { hex: "#ff00ccff", tailwind: "bg-[#ff00ccff]" },
 };
 
 const dimStr = (v) =>

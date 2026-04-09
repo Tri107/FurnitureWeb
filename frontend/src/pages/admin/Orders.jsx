@@ -124,7 +124,7 @@ export default function Orders() {
     queryKey: ['orders', search, currentCursor],
     queryFn: async () => {
       const res = await getOrders({ cursor: currentCursor, limit: 15, search });
-      return res; // { data: [...orders], nextCursor: ID }
+      return res; 
     },
     placeholderData: keepPreviousData,
   });

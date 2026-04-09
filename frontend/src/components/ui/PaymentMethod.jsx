@@ -2,7 +2,6 @@ import React from "react";
 import { Truck } from "lucide-react";
 
 export default function PaymentMethod({ method, setMethod }) {
-  // Excluding MoMo payment as requested
   const options = [
     { id: "cod", label: "Thanh toán khi giao hàng đến nơi", icon: <Truck className="w-5 h-5" /> },
     {

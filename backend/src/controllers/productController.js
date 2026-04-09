@@ -73,9 +73,6 @@ const ProductController = {
 
   createVariant: async (req, res, next) => {
     try {
-      // Body can be the full variantData object (with nested variants array)
-      // or a simpler object for manual entry. 
-      // The ProductModel will simply pass it to Mongoose.
       const variantId = await ProductModel.createVariant(req.body);
 
       return res.status(201).json({
@@ -164,9 +161,6 @@ const ProductController = {
     }
   },
 
-  // === UPDATE HANDLERS ===
-
-  // Cập nhật thông tin cơ bản sản phẩm (MySQL)
   updateProduct: async (req, res, next) => {
     try {
       const { id } = req.params;
@@ -200,7 +194,6 @@ const ProductController = {
     }
   },
 
-  // Cập nhật variant data (MongoDB)
   updateVariant: async (req, res, next) => {
     try {
       const { variantRef } = req.params;
@@ -221,7 +214,6 @@ const ProductController = {
     }
   },
 
-  // Cập nhật images (R2 + MongoDB): xoá ảnh cũ trên R2, upload mới, update MongoDB
   updateImages: async (req, res) => {
     try {
       const { variantRef } = req.params;
@@ -230,13 +222,11 @@ const ProductController = {
         return res.status(400).json({ message: "Không có file ảnh nào được gửi" });
       }
 
-      // Lấy ảnh cũ từ MongoDB
       const currentVariant = await ProductModel.getVariantByRef(variantRef);
       if (!currentVariant) {
         return res.status(404).json({ message: "Không tìm thấy variant" });
       }
 
-      // Xoá ảnh cũ trên R2 (trích xuất key từ URL)
       if (currentVariant.images && currentVariant.images.length > 0) {
         const oldKeys = currentVariant.images
           .map((url) => extractR2Key(url))
@@ -246,11 +236,9 @@ const ProductController = {
         }
       }
 
-      // Upload ảnh mới
       const results = await uploadMultipleToR2(req.files, "images");
       const newUrls = results.map((r) => r.url);
 
-      // Cập nhật URLs mới vào MongoDB
       const updated = await ProductModel.updateVariantImages(variantRef, newUrls);
 
       return res.status(200).json({
@@ -265,7 +253,6 @@ const ProductController = {
     }
   },
 
-  // Cập nhật model 3D (R2 + MongoDB): xoá model cũ, upload mới, update MongoDB
   updateModel: async (req, res) => {
     try {
       const { variantRef } = req.params;
@@ -274,13 +261,11 @@ const ProductController = {
         return res.status(400).json({ message: "Không có file model nào được gửi" });
       }
 
-      // Lấy model cũ từ MongoDB
       const currentVariant = await ProductModel.getVariantByRef(variantRef);
       if (!currentVariant) {
         return res.status(404).json({ message: "Không tìm thấy variant" });
       }
 
-      // Xoá model cũ trên R2
       if (currentVariant.model3d) {
         const oldKey = extractR2Key(currentVariant.model3d);
         if (oldKey) {
@@ -288,11 +273,9 @@ const ProductController = {
         }
       }
 
-      // Upload model mới
       const result = await uploadToR2(req.file, "models");
       const newUrl = result.url;
 
-      // Cập nhật URL mới vào MongoDB
       await ProductModel.updateVariantModel(variantRef, newUrl);
 
       return res.status(200).json({
@@ -308,8 +291,6 @@ const ProductController = {
   },
 };
 
-// Helper: trích xuất R2 key từ full URL
-// VD: https://pub-xxx.r2.dev/images/1234-file.jpg → images/1234-file.jpg
 const extractR2Key = (url) => {
   if (!url || !R2_PUBLIC_URL) return null;
   try {
@@ -317,7 +298,6 @@ const extractR2Key = (url) => {
     if (url.startsWith(prefix)) {
       return url.slice(prefix.length);
     }
-    // Fallback: lấy phần sau domain
     const urlObj = new URL(url);
     return urlObj.pathname.startsWith("/") ? urlObj.pathname.slice(1) : urlObj.pathname;
   } catch {

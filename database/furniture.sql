@@ -54,7 +54,7 @@ CREATE TABLE accounts (
 
 CREATE TABLE user_profiles (
     profile_id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE NOT NULL,
+    username VARCHAR(50),
     phone_number VARCHAR(15),
     user_address TEXT,
     account_id INT NOT NULL,

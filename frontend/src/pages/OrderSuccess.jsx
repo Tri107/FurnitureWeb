@@ -13,11 +13,13 @@ import Footer from "@/components/ui/footer";
 
 import { createOrder } from "@/lib/api";
 import { clearCart } from "@/lib/cartApi";
+import { useCart } from "@/hooks/useCart";
 
 export default function OrderSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { optimisticClear, refetch } = useCart();
 
   const hasCreatedOrderRef = useRef(false);
 
@@ -84,7 +86,9 @@ export default function OrderSuccess() {
         };
 
         await createOrder(payload);
+        optimisticClear();
         await clearCart();
+        refetch();
 
         sessionStorage.removeItem("pendingOrder");
 
@@ -93,7 +97,6 @@ export default function OrderSuccess() {
           address: fullAddress,
           paymentMethod: "vnpay",
         });
-
         setIsVnpaySuccess(true);
         toast.success("Thanh toán VNPay thành công, đơn hàng đã được tạo.");
       } catch (error) {
@@ -207,7 +210,6 @@ export default function OrderSuccess() {
             </Link>
           </div>
         </div>
-        {/* Đã xóa bớt 1 thẻ </div> bị dư ở đây */}
       </main>
 
       <Footer />

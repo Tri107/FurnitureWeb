@@ -1,4 +1,3 @@
-/* UI khi chưa có sản phẩm */
 
 export default function FavoritesEmpty() {
   return (

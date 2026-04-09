@@ -177,7 +177,7 @@ export default function AddProductModal({ open, onClose, onProductAdded }) {
     }
   };
 
-  // Convert specPreview rows to JSON (dynamic key-value)
+  // Convert specPreview rows to JSON 
   const specPreviewToJson = () => {
     const specs = {};
     specPreview.forEach(([key, val]) => {
@@ -191,17 +191,15 @@ export default function AddProductModal({ open, onClose, onProductAdded }) {
     setSubmitting(true);
 
     try {
-      // === Bước 1: Upload images → lấy URLs ===
       let imageUrls = [];
       if (images.length > 0) {
         const uploadRes = await uploadProductImages(images);
         console.log("Upload response:", uploadRes);
-        // Trích xuất URLs linh hoạt (phòng trường hợp cấu trúc data thay đổi)
+       
         imageUrls = uploadRes.data?.urls || uploadRes.urls || (Array.isArray(uploadRes.data) ? uploadRes.data : []);
         console.log("Extracted imageUrls:", imageUrls);
       }
 
-      // === Bước 1.5: Upload 3d model ===
       let model3dUrl = null;
       if (model3dFile) {
         const uploadModelRes = await uploadProductModel3d(model3dFile);
@@ -209,10 +207,8 @@ export default function AddProductModal({ open, onClose, onProductAdded }) {
         model3dUrl = uploadModelRes.data?.url || uploadModelRes.url;
       }
 
-      // === Bước 2: Tạo Variant (MongoDB) → lấy ObjectId ===
       let variantRes;
       if (variantData) {
-        // Nếu có data từ file, ưu tiên dùng variantData nhưng CẦN merge thêm ảnh đã upload và model
         const finalVariantData = {
           ...variantData,
           images: imageUrls.length > 0 ? imageUrls : (variantData.images || []),
@@ -221,10 +217,10 @@ export default function AddProductModal({ open, onClose, onProductAdded }) {
         console.log("Sending finalVariantData to Mongo:", finalVariantData);
         variantRes = await createVariant(finalVariantData);
       } else {
-        // Fallback cho manual hoặc legacy preview: bọc vào mảng variants để khớp schema mới
+      
         const specs = specPreview.length > 0 ? specPreviewToJson() : {};
         const manualVariantData = {
-          images: imageUrls, // Ảnh từ manual upload
+          images: imageUrls, 
           model3d: model3dUrl || null,
           variants: [
             {
@@ -242,7 +238,6 @@ export default function AddProductModal({ open, onClose, onProductAdded }) {
 
       const variantRef = variantRes.data.variant_id;
 
-      // === Bước 3: Tạo Product (MySQL) ===
       await createProduct({
         product_name: form.product_name,
         product_description: form.product_description,
@@ -377,8 +372,6 @@ export default function AddProductModal({ open, onClose, onProductAdded }) {
                 </Select>
               </div>
             </div>
-
-
 
             {/* Spec upload */}
             <div className="col-span-2">

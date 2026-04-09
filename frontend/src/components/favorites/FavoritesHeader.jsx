@@ -1,4 +1,3 @@
-/* Header quản lý wishlist*/
 
 export default function FavoritesHeader({
   count,

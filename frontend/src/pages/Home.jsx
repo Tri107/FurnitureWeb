@@ -201,56 +201,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* <section className="py-16 bg-slate-50">
-          <div className="mx-auto max-w-7xl px-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">
-                  Danh Mục Sản Phẩm
-                </h2>
-                <p className="mt-1 text-xs text-slate-500 max-w-xl">
-                  Khám phá các danh mục sản phẩm được yêu thích nhất của chúng tôi,
-                  từ nội thất cơ bản đến những món đồ trang trí tinh tế.
-                </p>
-              </div>
-
-              <button
-                onClick={goToProducts}
-                className="text-xs font-medium text-orange-500 hover:text-orange-600"
-              >
-                Xem tất cả danh mục →
-              </button>
-            </div>
-
-            <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-5">
-              {categories.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => goToCategoryProducts(c.name)}
-                  className="relative overflow-hidden rounded-lg text-left"
-                >
-                  <div className="aspect-[3/4] bg-slate-100">
-                    <img
-                      src={c.img}
-                      alt={c.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-
-                  <div className="absolute inset-0 bg-black/25" />
-                  <div className="absolute bottom-3 left-3">
-                    <p className="text-white text-sm font-semibold leading-none">
-                      {c.name}
-                    </p>
-                    <p className="mt-1 text-[10px] text-white/80">{c.count}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section> */}
-
         <section className="bg-slate-50 mt-20">
           <div className="mx-auto max-w-7xl px-4">
             <div className="bg-yellow-50 border border-slate-100 rounded-xl shadow-lg grid md:grid-cols-2 items-center overflow-hidden">

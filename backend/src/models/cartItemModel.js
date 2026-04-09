@@ -101,7 +101,6 @@ const CartItemModel = {
             price: selectedVariant.price,
         };
 
-        // nếu mỗi màu có sku riêng thì update luôn sku
         const newSku = selectedVariant.sku || sku;
 
         const [result] = await db.query(

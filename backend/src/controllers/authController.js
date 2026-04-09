@@ -222,13 +222,13 @@ const AuthController = {
     try {
       const refreshToken = req.cookies.refreshToken;
       if (refreshToken) {
-        // Xóa token trong DB
+
         const user = await AccountModel.findByRefreshToken(refreshToken);
         if (user) {
           await AccountModel.updateRefreshToken(user.account_id, null);
         }
       }
-      // Xóa Cookie
+
       res.clearCookie('refreshToken');
       return res.status(200).json({ message: 'Đăng xuất thành công' });
     } catch (error) {

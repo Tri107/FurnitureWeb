@@ -31,7 +31,7 @@ export default function OrderChart({ data = [] }) {
       { name: STATUS_NAMES[1], value: summary.delivering },
       { name: STATUS_NAMES[2], value: summary.delivered },
       { name: STATUS_NAMES[3], value: summary.cancelled },
-    ].filter(item => item.value > 0); // Only show statuses with values
+    ].filter(item => item.value > 0); 
 
     return { chartData: formattedData, totalOrders: total };
   }, [data]);
