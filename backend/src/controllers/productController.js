@@ -114,7 +114,7 @@ const ProductController = {
         return res.status(400).json({ message: "Không có file nào được gửi" });
       }
 
-      const result = await uploadToR2(req.file, "3d-models");
+      const result = await uploadToR2(req.file, "models");
       const url = result.url;
 
       return res.status(200).json({
