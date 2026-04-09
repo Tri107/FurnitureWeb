@@ -8,18 +8,31 @@ export const createConversation = async (req, res) => {
   try {
     const { userId, email } = req.body;
 
-    //  tìm nếu đã tồn tại
-    let conversation = await Conversation.findOne({ userId });
+    //  tìm nếu đã tồn tại theo userId HOẶC email
+    let conversation = await Conversation.findOne({
+      $or: [
+        { userId: userId },
+        { email: email }
+      ]
+    });
 
     if (!conversation) {
       conversation = await Conversation.create({
         userId,
         email
       });
-    } else if (email && !conversation.email) {
-      // Cập nhật lại email cho những box chat cũ chưa có email
-      conversation.email = email;
-      await conversation.save();
+    } else {
+      // Nếu đã tồn tại nhưng thông tin mới (ví dụ thay đổi login device) thì cập nhật
+      let isChanged = false;
+      if (email && conversation.email !== email) {
+        conversation.email = email;
+        isChanged = true;
+      }
+      if (userId && conversation.userId !== userId) {
+        conversation.userId = userId;
+        isChanged = true;
+      }
+      if (isChanged) await conversation.save();
     }
 
     res.json(conversation);
@@ -27,7 +40,9 @@ export const createConversation = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
+/**
+ *  Lấy tin nhắn
+ */
 export const getMessages = async (req, res) => {
   try {
     const messages = await Message.find({
@@ -40,7 +55,9 @@ export const getMessages = async (req, res) => {
   }
 };
 
-
+/**
+ *  ADMIN: Lấy danh sách conversation
+ */
 export const getConversation = async (req, res) => {
   try {
     const data = await Conversation.find()
@@ -56,14 +73,22 @@ export const getConversations = async (req, res) => {
   try {
     const list = await Conversation.find().sort({ updatedAt: -1 });
     
-    // Lọc ra các phòng thực sự có tin nhắn
-    const validList = [];
+    // Lọc khử trùng lặp theo Email và chỉ lấy phòng có tin nhắn
+    const uniqueMap = new Map();
+    
     for (const conv of list) {
+      if (!conv.email) continue;
+      
+      // Cái đầu tiên của mỗi email sẽ là cái mới nhất
+      if (uniqueMap.has(conv.email)) continue;
+
       const count = await Message.countDocuments({ conversationId: conv._id });
-      if (count > 0) validList.push(conv);
+      if (count > 0) {
+        uniqueMap.set(conv.email, conv);
+      }
     }
 
-    res.json(validList);
+    res.json(Array.from(uniqueMap.values()));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

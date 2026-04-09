@@ -1,132 +1,18 @@
-import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
-import { useLocation } from "react-router-dom";
 import { MessageCircle, X } from "lucide-react";
-import { createOrGetConversation, getChatMessages } from "../../lib/api";
+import useChatBox from "../../hooks/useChatBox";
 
 export default function ChatBox() {
-  const location = useLocation();
-  const socketRef = useRef(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [messageToRecall, setMessageToRecall] = useState(null);
-  const fileInputRef = useRef(null);
-  const messagesEndRef = useRef(null);
-
-  // Tự động cuộn xuống cuối khi có tin nhắn mới
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isOpen]);
-  
-
-  const [conversationId, setConversationId] = useState(null);
-
-  // 🔥 LẤY USER TỪ LOCALSTORAGE
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-
-  // 🔥 TẠO SOCKET VÀ EVENT LISTENER
-  useEffect(() => {
-    const socket = io("http://localhost:9999", {
-      transports: ["websocket"],
-    });
-    socketRef.current = socket;
-
-    socket.on("receive_message", (data) => {
-      setMessages(prev => {
-        // 🔥 CHỐNG DUPLICATE
-        const exists = prev.some(msg => msg._id === data._id);
-        if (exists) return prev;
-        return [...prev, data];
-      });
-    });
-
-    socket.on("message_recalled", (messageId) => {
-      setMessages(prev => prev.map(msg => 
-        msg._id === messageId ? { ...msg, isRecalled: true } : msg
-      ));
-    });
-
-    return () => {
-      socket.off("receive_message");
-      socket.off("message_recalled");
-      socket.disconnect();
-    };
-  }, []);
-
-  // 🔥 TẠO / LẤY CONVERSATION
-  useEffect(() => {
-    if (!user) return;
-
-    createOrGetConversation({
-      userId: user.id || user._id,
-      email: user.email,
-    })
-      .then(data => {
-        setConversationId(data._id);
-
-        // 🔥 JOIN ROOM
-        socketRef.current.emit("join_room", data._id);
-
-        // 🔥 LOAD MESSAGE
-        return getChatMessages(data._id);
-      })
-      .then(data => setMessages(data))
-      .catch(err => console.error("Lỗi khi tải chat:", err));
-  }, [user?.id, user?._id, user?.email]);
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB.");
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const cancelImage = () => {
-    setImage(null);
-    setImagePreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  // 🔥 GỬI TIN NHẮN
-  const sendMessage = () => {
-    if ((!input.trim() && !image) || !user || !conversationId) return;
-
-    const msg = {
-      conversationId,
-      senderId: user.id || user._id,
-      email: user.email,
-      content: input.trim(),
-      image: image,
-    };
-
-    socketRef.current.emit("send_message", msg);
-
-    setInput("");
-    cancelImage();
-  };
-
-  const handleRecall = () => {
-    if (messageToRecall) {
-      socketRef.current.emit("recall_message", {
-        messageId: messageToRecall,
-        conversationId,
-      });
-      setMessageToRecall(null);
-    }
-  };
+  const {
+    isOpen, setIsOpen,
+    messages,
+    input, setInput,
+    imagePreview,
+    handleImageChange, cancelImage,
+    sendMessage,
+    messageToRecall, setMessageToRecall, handleRecall,
+    fileInputRef, messagesEndRef,
+    user, location
+  } = useChatBox();
 
   // Không render popup ở trang admin hoặc trang auth, hoặc nếu user là admin
   const hiddenRoutes = ["/admin", "/login", "/register", "/otp"];
@@ -139,16 +25,16 @@ export default function ChatBox() {
       {/* Nút bật/tắt (Floating Icon) kèm lời chào */}
       {!isOpen && (
         <div className="flex flex-col items-end gap-3 z-50 group cursor-pointer" onClick={() => setIsOpen(true)}>
-          {/* Tooltip bubble */}
-          <div className="absolute right-full mr-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 bg-white p-4 rounded-2xl shadow-2xl w-[260px] border border-gray-100 transition-all duration-300">
+          {/* Tooltip bubble - Đã chuyển lên phía trên */}
+          <div className="absolute bottom-full mb-4 right-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-2 group-hover:translate-y-0 bg-white p-4 rounded-2xl shadow-2xl w-[260px] border border-gray-100 transition-all duration-300">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-semibold text-blue-600 text-sm">Trợ lý B2VT</span>
             </div>
             <p className="text-sm text-gray-600 leading-relaxed font-medium">
               Xin chào Anh/Chị! Em là trợ lý của B2VT. Cần hỗ trợ gì Anh/Chị cứ nhắn nhé!
             </p>
-            {/* Mũi tên trỏ sang phải thay vì trỏ xuống do đã chuyển popup sang bên trái icon */}
-            <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 w-4 h-4 bg-white border-t border-r border-gray-100 rotate-45"></div>
+            {/* Mũi tên trỏ xuống dưới */}
+            <div className="absolute -bottom-2 right-5 w-4 h-4 bg-white border-b border-r border-gray-100 rotate-45"></div>
           </div>
 
           <button
@@ -270,22 +156,22 @@ export default function ChatBox() {
               </button>
               <input
                 value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              disabled={!user}
-              className="flex-1 border px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
-              placeholder={user ? "Nhập tin nhắn..." : "Đăng nhập để chat..."}
-            />
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                disabled={!user}
+                className="flex-1 border px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+                placeholder={user ? "Nhập tin nhắn..." : "Đăng nhập để chat..."}
+              />
             <button
               onClick={sendMessage}
-              disabled={!user || (!input.trim() && !image)}
+              disabled={!user || (!input.trim() && !imagePreview)} // Sửa image thành imagePreview hoặc input để check disable
               className="bg-blue-600 text-white px-4 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition"
             >
               Gửi
             </button>
           </div>
 
-          {/* Popup Thu Hồi Khu Vực Trực Tiếp Bên Trong Box */}
+          {/* Popup Thu Hồi */}
           {messageToRecall && (
             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] rounded-2xl">
               <div className="bg-white p-6 rounded-[24px] shadow-2xl w-[85%] text-center transform scale-100 transition-all flex flex-col items-center">

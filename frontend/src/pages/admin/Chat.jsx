@@ -6,6 +6,7 @@ export default function AdminChat() {
   const socketRef = useRef(null);
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
+  const activeConversationRef = useRef(null); // Sử dụng Ref để socket listener luôn lấy được giá trị mới nhất
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [image, setImage] = useState(null);
@@ -68,12 +69,13 @@ export default function AdminChat() {
 
   // Thay đổi phòng chat
   const handleSelectConversation = async (conv) => {
-    // Rời phòng cũ nếu có
+    
     if (activeConversation) {
-      // (Option) Emitted leave_room nếu server có support, hiện tại chỉ quan tâm join
+      // Hiện tại chỉ quan tâm join
     }
     
     setActiveConversation(conv._id);
+    activeConversationRef.current = conv._id; 
     
     if (!conv.hasAdminRead) {
       socketRef.current.emit("mark_as_read", conv._id);
@@ -99,18 +101,29 @@ export default function AdminChat() {
     if (!socketRef.current) return;
 
     const receiveMessageHandler = (data) => {
-      // Xử lý cẩn thận để tin nhắn chỉ hiện khi đang ở đúng phòng chat, 
-      // Nhưng do ta đã join room riêng biệt, nó thường chỉ lắng nghe room đó.
-      setMessages(prev => {
-        // Chống duplicate
-        if (prev.some(msg => msg._id === data._id)) return prev;
-        return [...prev, data];
-      });
-      
-      // Nếu admin đang đọc live, và tin từ user thì đánh dấu đã đọc
-      if (data.senderId !== "admin") {
-         socketRef.current.emit("mark_as_read", data.conversationId);
-         setConversations(prev => prev.map(c => c._id === data.conversationId ? { ...c, hasAdminRead: true } : c));
+      // CHỈ thêm tin nhắn vào màn hình nếu nó thuộc về phòng đang mở
+      if (data.conversationId === activeConversationRef.current) {
+        setMessages(prev => {
+          
+          if (prev.some(msg => msg._id === data._id)) return prev;
+          return [...prev, data];
+        });
+        
+        // Nếu admin đang đọc live, đánh dấu đã đọc
+        if (data.senderId !== "admin") {
+           socketRef.current.emit("mark_as_read", data.conversationId);
+           setConversations(prev => prev.map(c => c._id === data.conversationId ? { ...c, hasAdminRead: true } : c));
+        }
+      } else {
+        // Nếu tin nhắn thuộc về phòng khác, chỉ cập nhật chấm xanh ở sidebar 
+        if (data.senderId !== "admin") {
+          setConversations(prev => prev.map(c => {
+            if (c._id === data.conversationId) {
+              return { ...c, hasAdminRead: false };
+            }
+            return c;
+          }));
+        }
       }
     };
 
@@ -207,8 +220,16 @@ export default function AdminChat() {
                   {/* Có thể lấy username ngắn gọn */}
                   {c.userId?.substring(0, 1) || 'U'}
                 </div>
-                <div className="overflow-hidden">
-                  <p className="font-semibold text-gray-800 text-sm truncate">{c.email || `User: ${c.userId?.substring(0, 8)}...`}</p>
+                <div className="overflow-hidden flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-gray-800 text-sm truncate">
+                      {c.email || `User: ${c.userId?.substring(0, 8)}...`}
+                    </p>
+                    {/* CHẤM XANH THÔNG BÁO CHƯA ĐỌC */}
+                    {!c.hasAdminRead && (
+                      <span className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse shrink-0"></span>
+                    )}
+                  </div>
                   <p className="text-xs text-gray-500 truncate mt-0.5">Hỗ trợ khách hàng</p>
                 </div>
               </div>
