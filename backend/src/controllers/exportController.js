@@ -83,13 +83,12 @@ const ExportController = {
 
         const startRow = currentRow;
 
-        // --- Step 1: Create empty row objects for this product ---
+
         const productRows = [];
         for (let i = 0; i < totalRows; i++) {
           productRows.push({});
         }
 
-        // --- Step 2: Fill product-level fields (first row only) ---
         productRows[0].id = product.product_id;
         productRows[0].name = product.product_name;
         productRows[0].description = product.product_description || "";
@@ -98,13 +97,11 @@ const ExportController = {
         productRows[0].brand = product.brand_name || "";
         productRows[0].model3d = product.variants?.model3d || "";
 
-        // --- Step 3: Distribute images across totalRows ---
         const imageSlots = distributeRows(images.length, totalRows);
         imageSlots.forEach((slot, idx) => {
-          // Place image value in the first row of this slot
+
           productRows[slot.startOffset].image_url = images[idx];
 
-          // Merge image column if this slot spans multiple rows
           if (slot.span > 1) {
             merges.push({
               top: startRow + slot.startOffset,
@@ -115,7 +112,6 @@ const ExportController = {
           }
         });
 
-        // If no images, merge the entire image column for this product
         if (images.length === 0 && totalRows > 1) {
           merges.push({
             top: startRow,
@@ -125,13 +121,11 @@ const ExportController = {
           });
         }
 
-        // --- Step 4: Distribute variants across totalRows ---
         const variantSlots = distributeRows(variantItems.length, totalRows);
         variantSlots.forEach((slot, idx) => {
           const v = variantItems[idx];
           const targetRow = productRows[slot.startOffset];
 
-          // Place variant values in the first row of this slot
           targetRow.sku = v.sku || "";
           targetRow.price = v.price || "";
           targetRow.stock = v.stock != null ? v.stock : "";
@@ -143,7 +137,6 @@ const ExportController = {
           targetRow.color = v.specs?.color || "";
           targetRow.variant_status = v.status || "";
 
-          // Red font for variant_status !== "available"
           if (v.status && v.status.toLowerCase() !== "available") {
             redCells.push({
               row: startRow + slot.startOffset,
@@ -176,7 +169,6 @@ const ExportController = {
           }
         }
 
-        // --- Step 5: Red font for product status !== "AVAILABLE" ---
         if (
           product.product_status &&
           product.product_status.toUpperCase() !== "AVAILABLE"
@@ -184,7 +176,6 @@ const ExportController = {
           redCells.push({ row: startRow, col: STATUS_COL });
         }
 
-        // --- Step 6: Merge product-level columns if multiple rows ---
         if (totalRows > 1) {
           for (let col = PRODUCT_COL_START; col <= PRODUCT_COL_END; col++) {
             merges.push({
@@ -254,11 +245,11 @@ const ExportController = {
       const rows = [];
       const redCells = [];
 
-      // Column index for "Trạng thái" is 3
+
       const STATUS_COL = 3;
 
       orders.forEach((order, index) => {
-        const rowIndex = index + 2; // +1 for header, +1 for 1-based index
+        const rowIndex = index + 2;
 
         rows.push({
           id: `#${order.order_id}`,
@@ -274,7 +265,6 @@ const ExportController = {
           note: order.note || "-",
         });
 
-        // Highlight CANCELLED status in Red & Bold
         if (order.order_status === "CANCELLED") {
           redCells.push({ row: rowIndex, col: STATUS_COL });
         }

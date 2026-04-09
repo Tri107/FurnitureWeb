@@ -26,7 +26,6 @@ export default function Product() {
       const formatted = res.data.map((item) => {
         const variantsArr = item.variants?.variants || [];
         const totalStock = variantsArr.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
-        // Lấy status của variant đầu tiên làm đại diện hoặc 'N/A'
         const status = variantsArr[0]?.status || "unknown";
 
         return {
@@ -34,7 +33,7 @@ export default function Product() {
           name: item.product_name,
           status,
           stock: totalStock,
-          image: item.variants?.images?.[0], // Sử dụng ảnh đầu tiên từ variantData
+          image: item.variants?.images?.[0], 
         };
       });
 

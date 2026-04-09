@@ -56,7 +56,6 @@ export const addToCart = async (
   return handleResponse(res);
 };
 
-
 export const updateCartItem = async (cartItemId, quantity) => {
   const res = await fetch(`${CART_API_URL}/${cartItemId}`, {
     method: "PUT",
@@ -68,7 +67,6 @@ export const updateCartItem = async (cartItemId, quantity) => {
 
   return handleResponse(res);
 };
-
 
 export const removeCartItem = async (productId) => {
   const res = await fetch(`${CART_API_URL}/${productId}`, {
@@ -96,6 +94,5 @@ export const clearCart = async () => {
     headers: getHeaders(),
     body: JSON.stringify({ accountId: user.id })
   });
-
   return handleResponse(res);
 };

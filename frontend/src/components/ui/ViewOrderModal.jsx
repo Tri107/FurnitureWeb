@@ -79,8 +79,6 @@ export default function ViewOrderModal({ open, onClose, orderId }) {
       const baseTotal = subTotal + (Number(extraInfo.vat) || 0) + (Number(extraInfo.assemblyFee) || 0) + (Number(extraInfo.shippingFee) || 0);
       discountValue = Math.round((baseTotal * Number(order.discount_percentage)) / 100);
     } else if (order.discount_code && subTotal > order.total_price) {
-      // Fallback: Nếu không có % nhưng có code thì có thể đó là mã giảm tĩnh (amount)
-      // ta có thể tính ngược lại từ tổng giá
       const baseTotal = subTotal + (Number(extraInfo.vat) || 0) + (Number(extraInfo.assemblyFee) || 0) + (Number(extraInfo.shippingFee) || 0);
       discountValue = baseTotal - Number(order.total_price);
     }

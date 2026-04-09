@@ -43,7 +43,6 @@ import { Loader2, X, Upload, FileBox, ImagePlus, Plus, Trash2 } from "lucide-rea
 import toast from "react-hot-toast";
 
 export default function EditProductModal({ open, onClose, productId, onProductUpdated }) {
-  // === State: Basic Info ===
   const [form, setForm] = useState({
     product_name: "",
     product_description: "",
@@ -54,11 +53,9 @@ export default function EditProductModal({ open, onClose, productId, onProductUp
     collection_id: "",
   });
 
-  // === State: Variant Table ===
   const [variantRows, setVariantRows] = useState([]);
   const [variantRef, setVariantRef] = useState(null);
 
-  // === State: Images ===
   const [existingImages, setExistingImages] = useState([]); // URLs from DB
   const [newImageFiles, setNewImageFiles] = useState([]); // New File objects
   const [newImagePreviews, setNewImagePreviews] = useState([]); // Blob URLs for preview
@@ -298,31 +295,22 @@ export default function EditProductModal({ open, onClose, productId, onProductUp
         labels.push("Biến thể");
       }
 
-      // 3. Update images (R2 + MongoDB) — only if changed
       if (imagesChanged && variantRef) {
-        // If user removed all existing images and added new ones,
-        // or modified the image set in any way
         if (newImageFiles.length > 0) {
-          // Upload new files + remaining existing handled by backend (overwrite)
           promises.push(updateProductImages(variantRef, newImageFiles));
           labels.push("Hình ảnh");
         } else if (existingImages.length === 0) {
-          // All images removed — we need a way to clear images
-          // For now, skip if no new files (backend requires files)
           console.warn("All images removed but no new images to upload");
         }
       }
 
-      // 4. Update model 3D (R2 + MongoDB) — only if changed
       if (modelChanged && variantRef && newModelFile) {
         promises.push(updateProductModel3d(variantRef, newModelFile));
         labels.push("Model 3D");
       }
 
-      // Execute all in parallel
       const results = await Promise.allSettled(promises);
 
-      // Check results
       const failed = results
         .map((r, i) => (r.status === "rejected" ? labels[i] : null))
         .filter(Boolean);

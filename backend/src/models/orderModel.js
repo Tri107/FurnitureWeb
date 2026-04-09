@@ -110,15 +110,6 @@ const OrderModel = {
     
       for (let item of items) {
 
-        /*
-        const variantDoc = await Variant.findOne({ "variants.sku": item.sku }).lean();
-        if (!variantDoc) throw new Error(`Variant not found: ${item.sku}`);
-      
-        const specificVariant = variantDoc.variants.find(v => v.sku === item.sku);
-        if (!specificVariant) throw new Error(`SKU not found: ${item.sku}`);
-        */
-
-        // Bước 1: Lấy variant_ref từ MySQL theo product_id để xác định đúng document MongoDB
         const [pRows] = await connection.query(
           "SELECT variant_ref FROM products WHERE product_id = ?",
           [item.product_id]
@@ -130,7 +121,6 @@ const OrderModel = {
         
         const variantRef = pRows[0].variant_ref;
 
-        // Bước 2: Tìm variant trong MongoDB cực kỳ chính xác bằng variant_ref + sku
         const variantDoc = await Variant.findById(variantRef).lean();
         if (!variantDoc) throw new Error(`Document Variant không tồn tại: ${variantRef}`);
 
@@ -139,17 +129,15 @@ const OrderModel = {
           throw new Error(`Không tìm thấy SKU ${item.sku} trong sản phẩm ${item.product_id}`);
         }
 
-        // Kiểm tra tồn kho trước khi thực hiện mua hàng
         if (specificVariant.stock < item.quantity) {
           throw new Error(`Sản phẩm (SKU: ${item.sku}) không đủ tồn kho. Hiện có: ${specificVariant.stock}, yêu cầu: ${item.quantity}`);
         }
 
-        // Cập nhật tồn kho trong MongoDB một cách nguyên tử (Atomic Update)
         const updateResult = await Variant.updateOne(
           { 
             _id: variantRef, 
             "variants.sku": item.sku,
-            "variants.stock": { $gte: item.quantity } // Đảm bảo stock vẫn đủ tại thời điểm update
+            "variants.stock": { $gte: item.quantity }
           },
           { $inc: { "variants.$.stock": -item.quantity } }
         );

@@ -69,7 +69,6 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       setIsUpdating(true);
-      // Gọi API cập nhật (hãy đảm bảo bạn đã định nghĩa hàm này trong lib/api)
       await updateProfile(formData);
       
       // Load lại dữ liệu mới

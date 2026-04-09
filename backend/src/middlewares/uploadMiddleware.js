@@ -21,8 +21,6 @@ export const baseUpload = multer({
   limits: { fileSize: 30 * 1024 * 1024 } // 30MB
 });
 
-// 1. Nhánh upload nhiều ảnh (Product Images) - Tối đa 10 ảnh, field name là 'images'
-export const uploadMultiple = baseUpload.array("images", 10);
+export const uploadMultiple = baseUpload.array("images", 3);
 
-// 2. Nhánh upload 1 file model 3D (GLB) - field name là 'model3d'
 export const upload3dModel = baseUpload.single("model3d");

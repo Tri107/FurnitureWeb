@@ -1,9 +1,6 @@
 import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
 
-/**
- *  Tạo conversation
- */
 export const createConversation = async (req, res) => {
   try {
     const { userId, email } = req.body;
@@ -40,9 +37,7 @@ export const createConversation = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-/**
- *  Lấy tin nhắn
- */
+
 export const getMessages = async (req, res) => {
   try {
     const messages = await Message.find({
@@ -55,9 +50,7 @@ export const getMessages = async (req, res) => {
   }
 };
 
-/**
- *  ADMIN: Lấy danh sách conversation
- */
+
 export const getConversation = async (req, res) => {
   try {
     const data = await Conversation.find()

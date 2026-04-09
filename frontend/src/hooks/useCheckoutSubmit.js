@@ -115,7 +115,6 @@ export default function useCheckoutSubmit({
 
       optimisticClear();
       await clearCart();
-
       toast.success("Đặt hàng thành công");
 
       navigate("/order-success", {
